@@ -17,14 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.test.lifehub.R;
 import com.test.lifehub.features.two_productivity.data.NoteEntry;
 
-import java.util.Date; // <-- IMPORT NÀY
+import java.util.Date; // <-- Import Date
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-/**
- * Activity để Thêm (Add) hoặc Sửa (Edit) một Ghi chú (Note).
- * (Phiên bản đã sửa lỗi Timestamp)
- */
+// (Chúng ta sẽ thêm logic cho Nút Đặt giờ ở bước sau)
+
 @AndroidEntryPoint
 public class AddEditNoteActivity extends AppCompatActivity {
 
@@ -47,6 +45,8 @@ public class AddEditNoteActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.toolbar_add_edit_note);
         mEtTitle = findViewById(R.id.et_note_title);
         mEtContent = findViewById(R.id.et_note_content);
+
+        // (Chúng ta sẽ ánh xạ các nút Đặt giờ ở bước sau)
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,12 +79,12 @@ public class AddEditNoteActivity extends AppCompatActivity {
         if (note == null) return;
         mEtTitle.setText(note.getTitle());
         mEtContent.setText(note.getContent());
+        // (Chúng ta sẽ cập nhật UI đặt giờ ở đây)
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.add_edit_menu, menu);
-        // Ẩn nút Xóa nếu là Thêm mới
         MenuItem deleteItem = menu.findItem(R.id.action_delete);
         if (mCurrentNoteId == null) {
             deleteItem.setVisible(false);
@@ -105,32 +105,21 @@ public class AddEditNoteActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Xóa Ghi chú (chỉ khi ở chế độ Sửa)
-     */
     private void deleteNote() {
         if (mCurrentNote != null) {
             mViewModel.deleteNote(mCurrentNote);
             Toast.makeText(this, "Đã xóa Ghi chú", Toast.LENGTH_SHORT).show();
-            setResult(Activity.RESULT_OK); // Đặt kết quả OK
+            setResult(Activity.RESULT_OK);
             finish();
         }
     }
 
-    /**
-     * Logic chính: Lưu Ghi chú
-     */
     private void saveNote() {
         String title = mEtTitle.getText().toString().trim();
         String content = mEtContent.getText().toString().trim();
 
-        if (TextUtils.isEmpty(title)) {
-            Toast.makeText(this, "Vui lòng nhập Tiêu đề", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (TextUtils.isEmpty(content)) {
-            Toast.makeText(this, "Vui lòng nhập Nội dung", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(content)) {
+            Toast.makeText(this, "Vui lòng nhập Tiêu đề và Nội dung", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -139,8 +128,9 @@ public class AddEditNoteActivity extends AppCompatActivity {
             NoteEntry newNote = new NoteEntry(
                     title,
                     content,
-                    new Date() // SỬA LỖI: Dùng new Date() thay vì .getTime()
+                    new Date() // SỬA LỖI: Dùng new Date()
             );
+            // (Chúng ta sẽ lưu reminderTime ở đây)
             mViewModel.insertNote(newNote);
             Toast.makeText(this, "Đã lưu Ghi chú", Toast.LENGTH_SHORT).show();
 
@@ -150,13 +140,9 @@ public class AddEditNoteActivity extends AppCompatActivity {
                 mCurrentNote.setTitle(title);
                 mCurrentNote.setContent(content);
                 mCurrentNote.setLastModified(new Date()); // SỬA LỖI
+                // (Chúng ta sẽ lưu reminderTime ở đây)
 
                 mViewModel.updateNote(mCurrentNote);
-                Toast.makeText(this, "Đã cập nhật Ghi chú", Toast.LENGTH_SHORT).show();
-            } else {
-                NoteEntry updatedNote = new NoteEntry(title, content, new Date()); // SỬA LỖI
-                updatedNote.documentId = mCurrentNoteId;
-                mViewModel.updateNote(updatedNote);
                 Toast.makeText(this, "Đã cập nhật Ghi chú", Toast.LENGTH_SHORT).show();
             }
         }

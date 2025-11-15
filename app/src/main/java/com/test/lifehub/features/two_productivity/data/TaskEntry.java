@@ -1,11 +1,11 @@
 package com.test.lifehub.features.two_productivity.data;
 
 import com.google.firebase.firestore.Exclude;
-import java.util.Date; // <-- THÊM IMPORT NÀY
+import java.util.Date; // <-- Import Date
 
 /**
  * POJO (Đối tượng Java) cho một Công việc (Task)
- * (Phiên bản đã sửa lỗi Timestamp sang Date)
+ * (Phiên bản đã sửa lỗi Timestamp và thêm lại trường Reminder)
  */
 public class TaskEntry {
 
@@ -18,6 +18,7 @@ public class TaskEntry {
     private boolean isCompleted;
     private int taskType;
     private String userOwnerId;
+    private Date reminderTime; // <-- THÊM LẠI: Trường đặt giờ
 
     /**
      * Constructor rỗng (BẮT BUỘC cho Firestore)
@@ -28,11 +29,12 @@ public class TaskEntry {
     /**
      * Constructor chính
      */
-    public TaskEntry(String name, Date lastModified, boolean isCompleted, int taskType) { // <-- SỬA LỖI: Đổi sang Date
+    public TaskEntry(String name, Date lastModified, boolean isCompleted, int taskType) {
         this.name = name;
         this.lastModified = lastModified;
         this.isCompleted = isCompleted;
         this.taskType = taskType;
+        this.reminderTime = null; // Mặc định không có nhắc giờ
     }
 
     // --- Getters & Setters (BẮT BUỘC cho Firestore) ---
@@ -45,11 +47,11 @@ public class TaskEntry {
         this.name = name;
     }
 
-    public Date getLastModified() { // <-- SỬA LỖI: Đổi sang Date
+    public Date getLastModified() { // Sửa thành Date
         return lastModified;
     }
 
-    public void setLastModified(Date lastModified) { // <-- SỬA LỖI: Đổi sang Date
+    public void setLastModified(Date lastModified) { // Sửa thành Date
         this.lastModified = lastModified;
     }
 
@@ -75,6 +77,14 @@ public class TaskEntry {
 
     public void setUserOwnerId(String userOwnerId) {
         this.userOwnerId = userOwnerId;
+    }
+
+    public Date getReminderTime() { // <-- THÊM LẠI
+        return reminderTime;
+    }
+
+    public void setReminderTime(Date reminderTime) { // <-- THÊM LẠI
+        this.reminderTime = reminderTime;
     }
 
     // --- Getter/Setter cho ID (Không phải của Firestore) ---

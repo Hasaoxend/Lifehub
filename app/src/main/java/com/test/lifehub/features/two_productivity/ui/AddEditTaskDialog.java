@@ -25,27 +25,18 @@ import java.util.Date;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-/**
- * Dialog (Hộp thoại) để Thêm/Sửa một Công việc (Task)
- * (Phiên bản đã sửa lỗi 'container' và 'Date/long')
- */
 @AndroidEntryPoint
 public class AddEditTaskDialog extends DialogFragment {
 
-    // --- Views ---
     private TextInputEditText mEtTaskName;
     private TextView mTvTitle;
 
-    // --- Logic ---
     private ProductivityViewModel mViewModel;
     private final TaskEntry mCurrentTask;
     private final int mTaskType;
 
-    /**
-     * Constructor cho Thêm/Sửa
-     * @param task Task để sửa (null nếu Thêm mới)
-     * @param taskType Loại Task (General / Shopping)
-     */
+    // (Chúng ta sẽ thêm logic cho Nút Đặt giờ ở bước sau)
+
     public AddEditTaskDialog(TaskEntry task, int taskType) {
         this.mCurrentTask = task;
         this.mTaskType = taskType;
@@ -54,33 +45,25 @@ public class AddEditTaskDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        // --- 1. Inflate Layout ---
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-
-        // SỬA LỖI: (Cannot resolve symbol 'container')
-        // Đổi 'container' thành 'null' vì đây là Dialog.
         View view = inflater.inflate(R.layout.dialog_add_edit_task, null);
 
-        // --- 2. Ánh xạ Views ---
         mEtTaskName = view.findViewById(R.id.et_task_name);
         mTvTitle = view.findViewById(R.id.tv_dialog_task_title);
+        // (Ánh xạ nút Đặt giờ ở đây)
 
-        // --- 3. Khởi tạo ViewModel ---
         mViewModel = new ViewModelProvider(this).get(ProductivityViewModel.class);
 
-        // --- 4. Cấu hình Dialog ---
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setView(view)
                 .setPositiveButton("Lưu", null)
                 .setNegativeButton("Hủy", (dialog, which) -> dismiss());
 
-        // --- 5. Kiểm tra Thêm mới hay Sửa ---
         if (mCurrentTask != null) {
-            // ----- CHẾ ĐỘ SỬA -----
             mTvTitle.setText("Sửa Công việc");
             mEtTaskName.setText(mCurrentTask.getName());
+            // (Cập nhật UI Đặt giờ ở đây)
         } else {
-            // ----- CHẾ ĐỘ THÊM MỚI -----
             if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
                 mTvTitle.setText("Thêm Đồ Mua sắm");
             } else {
@@ -88,10 +71,8 @@ public class AddEditTaskDialog extends DialogFragment {
             }
         }
 
-        // --- 6. Tạo Dialog ---
         AlertDialog dialog = builder.create();
 
-        // (Trick: Override nút Positive để validation)
         dialog.setOnShowListener(d -> {
             Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> {
@@ -102,9 +83,6 @@ public class AddEditTaskDialog extends DialogFragment {
         return dialog;
     }
 
-    /**
-     * Logic chính: Lưu Công việc
-     */
     private void saveTask() {
         String taskName = mEtTaskName.getText().toString().trim();
 
@@ -117,21 +95,23 @@ public class AddEditTaskDialog extends DialogFragment {
             // ----- THÊM MỚI -----
             TaskEntry newTask = new TaskEntry(
                     taskName,
-                    new Date(), // Đã sửa (xóa .getTime())
+                    new Date(), // SỬA LỖI: Dùng new Date()
                     false,
                     mTaskType
             );
+            // (Lưu reminderTime ở đây)
             mViewModel.insertTask(newTask);
             Toast.makeText(getContext(), "Đã thêm", Toast.LENGTH_SHORT).show();
 
         } else {
             // ----- CẬP NHẬT (SỬA) -----
             mCurrentTask.setName(taskName);
-            mCurrentTask.setLastModified(new Date()); // Đã sửa (xóa .getTime())
+            mCurrentTask.setLastModified(new Date()); // SỬA LỖI
+            // (Lưu reminderTime ở đây)
             mViewModel.updateTask(mCurrentTask);
             Toast.makeText(getContext(), "Đã cập nhật", Toast.LENGTH_SHORT).show();
         }
 
-        dismiss(); // Đóng Dialog
+        dismiss();
     }
 }
