@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Đây là layout cho MỘT HÀNG trường tùy chỉnh.
+  Nó KHÔNG phải là một item của RecyclerView, mà là một layout
+  được "include" (đính kèm) nhiều lần.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="8dp">
+
+    <!-- Hàng chứa Tên trường (Label) và Nút Bật/Tắt Ẩn -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_custom_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_custom_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tên đề mục"
+                android:inputType="textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Nút Bật/Tắt Ẩn (Text/Password) -->
+        <ImageButton
+            android:id="@+id/btn_toggle_field_type"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_visibility_off"
+            app:tint="?attr/colorOnSurfaceVariant"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Chuyển đổi kiểu trường (văn bản/mật khẩu)"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+    <!-- Ô nhập Giá trị (Value) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_custom_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_custom_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nội dung"
+            android:inputType="textVisiblePassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>
