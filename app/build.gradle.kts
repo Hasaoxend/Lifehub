@@ -53,6 +53,14 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
+    //API WEATHER
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // ----- FIREBASE -----
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
@@ -74,6 +82,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+
 }
 
 // ----- KHỐI NÀY VẪN GIỮ NGUYÊN -----

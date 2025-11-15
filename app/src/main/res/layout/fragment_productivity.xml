@@ -80,7 +80,8 @@
         android:focusable="true"
         android:minHeight="80dp"
         app:cardElevation="2dp"
-        app:cardCornerRadius="16dp"> <LinearLayout
+        app:cardCornerRadius="16dp">
+        <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -90,13 +91,78 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_shopping_cart"
-            app:tint="?attr/colorPrimary"/> <TextView
+            app:tint="?attr/colorPrimary"/><TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Danh sách Mua sắm"
         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
         android:layout_marginStart="16dp"/>
     </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_calculator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="80dp"
+        app:cardElevation="2dp"
+        app:cardCornerRadius="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_calculator"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Máy tính"
+                android:textAppearance="?attr/textAppearanceHeadline6" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_weather"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="80dp"
+        app:cardElevation="2dp"
+        app:cardCornerRadius="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_weather"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Thời tiết" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Thời tiết"
+                android:textAppearance="?attr/textAppearanceHeadline6" />
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
