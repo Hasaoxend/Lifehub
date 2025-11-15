@@ -1,40 +1,64 @@
 package com.test.lifehub.features.two_productivity.data;
 
 import com.google.firebase.firestore.Exclude;
-import com.google.firebase.firestore.ServerTimestamp;
-
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * POJO (Plain Old Java Object) cho một "Project" (Thư mục Todo).
- * Dùng để đọc/ghi trực tiếp với Firebase Firestore.
+ * POJO cho Project (Thư mục Todo)
  */
 public class ProjectEntry implements Serializable {
 
     @Exclude
     public String documentId;
 
-    public String name; // Tên của Project (ví dụ: "Việc cá nhân", "Đồ án")
-    public String color; // (Tương lai) Mã màu (ví dụ: "#E44332")
+    private String name;
+    private String color;
+    private String userOwnerId;
+    private Date createdDate;
+    private Date lastModified;
 
-    public String userOwnerId; // Chủ sở hữu
-
-    @ServerTimestamp
-    public Date createdDate;
+    // ✅ THÊM: ID của thư mục cha (null = root)
+    private String projectId;
 
     public ProjectEntry() {
-        // Constructor rỗng (bắt buộc cho Firestore)
+        // Constructor rỗng
     }
 
-    // Constructor tiện lợi
     public ProjectEntry(String name, String userOwnerId) {
         this.name = name;
         this.userOwnerId = userOwnerId;
-        this.color = "#808080"; // Mặc định màu xám
+        this.color = "#808080";
+        this.createdDate = new Date();
+        this.lastModified = new Date();
+        this.projectId = null; // Mặc định là thư mục gốc
     }
 
-    // Ghi đè hàm này để Spinner (menu thả xuống) hiển thị tên
+    // --- Getters & Setters ---
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public String getUserOwnerId() { return userOwnerId; }
+    public void setUserOwnerId(String userOwnerId) { this.userOwnerId = userOwnerId; }
+
+    public Date getCreatedDate() { return createdDate; }
+    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
+
+    public Date getLastModified() { return lastModified; }
+    public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
+
+    // ✅ THÊM MỚI:
+    public String getProjectId() { return projectId; }
+    public void setProjectId(String projectId) { this.projectId = projectId; }
+
+    @Exclude
+    public String getDocumentId() { return documentId; }
+    @Exclude
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
+
     @Override
     public String toString() {
         return name;

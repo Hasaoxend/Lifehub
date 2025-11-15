@@ -10,115 +10,138 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.WriteBatch;
 import com.test.lifehub.core.util.Constants;
 import com.test.lifehub.features.two_productivity.data.NoteEntry;
+import com.test.lifehub.features.two_productivity.data.ProjectEntry;
 import com.test.lifehub.features.two_productivity.data.TaskEntry;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/**
- * Repository (Kho chứa) cho Module Năng suất.
- * (Phiên bản đã refactor Hilt)
- */
 @Singleton
 public class ProductivityRepository {
 
     private static final String TAG = "ProductivityRepo";
+    private static final String COLLECTION_PROJECTS = "projects";
 
-    // Dependencies (Được Hilt tiêm vào)
     private final FirebaseAuth mAuth;
     private final FirebaseFirestore mDb;
-    private CollectionReference mNotesCollection; // Trỏ đến /users/{UID}/notes
-    private CollectionReference mTasksCollection; // Trỏ đến /users/{UID}/tasks
+    private CollectionReference mNotesCollection;
+    private CollectionReference mTasksCollection;
+    private CollectionReference mProjectsCollection;
 
-    // LiveData
     private final MutableLiveData<List<NoteEntry>> mAllNotes = new MutableLiveData<>();
     private final MutableLiveData<List<TaskEntry>> mAllTasks = new MutableLiveData<>();
     private final MutableLiveData<List<TaskEntry>> mAllShoppingItems = new MutableLiveData<>();
+    private final MutableLiveData<List<ProjectEntry>> mAllProjects = new MutableLiveData<>();
 
     @Inject
     public ProductivityRepository(FirebaseAuth auth, FirebaseFirestore db) {
         this.mAuth = auth;
         this.mDb = db;
-
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             String uid = user.getUid();
-            // Trỏ CSDL vào đúng thư mục của người dùng
             mNotesCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_NOTES);
             mTasksCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_TASKS);
+            mProjectsCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(COLLECTION_PROJECTS);
 
-            // Bắt đầu lắng nghe
+            Log.d(TAG, "Repository initialized. User: " + uid);
             listenForNoteChanges();
             listenForTaskChanges();
+            listenForProjectChanges();
+        } else {
+            Log.e(TAG, "Repository init failed: User is NULL");
         }
     }
 
-    /**
-     * Lắng nghe thay đổi của Ghi chú (Notes)
-     */
     private void listenForNoteChanges() {
         if (mNotesCollection == null) return;
         mNotesCollection.orderBy("lastModified", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) { Log.w(TAG, "Lỗi lắng nghe Notes", e); return; }
+                    if (e != null) { Log.w(TAG, "❌ Lỗi lắng nghe Notes", e); return; }
                     if (snapshot != null) {
                         List<NoteEntry> notes = snapshot.toObjects(NoteEntry.class);
                         for (int i = 0; i < snapshot.getDocuments().size(); i++) {
                             notes.get(i).documentId = snapshot.getDocuments().get(i).getId();
                         }
                         mAllNotes.setValue(notes);
+                        Log.d(TAG, "✅ Notes updated: " + notes.size() + " items");
                     }
                 });
     }
 
     /**
-     * Lắng nghe thay đổi của Công việc (Tasks & Shopping)
+     * ✅ SỬA LỖI (Index): Đơn giản hóa Query để không cần Index
+     * Chúng ta sẽ sắp xếp (sort) ở client (Activity/ViewModel)
      */
     private void listenForTaskChanges() {
         if (mTasksCollection == null) return;
-        mTasksCollection.orderBy("isCompleted", Query.Direction.ASCENDING)
-                .orderBy("lastModified", Query.Direction.DESCENDING)
+        Log.d(TAG, "Lắng nghe TẤT CẢ Tasks...");
+
+        // Query đơn giản nhất: Lấy tất cả, sắp xếp theo thời gian
+        mTasksCollection.orderBy("lastModified", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) { Log.w(TAG, "Lỗi lắng nghe Tasks", e); return; }
+                    if (e != null) {
+                        Log.w(TAG, "❌ Lỗi lắng nghe Tasks", e);
+                        return;
+                    }
                     if (snapshot != null) {
-                        // 1. Lấy TẤT CẢ công việc
                         List<TaskEntry> allTasks = snapshot.toObjects(TaskEntry.class);
                         for (int i = 0; i < snapshot.getDocuments().size(); i++) {
                             allTasks.get(i).documentId = snapshot.getDocuments().get(i).getId();
                         }
 
-                        // 2. Tách (Filter) thành 2 danh sách riêng biệt
+                        // Lọc ra 2 danh sách
                         List<TaskEntry> generalTasks = new ArrayList<>();
                         List<TaskEntry> shoppingItems = new ArrayList<>();
                         for (TaskEntry task : allTasks) {
                             if (task.getTaskType() == Constants.TASK_TYPE_SHOPPING) {
                                 shoppingItems.add(task);
                             } else {
-                                generalTasks.add(task); // Mặc định là General
+                                generalTasks.add(task); // Bao gồm cả task trong project
                             }
                         }
 
-                        // 3. Đẩy vào 2 LiveData riêng biệt
+                        // Cập nhật cả 2 LiveData
                         mAllTasks.setValue(generalTasks);
                         mAllShoppingItems.setValue(shoppingItems);
+                        Log.d(TAG, "✅ Tasks updated: " + generalTasks.size() + " tasks, " + shoppingItems.size() + " shopping items");
                     }
                 });
     }
 
-    // ----- Getters (Lấy dữ liệu) -----
+    // Lắng nghe Projects (sắp xếp A-Z)
+    private void listenForProjectChanges() {
+        if (mProjectsCollection == null) return;
+        mProjectsCollection.orderBy("name", Query.Direction.ASCENDING)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) { Log.w(TAG, "❌ Lỗi lắng nghe Projects", e); return; }
+                    if (snapshot != null) {
+                        List<ProjectEntry> projects = snapshot.toObjects(ProjectEntry.class);
+                        for (int i = 0; i < snapshot.getDocuments().size(); i++) {
+                            projects.get(i).documentId = snapshot.getDocuments().get(i).getId();
+                        }
+                        mAllProjects.setValue(projects);
+                        Log.d(TAG, "✅ Projects updated: " + projects.size() + " items");
+                    }
+                });
+    }
+
+    // ----- Getters -----
     public LiveData<List<NoteEntry>> getAllNotes() { return mAllNotes; }
     public LiveData<List<TaskEntry>> getAllTasks() { return mAllTasks; }
     public LiveData<List<TaskEntry>> getAllShoppingItems() { return mAllShoppingItems; }
+    public LiveData<List<ProjectEntry>> getAllProjects() { return mAllProjects; }
 
     public LiveData<NoteEntry> getNoteById(String documentId) {
         MutableLiveData<NoteEntry> noteData = new MutableLiveData<>();
         if (mNotesCollection == null) return noteData;
-
         mNotesCollection.document(documentId).addSnapshotListener((snapshot, e) -> {
             if (snapshot != null && snapshot.exists()) {
                 NoteEntry note = snapshot.toObject(NoteEntry.class);
@@ -131,51 +154,93 @@ public class ProductivityRepository {
         return noteData;
     }
 
-    // ----- Cập nhật Ghi chú (Notes) -----
-
+    // ----- Notes -----
     public void insertNote(NoteEntry note) {
-        if (mNotesCollection == null || mAuth.getCurrentUser() == null) return;
-        note.setUserOwnerId(mAuth.getCurrentUser().getUid()); // Đặt chủ sở hữu
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (mNotesCollection == null || currentUser == null) return;
+        note.setUserOwnerId(currentUser.getUid());
         mNotesCollection.add(note)
-                .addOnSuccessListener(ref -> Log.d(TAG, "Đã thêm Ghi chú: " + ref.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi thêm Ghi chú", e));
+                .addOnSuccessListener(ref -> Log.d(TAG, "✅ Đã thêm Note: " + ref.getId()))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi thêm Note", e));
     }
-
     public void updateNote(NoteEntry note) {
         if (mNotesCollection == null || note.documentId == null) return;
         mNotesCollection.document(note.documentId).set(note)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã cập nhật Ghi chú"))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi cập nhật Ghi chú", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã cập nhật Note"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi cập nhật Note", e));
     }
-
     public void deleteNote(NoteEntry note) {
         if (mNotesCollection == null || note.documentId == null) return;
         mNotesCollection.document(note.documentId).delete()
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã xóa Ghi chú"))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi xóa Ghi chú", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã xóa Note"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi xóa Note", e));
     }
 
-    // ----- Cập nhật Công việc (Tasks) -----
-
+    // ----- Tasks -----
     public void insertTask(TaskEntry task) {
-        if (mTasksCollection == null || mAuth.getCurrentUser() == null) return;
-        task.setUserOwnerId(mAuth.getCurrentUser().getUid()); // Đặt chủ sở hữu
-        mTasksCollection.add(task)
-                .addOnSuccessListener(ref -> Log.d(TAG, "Đã thêm Công việc: " + ref.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi thêm Công việc", e));
-    }
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        Log.d(TAG, "insertTask called. ProjectId: " + task.getProjectId());
+        Log.d(TAG, "User: " + (currentUser != null ? currentUser.getUid() : "NULL"));
 
+        if (mTasksCollection == null || currentUser == null) {
+            Log.e(TAG, "Cannot insert task: collection or user is null");
+            return;
+        }
+
+        task.setUserOwnerId(currentUser.getUid());
+        mTasksCollection.add(task)
+                .addOnSuccessListener(ref -> Log.d(TAG, "✅ Đã thêm Task: " + ref.getId()))
+                .addOnFailureListener(e -> Log.e(TAG, "❌ Lỗi thêm Task", e));
+    }
     public void updateTask(TaskEntry task) {
         if (mTasksCollection == null || task.documentId == null) return;
         mTasksCollection.document(task.documentId).set(task)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã cập nhật Công việc"))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi cập nhật Công việc", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã cập nhật Task"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi cập nhật Task", e));
     }
-
     public void deleteTask(TaskEntry task) {
         if (mTasksCollection == null || task.documentId == null) return;
         mTasksCollection.document(task.documentId).delete()
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã xóa Công việc"))
-                .addOnFailureListener(e -> Log.w(TAG, "Lỗi xóa Công việc", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã xóa Task"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi xóa Task", e));
+    }
+
+    // ----- Projects -----
+    public void insertProject(String name, String parentProjectId) {
+        if (mProjectsCollection == null || mAuth.getCurrentUser() == null) return;
+        ProjectEntry project = new ProjectEntry(name, mAuth.getCurrentUser().getUid());
+        project.setProjectId(parentProjectId); // Gán ID cha
+        mProjectsCollection.add(project)
+                .addOnSuccessListener(ref -> Log.d(TAG, "✅ Đã tạo Project: " + ref.getId()))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi tạo Project", e));
+    }
+
+    public void updateProjectName(String projectId, String newName) {
+        if (mProjectsCollection == null || projectId == null) return;
+        mProjectsCollection.document(projectId)
+                .update("name", newName, "lastModified", new Date())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã đổi tên Project"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi đổi tên Project", e));
+    }
+
+    public void deleteProject(ProjectEntry project) {
+        if (mProjectsCollection == null || project.documentId == null) return;
+
+        WriteBatch batch = mDb.batch();
+
+        mTasksCollection.whereEqualTo("projectId", project.documentId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (int i = 0; i < querySnapshot.getDocuments().size(); i++) {
+                        batch.update(querySnapshot.getDocuments().get(i).getReference(), "projectId", null);
+                    }
+
+                    batch.delete(mProjectsCollection.document(project.documentId));
+
+                    batch.commit()
+                            .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Đã xóa Project và cập nhật tasks"))
+                            .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi xóa Project (batch)", e));
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Lỗi tìm task để xóa project", e));
     }
 }

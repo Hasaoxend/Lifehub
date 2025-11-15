@@ -15,22 +15,21 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.ViewModelProvider; // <-- THÊM IMPORT NÀY
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth; // <-- SẼ CẦN CHO VIỆC RESET PASS
-import com.google.firebase.auth.FirebaseUser; // <-- XÓA IMPORT NÀY
+import com.google.firebase.auth.FirebaseAuth;
 import com.test.lifehub.R;
 import com.test.lifehub.core.security.BiometricHelper;
-import com.test.lifehub.core.util.SessionManager; // <-- XÓA IMPORT NÀY
+import com.test.lifehub.core.util.SessionManager; // (Cần cho hàm cũ)
 
-import dagger.hilt.android.AndroidEntryPoint; // <-- THÊM IMPORT NÀY
+import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Activity xử lý Đăng nhập (Firebase) và Mở khóa (Vân tay).
- * (Phiên bản đã refactor hoàn toàn sang Hilt và MVVM)
+ * (Phiên bản đã sửa lỗi Tiêu đề Toolbar)
  */
-@AndroidEntryPoint // <-- THÊM CHÚ THÍCH NÀY
+@AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity implements BiometricHelper.BiometricAuthListener {
 
     private static final String TAG = "LoginActivity";
@@ -44,36 +43,34 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     private LinearLayout mLayoutBiometric;
 
     // --- Logic ---
-    private LoginViewModel mViewModel; // <-- SỬA LẠI: "BỘ NÃO" MỚI
-    private FirebaseAuth mAuth; // <-- Vẫn giữ lại cho chức năng Reset Password
+    private LoginViewModel mViewModel;
+    private FirebaseAuth mAuth; // Cần cho Reset Password
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Khởi tạo
-        // mAuth và mSessionManager SẼ ĐƯỢC HILT TIÊM VÀO VIEWMODEL
         mViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
-        mAuth = FirebaseAuth.getInstance(); // Vẫn cần cho dialog Quên mật khẩu
+        mAuth = FirebaseAuth.getInstance();
 
-        // Ánh xạ (Find) Views
         findViews();
 
-        // Cài đặt Toolbar
         setSupportActionBar(mToolbar);
+        // ✅ SỬA LỖI 4: Ẩn tiêu đề "LifeHub"
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
         mToolbar.setNavigationOnClickListener(v -> finish()); // Nút Back
 
-        // Thiết lập Listeners
         setupListeners();
 
-        // Thiết lập Observers (Lắng nghe ViewModel)
-        observeInitialCheck();
         observeLoginState();
+        observeInitialCheck();
 
-        // Chỉ gọi kiểm tra ban đầu MỘT LẦN khi Activity mới được tạo
         if (savedInstanceState == null) {
-            setLoading(true); // Hiển thị loading trong khi kiểm tra
+            setLoading(true);
             mViewModel.performInitialCheck();
         }
     }
@@ -81,8 +78,7 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     @Override
     protected void onStart() {
         super.onStart();
-        // XÓA HẾT MỌI LOGIC TRONG NÀY.
-        // ViewModel đã xử lý ở onCreate.
+        // Logic đã chuyển sang ViewModel
     }
 
     private void findViews() {
@@ -97,40 +93,31 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     }
 
     private void setupListeners() {
-        // Nút Đăng nhập
         btnLogin.setOnClickListener(v -> {
-            // SỬA LẠI: Giao việc cho ViewModel
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
             mViewModel.attemptManualLogin(email, password);
         });
 
-        // Nút chuyển sang Đăng ký
         tvGoToRegister.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterEmailActivity.class);
             startActivity(intent);
         });
 
-        // Nút Quên mật khẩu
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
 
-        // Nút Đăng nhập Vân tay
         mLayoutBiometric.setOnClickListener(v -> {
-            setLoading(true); // Ẩn form
+            setLoading(true);
             BiometricHelper.showBiometricPrompt(this, this);
         });
     }
 
-    /**
-     * HÀM MỚI:
-     * Lắng nghe trạng thái khởi động (thay cho onStart).
-     */
     private void observeInitialCheck() {
         mViewModel.initialState.observe(this, state -> {
             if (state == null) return;
             Log.d(TAG, "InitialCheckState: " + state.name());
 
-            setLoading(false); // Tắt loading (vì performInitialCheck đã xong)
+            setLoading(false);
 
             switch (state) {
                 case SHOW_LOGIN_FORM:
@@ -140,19 +127,14 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
                     mLayoutBiometric.setVisibility(View.VISIBLE);
                     break;
                 case NAVIGATE_TO_MAIN:
-                    navigateToMain(); // Vào thẳng
+                    navigateToMain();
                     break;
                 case IDLE:
-                    // Đang chờ... (setLoading(true) ở onCreate đã xử lý)
                     break;
             }
         });
     }
 
-    /**
-     * HÀM MỚI:
-     * Lắng nghe trạng thái của nút bấm Đăng nhập.
-     */
     private void observeLoginState() {
         mViewModel.loginState.observe(this, state -> {
             if (state == null) return;
@@ -185,16 +167,6 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         });
     }
 
-    /**
-     * Xử lý khi người dùng nhấn nút "Đăng nhập" thủ công.
-     * (HÀM NÀY ĐÃ BỊ XÓA - LOGIC ĐÃ CHUYỂN SANG VIEWMODEL)
-     */
-    // private void attemptManualLogin() { ... }
-
-    /**
-     * (Chức năng thêm) Hiển thị hộp thoại để gửi email Quên mật khẩu.
-     * (Hàm này giữ nguyên)
-     */
     private void showForgotPasswordDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_forgot_password, null);
@@ -218,9 +190,6 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
                 .show();
     }
 
-    /**
-     * (Hàm này giữ nguyên)
-     */
     private void navigateToMain() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -228,9 +197,6 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         finish();
     }
 
-    /**
-     * (Hàm này giữ nguyên)
-     */
     private void setLoading(boolean isLoading) {
         if (isLoading) {
             pbLogin.setVisibility(View.VISIBLE);
@@ -245,9 +211,7 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         }
     }
 
-
-    // ----- CÁC HÀM GỌI LẠI (CALLBACK) TỪ BIOMETRICHELPER -----
-    // (Giữ nguyên toàn bộ)
+    // --- CÁC HÀM GỌI LẠI (CALLBACK) TỪ BIOMETRICHELPER ---
 
     @Override
     public void onBiometricAuthSuccess() {
@@ -258,7 +222,7 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     @Override
     public void onBiometricAuthError(String errorMessage) {
         Log.e(TAG, "Lỗi vân tay: " + errorMessage);
-        setLoading(false); // Hiển thị lại form đăng nhập
+        setLoading(false);
         Toast.makeText(this, "Xác thực vân tay bị hủy.", Toast.LENGTH_SHORT).show();
     }
 

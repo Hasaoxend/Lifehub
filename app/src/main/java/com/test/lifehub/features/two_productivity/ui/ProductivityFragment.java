@@ -16,14 +16,8 @@ import com.test.lifehub.core.util.Constants;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-/**
- * Fragment chính cho tab Năng suất.
- * (Phiên bản Dashboard Menu đã refactor Hilt)
- */
 @AndroidEntryPoint
 public class ProductivityFragment extends Fragment {
-
-    // Không cần ViewModel hay Adapters ở đây nữa
 
     @Nullable
     @Override
@@ -31,12 +25,9 @@ public class ProductivityFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_productivity, container, false);
 
-        // Ánh xạ 3 thẻ CardView
         MaterialCardView cardNotes = view.findViewById(R.id.card_notes);
         MaterialCardView cardTodo = view.findViewById(R.id.card_todo);
         MaterialCardView cardShopping = view.findViewById(R.id.card_shopping);
-
-        // Gán sự kiện Click
 
         // Khi nhấn vào Ghi chú -> Mở NotesListActivity
         cardNotes.setOnClickListener(v -> {
@@ -48,6 +39,7 @@ public class ProductivityFragment extends Fragment {
         cardTodo.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TaskListActivity.class);
             intent.putExtra(Constants.EXTRA_TASK_TYPE, Constants.TASK_TYPE_GENERAL);
+            // (Không gửi ProjectId -> sẽ mở Root)
             startActivity(intent);
         });
 

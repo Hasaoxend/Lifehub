@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.test.lifehub.R;
@@ -61,7 +62,10 @@ public class NotesListActivity extends AppCompatActivity {
         // --- Cài đặt RecyclerView ---
         mNoteAdapter = new NoteAdapter(this, noteActivityResultLauncher);
         mRecyclerView.setAdapter(mNoteAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // DÒNG MỚI (2 cột)
+        StaggeredGridLayoutManager layoutManager =
+                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         // --- Cài đặt FAB ---
         mFab.setOnClickListener(v -> {

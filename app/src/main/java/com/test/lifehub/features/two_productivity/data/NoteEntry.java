@@ -1,80 +1,55 @@
 package com.test.lifehub.features.two_productivity.data;
 
 import com.google.firebase.firestore.Exclude;
-import java.util.Date; // <-- THÊM IMPORT NÀY
+import java.util.Date;
 
 /**
  * POJO (Đối tượng Java) cho một Ghi chú (Note).
- * (Phiên bản đã sửa lỗi Timestamp sang Date)
+ * (Phiên bản đã thêm alarmRequestCode)
  */
 public class NoteEntry {
 
     @Exclude
     public String documentId;
 
-    // --- Các trường dữ liệu (Fields) ---
     private String title;
     private String content;
-    private Date lastModified; // <-- SỬA LỖI: Đổi từ long sang Date
+    private Date lastModified;
     private String userOwnerId;
+    private Date reminderTime;
 
-    /**
-     * Constructor rỗng (BẮT BUỘC cho Firestore)
-     */
+    // ✅ THÊM LẠI TÍNH NĂNG: Trường để lưu ID của Alarm
+    private int alarmRequestCode;
+
     public NoteEntry() {
     }
 
-    /**
-     * Constructor chính
-     */
-    public NoteEntry(String title, String content, Date lastModified) { // <-- SỬA LỖI: Đổi sang Date
+    public NoteEntry(String title, String content, Date lastModified) {
         this.title = title;
         this.content = content;
         this.lastModified = lastModified;
+        this.reminderTime = null;
+        this.alarmRequestCode = 0; // Mặc định
     }
 
-    // --- Getters & Setters (BẮT BUỘC cho Firestore) ---
+    // --- Getters & Setters ---
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public Date getLastModified() { return lastModified; }
+    public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
+    public String getUserOwnerId() { return userOwnerId; }
+    public void setUserOwnerId(String userOwnerId) { this.userOwnerId = userOwnerId; }
+    public Date getReminderTime() { return reminderTime; }
+    public void setReminderTime(Date reminderTime) { this.reminderTime = reminderTime; }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Date getLastModified() { // <-- SỬA LỖI: Đổi sang Date
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) { // <-- SỬA LỖI: Đổi sang Date
-        this.lastModified = lastModified;
-    }
-
-    public String getUserOwnerId() {
-        return userOwnerId;
-    }
-
-    public void setUserOwnerId(String userOwnerId) {
-        this.userOwnerId = userOwnerId;
-    }
-
-    // --- Getter/Setter cho ID (Không phải của Firestore) ---
-    @Exclude
-    public String getDocumentId() {
-        return documentId;
-    }
+    // ✅ THÊM LẠI TÍNH NĂNG:
+    public int getAlarmRequestCode() { return alarmRequestCode; }
+    public void setAlarmRequestCode(int alarmRequestCode) { this.alarmRequestCode = alarmRequestCode; }
 
     @Exclude
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
-    }
+    public String getDocumentId() { return documentId; }
+    @Exclude
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
 }

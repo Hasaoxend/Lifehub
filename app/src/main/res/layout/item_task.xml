@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -16,12 +17,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/item_task_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        tools:text="Đây là nội dung công việc" />
+        android:orientation="vertical"
+        android:layout_marginStart="8dp">
+
+        <TextView
+            android:id="@+id/item_task_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:maxLines="1"
+            android:ellipsize="middle"
+            tools:text="Đây là nội dung công việc dài dài dài" />
+
+        <TextView
+            android:id="@+id/item_task_reminder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+            android:textColor="?attr/colorPrimary"
+            android:drawablePadding="4dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="Nhắc lúc 10:00, Hôm nay"
+            app:drawableStartCompat="@drawable/ic_alarm"
+            app:drawableTint="?attr/colorPrimary" />
+
+    </LinearLayout>
 
 </LinearLayout>
