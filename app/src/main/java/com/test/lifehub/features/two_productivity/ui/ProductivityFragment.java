@@ -29,6 +29,18 @@ public class ProductivityFragment extends Fragment {
         MaterialCardView cardTodo = view.findViewById(R.id.card_todo);
         MaterialCardView cardShopping = view.findViewById(R.id.card_shopping);
 
+        // Dòng mới: Tìm ID của thẻ máy tính
+        MaterialCardView cardCalculator = view.findViewById(R.id.card_calculator);
+
+
+        //Weather
+        MaterialCardView cardWeather = view.findViewById(R.id.card_weather);
+
+        cardWeather.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), WeatherActivity.class);
+            startActivity(intent);
+        });
+
         // Khi nhấn vào Ghi chú -> Mở NotesListActivity
         cardNotes.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), NotesListActivity.class);
@@ -47,6 +59,12 @@ public class ProductivityFragment extends Fragment {
         cardShopping.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TaskListActivity.class);
             intent.putExtra(Constants.EXTRA_TASK_TYPE, Constants.TASK_TYPE_SHOPPING);
+            startActivity(intent);
+        });
+
+        // Khối mới: Khi nhấn vào Máy tính -> Mở CalculatorActivity
+        cardCalculator.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), CalculatorActivity.class);
             startActivity(intent);
         });
 

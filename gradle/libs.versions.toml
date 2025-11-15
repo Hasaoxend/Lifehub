@@ -4,6 +4,8 @@ appcompat = "1.7.0"
 material = "1.12.0"
 activity = "1.9.0"
 constraintlayout = "2.1.4"
+retrofit = "2.9.0"
+gson = "2.10.1"
 
 # ----- SỬA LỖI Ở ĐÂY -----
 firebaseBom = "33.1.1" # ĐỔI TỪ 34.5.0 XUỐNG 33.1.1 (hoặc một bản 33.x.x ổn định)
@@ -37,6 +39,9 @@ espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref =
 
 google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
 google-dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
+
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 
 
 [plugins]

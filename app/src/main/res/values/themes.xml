@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme for Light mode -->
     <style name="Theme.Lifehub" parent="Theme.Material3.Light.NoActionBar">
         <!-- (Tất cả các item màu Sáng (Light) của bạn ở đây...) -->
@@ -38,4 +38,33 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/md_theme_light_background</item>
     </style>
+
+    <style name="Widget.App.CalculatorButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_gravity">fill_horizontal</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">32sp</item>
+        <item name="cornerRadius">100dp</item> <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+    </style>
+
+    <style name="Widget.App.CalculatorButton.DarkGray">
+        <item name="android:backgroundTint">#333333</item>
+    </style>
+
+    <style name="Widget.App.CalculatorButton.LightGray">
+        <item name="android:backgroundTint">#A5A5A5</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="Widget.App.CalculatorButton.Orange">
+        <item name="android:backgroundTint">#FF9F0A</item>
+    </style>
+
+
 </resources>

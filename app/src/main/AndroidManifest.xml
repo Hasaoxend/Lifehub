@@ -43,6 +43,10 @@
         <activity android:name=".features.two_productivity.ui.NotesListActivity" android:exported="false" />
         <activity android:name=".features.two_productivity.ui.TaskListActivity" android:exported="false" />
 
+        <activity
+            android:name=".features.two_productivity.ui.CalculatorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <service
             android:name=".core.services.ReminderService"
             android:enabled="true"
@@ -53,6 +57,11 @@
             android:enabled="true"
             android:exported="false" />
 
-    </application>
+        <activity android:name=".features.two_productivity.ui.CalculatorActivity" android:exported="false" android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".features.two_productivity.ui.WeatherActivity"
+            android:exported="false" />
+
+    </application>
 </manifest>
