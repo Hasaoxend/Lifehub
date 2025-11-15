@@ -1,18 +1,16 @@
 package com.test.lifehub.features.two_productivity.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.test.lifehub.R;
@@ -34,7 +33,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -50,25 +48,23 @@ public class TaskListActivity extends AppCompatActivity
     private ProductivityViewModel mViewModel;
     private TaskListAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private FloatingActionButton mFabMain, mFabAddProject, mFabAddTask;
-    private TextView mLabelProject, mLabelTask;
+    private FloatingActionButton mFab;
     private Toolbar mToolbar;
+    private SearchView mSearchView;
     private TextView mEmptyView;
     private CoordinatorLayout mCoordinatorLayout;
 
     private int mTaskType;
-
     private String mCurrentProjectId = null;
     private String mCurrentProjectName = null;
-    private boolean isFabMenuOpen = false;
-    private final OvershootInterpolator interpolator = new OvershootInterpolator();
 
-    // Xóa các biến fabMargin (không cần nữa)
+    private List<TaskListItem> mAllItems = new ArrayList<>();
+    private BottomSheetDialog mBottomSheetDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_task_list);
+        setContentView(R.layout.activity_task_list_drawer);
 
         mTaskType = getIntent().getIntExtra(Constants.EXTRA_TASK_TYPE, Constants.TASK_TYPE_GENERAL);
         mCurrentProjectId = getIntent().getStringExtra(EXTRA_PROJECT_ID);
@@ -76,17 +72,12 @@ public class TaskListActivity extends AppCompatActivity
 
         Log.d(TAG, "TaskListActivity created with type: " + mTaskType + " | ProjectId: " + mCurrentProjectId);
 
-        // --- Ánh xạ Views ---
         mToolbar = findViewById(R.id.toolbar_task_list);
         mRecyclerView = findViewById(R.id.recycler_view_task_list);
+        mSearchView = findViewById(R.id.search_view_tasks);
         mEmptyView = findViewById(R.id.empty_view_tasks);
         mCoordinatorLayout = findViewById(R.id.task_list_coordinator_layout);
-
-        mFabMain = findViewById(R.id.fab_main);
-        mFabAddProject = findViewById(R.id.fab_add_project);
-        mFabAddTask = findViewById(R.id.fab_add_task);
-        mLabelProject = findViewById(R.id.label_add_project);
-        mLabelTask = findViewById(R.id.label_add_task);
+        mFab = findViewById(R.id.fab_main);
 
         setSupportActionBar(mToolbar);
         updateToolbarTitle();
@@ -98,7 +89,18 @@ public class TaskListActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         setupSwipeToDelete();
-        setupFabMenu();
+        setupFabDrawer();
+        setupSearchView();
+
+        // Auto-dismiss drawer khi scroll
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    dismissBottomSheet();
+                }
+            }
+        });
 
         mViewModel = new ViewModelProvider(this).get(ProductivityViewModel.class);
         mViewModel.setCurrentProjectId(mCurrentProjectId);
@@ -106,111 +108,93 @@ public class TaskListActivity extends AppCompatActivity
         observeData();
     }
 
-    private void setupFabMenu() {
-        if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
-            mFabAddProject.setVisibility(View.GONE);
-            mLabelProject.setVisibility(View.GONE);
+    private void setupFabDrawer() {
+        mFab.setOnClickListener(v -> showBottomSheetMenu());
+    }
+
+    private void showBottomSheetMenu() {
+        if (mBottomSheetDialog != null && mBottomSheetDialog.isShowing()) {
+            return;
         }
 
-        mFabMain.setOnClickListener(v -> {
-            if (isFabMenuOpen) {
-                closeFabMenu(true);
-            } else {
-                openFabMenu();
-            }
-        });
+        View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_fab_menu, null);
+        mBottomSheetDialog = new BottomSheetDialog(this);
+        mBottomSheetDialog.setContentView(bottomSheetView);
 
-        mFabAddProject.setOnClickListener(v -> {
-            closeFabMenu(false);
-            AddEditProjectDialog dialog = AddEditProjectDialog.newInstance(null, mCurrentProjectId);
-            dialog.show(getSupportFragmentManager(), "AddProjectDialog");
-        });
+        View menuAddProject = bottomSheetView.findViewById(R.id.menu_add_project);
+        View menuAddTask = bottomSheetView.findViewById(R.id.menu_add_task);
 
-        mFabAddTask.setOnClickListener(v -> {
-            closeFabMenu(false);
+        // Ẩn menu Project nếu là Shopping
+        if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
+            menuAddProject.setVisibility(View.GONE);
+        } else {
+            menuAddProject.setOnClickListener(v -> {
+                dismissBottomSheet();
+                AddEditProjectDialog dialog = AddEditProjectDialog.newInstance(null, mCurrentProjectId);
+                dialog.show(getSupportFragmentManager(), "AddProjectDialog");
+            });
+        }
+
+        menuAddTask.setOnClickListener(v -> {
+            dismissBottomSheet();
             AddEditTaskDialog dialog = AddEditTaskDialog.newInstance(null, mTaskType, mCurrentProjectId);
             dialog.show(getSupportFragmentManager(), "AddTaskDialog");
         });
+
+        mBottomSheetDialog.show();
     }
 
-    /**
-     * ✅ SỬA LỖI 1 (FAB):
-     * Chỉ dùng setVisibility, alpha và rotation.
-     * Xóa bỏ hoàn toàn TranslationY (di chuyển) vì XML đã xử lý vị trí.
-     */
-    private void openFabMenu() {
-        if (isFabMenuOpen) return;
-        isFabMenuOpen = true;
-
-        mFabMain.animate().rotation(135f).setInterpolator(interpolator).setDuration(300).start();
-
-        // --- Hiển thị FAB Task ---
-        mFabAddTask.setVisibility(View.VISIBLE);
-        mLabelTask.setVisibility(View.VISIBLE);
-        mFabAddTask.setAlpha(0f);
-        mLabelTask.setAlpha(0f);
-
-        mFabAddTask.animate().alpha(1f).setInterpolator(interpolator).setDuration(300).start();
-        mLabelTask.animate().alpha(1f).setDuration(300).start();
-
-        // --- Hiển thị FAB Project (nếu là General Task) ---
-        if (mTaskType == Constants.TASK_TYPE_GENERAL) {
-            mFabAddProject.setVisibility(View.VISIBLE);
-            mLabelProject.setVisibility(View.VISIBLE);
-
-            mFabAddProject.setAlpha(0f);
-            mLabelProject.setAlpha(0f);
-
-            mFabAddProject.animate().alpha(1f).setInterpolator(interpolator).setDuration(300).start();
-            mLabelProject.animate().alpha(1f).setDuration(300).start();
+    private void dismissBottomSheet() {
+        if (mBottomSheetDialog != null && mBottomSheetDialog.isShowing()) {
+            mBottomSheetDialog.dismiss();
         }
     }
 
-    /**
-     * ✅ SỬA LỖI 1 (FAB):
-     * Sửa lỗi "biến mất" bằng cách dùng setVisibility(View.INVISIBLE)
-     */
-    private void closeFabMenu(boolean resetRotation) {
-        if (!isFabMenuOpen) return;
-        isFabMenuOpen = false;
+    private void setupSearchView() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                dismissBottomSheet();
+                return false;
+            }
 
-        if (resetRotation) {
-            mFabMain.animate().rotation(0f).setInterpolator(interpolator).setDuration(300).start();
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                dismissBottomSheet();
+                filterItems(newText);
+                return true;
+            }
+        });
+
+        mSearchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                dismissBottomSheet();
+            }
+        });
+    }
+
+    private void filterItems(String query) {
+        List<TaskListItem> filteredList = new ArrayList<>();
+
+        if (query == null || query.trim().isEmpty()) {
+            filteredList = mAllItems;
+        } else {
+            String lowerCaseQuery = query.toLowerCase().trim();
+            for (TaskListItem item : mAllItems) {
+                if (item.type == TaskListItem.TYPE_PROJECT) {
+                    if (item.project.getName().toLowerCase().contains(lowerCaseQuery)) {
+                        filteredList.add(item);
+                    }
+                } else {
+                    if (item.task.getName().toLowerCase().contains(lowerCaseQuery)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
         }
 
-        // --- Ẩn FAB Task ---
-        mFabAddTask.animate().alpha(0f).setInterpolator(interpolator).setDuration(300)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mFabAddTask.setVisibility(View.INVISIBLE); // Dùng INVISIBLE
-                    }
-                });
-        mLabelTask.animate().alpha(0f).setDuration(300)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLabelTask.setVisibility(View.INVISIBLE);
-                    }
-                });
-
-        // --- Ẩn FAB Project ---
-        if (mTaskType == Constants.TASK_TYPE_GENERAL) {
-            mFabAddProject.animate().alpha(0f).setInterpolator(interpolator).setDuration(300)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mFabAddProject.setVisibility(View.INVISIBLE);
-                        }
-                    });
-            mLabelProject.animate().alpha(0f).setDuration(300)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mLabelProject.setVisibility(View.INVISIBLE);
-                        }
-                    });
-        }
+        mAdapter.submitList(filteredList);
+        updateEmptyView(filteredList);
     }
 
     private void updateToolbarTitle() {
@@ -225,11 +209,7 @@ public class TaskListActivity extends AppCompatActivity
 
     private void observeData() {
         if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
-            mFabAddProject.setVisibility(View.GONE);
-            mLabelProject.setVisibility(View.GONE);
-
             mViewModel.getAllShoppingItems().observe(this, tasks -> {
-                Log.d(TAG, "Shopping items updated: " + (tasks != null ? tasks.size() : 0) + " items");
                 List<TaskListItem> items = new ArrayList<>();
                 if (tasks != null) {
                     Collections.sort(tasks, Comparator.comparing(TaskEntry::isCompleted)
@@ -238,49 +218,41 @@ public class TaskListActivity extends AppCompatActivity
                         items.add(new TaskListItem(task));
                     }
                 }
-                mAdapter.submitList(items);
-                updateEmptyView(items);
+                mAllItems = items;
+                filterItems(mSearchView.getQuery().toString());
             });
         } else {
-            // ----- CHẾ ĐỘ CÔNG VIỆC (CÓ THƯ MỤC) -----
-
-            // Lắng nghe Root
             mViewModel.getProjectsInRoot().observe(this, projects -> {
                 if (mCurrentProjectId == null) {
                     List<TaskEntry> tasks = mViewModel.getTasksInRoot().getValue();
                     List<TaskListItem> items = convertToListItems(projects, tasks);
-                    mAdapter.submitList(items);
-                    updateEmptyView(items);
-                    Log.d(TAG, "Root projects updated");
+                    mAllItems = items;
+                    filterItems(mSearchView.getQuery().toString());
                 }
             });
             mViewModel.getTasksInRoot().observe(this, tasks -> {
                 if (mCurrentProjectId == null) {
                     List<ProjectEntry> projects = mViewModel.getProjectsInRoot().getValue();
                     List<TaskListItem> items = convertToListItems(projects, tasks);
-                    mAdapter.submitList(items);
-                    updateEmptyView(items);
-                    Log.d(TAG, "Root tasks updated");
+                    mAllItems = items;
+                    filterItems(mSearchView.getQuery().toString());
                 }
             });
 
-            // Lắng nghe Sub-Project
             mViewModel.getProjectsInProject().observe(this, projects -> {
                 if (mCurrentProjectId != null) {
                     List<TaskEntry> tasks = mViewModel.getTasksInProject().getValue();
                     List<TaskListItem> items = convertToListItems(projects, tasks);
-                    mAdapter.submitList(items);
-                    updateEmptyView(items);
-                    Log.d(TAG, "Sub-projects updated");
+                    mAllItems = items;
+                    filterItems(mSearchView.getQuery().toString());
                 }
             });
             mViewModel.getTasksInProject().observe(this, tasks -> {
                 if (mCurrentProjectId != null) {
                     List<ProjectEntry> projects = mViewModel.getProjectsInProject().getValue();
                     List<TaskListItem> items = convertToListItems(projects, tasks);
-                    mAdapter.submitList(items);
-                    updateEmptyView(items);
-                    Log.d(TAG, "Sub-tasks updated");
+                    mAllItems = items;
+                    filterItems(mSearchView.getQuery().toString());
                 }
             });
         }
@@ -321,6 +293,7 @@ public class TaskListActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                dismissBottomSheet();
                 int position = viewHolder.getAdapterPosition();
                 TaskListItem item = mAdapter.getItemAt(position);
                 if (item == null) return;
@@ -338,15 +311,11 @@ public class TaskListActivity extends AppCompatActivity
     private void deleteTask(TaskEntry taskToDelete) {
         if (taskToDelete.getAlarmRequestCode() != 0) {
             AlarmHelper.cancelAlarm(this, taskToDelete.getAlarmRequestCode());
-            Log.d(TAG, "Đã hủy Alarm cho task (do xóa): " + taskToDelete.getName());
         }
 
         mViewModel.deleteTask(taskToDelete);
 
-        // === SỬA LỖI: KHÔNG ĐỂ SNACKBAR ĐẨY LAYOUT ===
-        // Gắn vào root view thay vì CoordinatorLayout
         View root = findViewById(android.R.id.content);
-
         Snackbar.make(root != null ? root : mCoordinatorLayout, "Đã xóa công việc", Snackbar.LENGTH_LONG)
                 .setAction("Hoàn tác", v -> {
                     mViewModel.insertTask(taskToDelete);
@@ -359,15 +328,13 @@ public class TaskListActivity extends AppCompatActivity
                                 taskToDelete.getName()
                         );
                     }
-                    Log.d(TAG, "Đã hoàn tác xóa task: " + taskToDelete.getName());
                 })
                 .show();
     }
 
-    // ----- Implement các hàm của Interface -----
-
     @Override
     public void onTaskCheckChanged(TaskEntry task, boolean isChecked) {
+        dismissBottomSheet();
         task.setCompleted(isChecked);
         task.setLastModified(new Date());
 
@@ -375,40 +342,37 @@ public class TaskListActivity extends AppCompatActivity
             AlarmHelper.cancelAlarm(this, task.getAlarmRequestCode());
             task.setAlarmRequestCode(0);
             task.setReminderTime(null);
-            Log.d(TAG, "Task completed, canceling alarm for: " + task.getName());
         }
 
         mViewModel.updateTask(task);
-        Log.d(TAG, "Task checked: " + task.getName() + " - " + isChecked);
     }
 
     @Override
     public void onTaskClicked(TaskEntry task) {
-        Log.d(TAG, "Task clicked: " + task.getName());
+        dismissBottomSheet();
         AddEditTaskDialog dialog = AddEditTaskDialog.newInstance(task, task.getTaskType(), task.getProjectId());
         dialog.show(getSupportFragmentManager(), "EditTaskDialog");
     }
 
     @Override
     public void onProjectClicked(ProjectEntry project) {
-        Log.d(TAG, "Project clicked: " + project.getName());
+        dismissBottomSheet();
         mCurrentProjectId = project.documentId;
         mCurrentProjectName = project.getName();
-
-        // ✅ SỬA LỖI 2: Báo cho ViewModel biết projectID mới
         mViewModel.setCurrentProjectId(mCurrentProjectId);
-
         updateToolbarTitle();
     }
 
     @Override
     public void onProjectEdit(ProjectEntry project) {
+        dismissBottomSheet();
         AddEditProjectDialog dialog = AddEditProjectDialog.newInstance(project, project.getProjectId());
         dialog.show(getSupportFragmentManager(), "EditProjectDialog");
     }
 
     @Override
     public void onProjectDelete(ProjectEntry project) {
+        dismissBottomSheet();
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận xóa")
                 .setMessage("Xóa thư mục \"" + project.getName() + "\"? Các công việc bên trong sẽ được chuyển ra ngoài màn hình chính.")
@@ -420,25 +384,23 @@ public class TaskListActivity extends AppCompatActivity
                 .show();
     }
 
-    /**
-     * ✅ SỬA LỖI 2 (Logic Thư mục): Xử lý nút Back
-     */
     @Override
     public void onBackPressed() {
-        if (isFabMenuOpen) {
-            closeFabMenu(true);
+        if (mBottomSheetDialog != null && mBottomSheetDialog.isShowing()) {
+            dismissBottomSheet();
         } else if (mCurrentProjectId != null) {
-            // ---- ĐANG Ở TRONG THƯ MỤC -> QUAY LẠI ROOT ----
             mCurrentProjectId = null;
             mCurrentProjectName = null;
-
-            // ✅ Báo cho ViewModel biết đã quay về root
             mViewModel.setCurrentProjectId(null);
-
             updateToolbarTitle();
         } else {
-            // ---- ĐANG Ở ROOT -> THOÁT ACTIVITY ----
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dismissBottomSheet();
     }
 }

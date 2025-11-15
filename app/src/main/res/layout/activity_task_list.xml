@@ -12,11 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_task_list"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             tools:title="Công việc" />
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/search_background"
+            app:iconifiedByDefault="false"
+            app:queryHint="Tìm kiếm công việc..."
+            app:closeIcon="@drawable/ic_close"
+            app:searchIcon="@drawable/ic_search" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -41,6 +54,7 @@
             tools:visibility="visible" />
     </FrameLayout>
 
+    <!-- Labels cho FAB -->
     <TextView
         android:id="@+id/label_add_project"
         android:layout_width="wrap_content"

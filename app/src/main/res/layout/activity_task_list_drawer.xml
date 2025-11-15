@@ -1,34 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/task_list_coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".features.one_accounts.ui.AccountFragment">
+    tools:context=".features.two_productivity.ui.TaskListActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_accounts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_accounts"
+            android:id="@+id/toolbar_task_list"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Tài khoản" />
+            tools:title="Công việc" />
 
-        <!-- Thanh tìm kiếm -->
         <androidx.appcompat.widget.SearchView
-            android:id="@+id/search_view_accounts"
+            android:id="@+id/search_view_tasks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/search_background"
             app:iconifiedByDefault="false"
-            app:queryHint="Tìm kiếm tài khoản..."
+            app:queryHint="Tìm kiếm công việc..."
             app:closeIcon="@drawable/ic_close"
             app:searchIcon="@drawable/ic_search" />
 
@@ -40,33 +38,32 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_accounts"
+            android:id="@+id/recycler_view_task_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="8dp"
             android:clipToPadding="false"
             android:paddingBottom="80dp"
-            tools:listitem="@layout/item_account" />
+            tools:listitem="@layout/item_task" />
 
         <TextView
-            android:id="@+id/tv_empty_list"
+            android:id="@+id/empty_view_tasks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Chưa có tài khoản nào"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:text="Không có công việc nào"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:visibility="gone"
             tools:visibility="visible" />
-
     </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_account"
+        android:id="@+id/fab_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Thêm tài khoản mới"
+        android:contentDescription="Thêm"
         app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -18,6 +18,17 @@
             android:layout_height="?attr/actionBarSize"
             app:title="Ghi chú" />
 
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view_notes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/search_background"
+            app:iconifiedByDefault="false"
+            app:queryHint="Tìm kiếm ghi chú..."
+            app:closeIcon="@drawable/ic_close"
+            app:searchIcon="@drawable/ic_search" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
