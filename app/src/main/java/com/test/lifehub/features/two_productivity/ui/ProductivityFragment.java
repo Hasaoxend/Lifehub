@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.card.MaterialCardView;
 import com.test.lifehub.R;
 import com.test.lifehub.core.util.Constants;
+import com.test.lifehub.features.four_calendar.ui.CalendarActivity;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -28,43 +29,46 @@ public class ProductivityFragment extends Fragment {
         MaterialCardView cardNotes = view.findViewById(R.id.card_notes);
         MaterialCardView cardTodo = view.findViewById(R.id.card_todo);
         MaterialCardView cardShopping = view.findViewById(R.id.card_shopping);
-
-        // Dòng mới: Tìm ID của thẻ máy tính
         MaterialCardView cardCalculator = view.findViewById(R.id.card_calculator);
-
-
-        //Weather
         MaterialCardView cardWeather = view.findViewById(R.id.card_weather);
+        MaterialCardView cardCalendar = view.findViewById(R.id.card_calendar); // ✅ THÊM
 
-        cardWeather.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), WeatherActivity.class);
-            startActivity(intent);
-        });
-
-        // Khi nhấn vào Ghi chú -> Mở NotesListActivity
+        // Ghi chú
         cardNotes.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), NotesListActivity.class);
             startActivity(intent);
         });
 
-        // Khi nhấn vào Công việc -> Mở TaskListActivity (chế độ Công việc)
+        // Công việc
         cardTodo.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TaskListActivity.class);
             intent.putExtra(Constants.EXTRA_TASK_TYPE, Constants.TASK_TYPE_GENERAL);
-            // (Không gửi ProjectId -> sẽ mở Root)
             startActivity(intent);
         });
 
-        // Khi nhấn vào Mua sắm -> Mở TaskListActivity (chế độ Mua sắm)
+        // Mua sắm
         cardShopping.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TaskListActivity.class);
             intent.putExtra(Constants.EXTRA_TASK_TYPE, Constants.TASK_TYPE_SHOPPING);
             startActivity(intent);
         });
 
-        // Khối mới: Khi nhấn vào Máy tính -> Mở CalculatorActivity
+        // Máy tính
         cardCalculator.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), CalculatorActivity.class);
+            startActivity(intent);
+        });
+
+        // Thời tiết
+        // Thời tiết
+        cardWeather.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), WeatherActivity.class);
+            startActivity(intent);
+        });
+
+        // ✅ Lịch (MỚI)
+        cardCalendar.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), CalendarActivity.class);
             startActivity(intent);
         });
 
@@ -74,6 +78,5 @@ public class ProductivityFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Không cần làm gì ở đây nữa
     }
 }

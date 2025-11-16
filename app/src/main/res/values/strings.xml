@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Lifehub</string>
+
+    <string-array name="repeat_options">
+    <item>Không lặp lại</item>
+    <item>Hàng ngày</item>
+    <item>Hàng tuần</item>
+    <item>Hàng tháng</item>
+    </string-array>
 </resources>

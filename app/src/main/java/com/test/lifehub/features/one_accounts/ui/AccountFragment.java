@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,6 +48,12 @@ public class AccountFragment extends Fragment {
         mEmptyView = view.findViewById(R.id.tv_empty_list);
 
         mAdapter = new AccountAdapter();
+        mAdapter.setOnAccountActionListener(account -> {
+            // Handle delete from long press menu
+            mAccountViewModel.delete(account);
+            Toast.makeText(getContext(), "Đã xóa tài khoản", Toast.LENGTH_SHORT).show();
+        });
+
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

@@ -16,6 +16,8 @@ public final class Constants {
     public static final String COLLECTION_ACCOUNTS = "accounts";
     public static final String COLLECTION_NOTES = "notes";
     public static final String COLLECTION_TASKS = "tasks";
+    public static final String COLLECTION_CALENDAR_EVENTS = "calendar_events"; // ✅ THÊM MỚI
+
 
 
     // --- Hằng số cho Nhắc nhở & Thông báo (Notifications) ---
@@ -34,10 +36,14 @@ public final class Constants {
     public static final int TASK_TYPE_SHOPPING = 1;
 
 
-    // --- Hằng số cho Intent Extras ---
-    // (THÊM MỚI: Dùng để ProductivityFragment "bảo" TaskListActivity
-    // nên hiển thị loại công việc nào (General hay Shopping))
+
     public static final String EXTRA_TASK_TYPE = "EXTRA_TASK_TYPE";
+
+    // --- Calendar Repeat Types ---
+    public static final String REPEAT_NONE = "NONE";
+    public static final String REPEAT_DAILY = "DAILY";
+    public static final String REPEAT_WEEKLY = "WEEKLY";
+    public static final String REPEAT_MONTHLY = "MONTHLY";
 
 
     // --- CÁC HẰNG SỐ CŨ ĐÃ BỊ XÓA ---
