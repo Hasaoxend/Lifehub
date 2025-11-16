@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground">
+
+    <View
+        android:id="@+id/view_color_bar"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="#2196F3" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_event_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="Họp với khách hàng" />
+
+        <TextView
+            android:id="@+id/tv_event_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="10:00 - 11:00" />
+
+        <TextView
+            android:id="@+id/tv_event_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?android:attr/textColorSecondary"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_location"
+            android:drawableTint="?android:attr/textColorSecondary"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="Phòng họp A" />
+
+    </LinearLayout>
+
+</LinearLayout>

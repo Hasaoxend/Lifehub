@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp">
+
+    <TextView
+        android:id="@+id/tv_field_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="Câu hỏi bảo mật" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/tv_field_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            tools:text="Tên thú cưng" />
+
+        <ImageButton
+            android:id="@+id/btn_copy_field"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_copy"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Sao chép" />
+
+    </LinearLayout>
+
+</LinearLayout>

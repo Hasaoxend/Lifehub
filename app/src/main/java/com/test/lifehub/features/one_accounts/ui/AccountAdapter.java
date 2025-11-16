@@ -6,9 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,17 +21,20 @@ import com.test.lifehub.features.one_accounts.data.AccountEntry;
 
 import java.util.Objects;
 
-/**
- * Adapter cho RecyclerView hiển thị danh sách các Tài khoản (AccountEntry).
- * (Phiên bản đã VIẾT LẠI cho Firebase Firestore)
- */
 public class AccountAdapter extends ListAdapter<AccountEntry, AccountAdapter.AccountViewHolder> {
 
-    /**
-     * Khởi tạo Adapter.
-     */
+    public interface OnAccountActionListener {
+        void onDelete(AccountEntry account);
+    }
+
+    private OnAccountActionListener mListener;
+
     public AccountAdapter() {
         super(DIFF_CALLBACK);
+    }
+
+    public void setOnAccountActionListener(OnAccountActionListener listener) {
+        this.mListener = listener;
     }
 
     @NonNull
@@ -46,21 +52,55 @@ public class AccountAdapter extends ListAdapter<AccountEntry, AccountAdapter.Acc
         holder.tvServiceName.setText(currentAccount.serviceName);
         holder.tvUsername.setText(currentAccount.username);
 
+        // Normal click - Open detail view
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
-            Intent intent = new Intent(context, AddEditAccountActivity.class);
-
-            // SỬA LỖI: Dòng này giờ sẽ hoạt động
-            // vì EXTRA_ACCOUNT_ID đã được định nghĩa trong AddEditAccountActivity
-            intent.putExtra(AddEditAccountActivity.EXTRA_ACCOUNT_ID, currentAccount.documentId);
-
+            Intent intent = new Intent(context, AccountDetailActivity.class);
+            intent.putExtra(AccountDetailActivity.EXTRA_ACCOUNT_ID, currentAccount.documentId);
             context.startActivity(intent);
+        });
+
+        // Long click - Show menu
+        holder.itemView.setOnLongClickListener(v -> {
+            showPopupMenu(v, currentAccount);
+            return true;
         });
     }
 
-    /**
-     * Lớp ViewHolder
-     */
+    private void showPopupMenu(View view, AccountEntry account) {
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        popup.getMenuInflater().inflate(R.menu.account_item_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.action_edit_account) {
+                // Open edit
+                Context context = view.getContext();
+                Intent intent = new Intent(context, AddEditAccountActivity.class);
+                intent.putExtra(AddEditAccountActivity.EXTRA_ACCOUNT_ID, account.documentId);
+                context.startActivity(intent);
+                return true;
+            } else if (id == R.id.action_delete_account) {
+                // Confirm delete
+                new AlertDialog.Builder(view.getContext())
+                        .setTitle("Xác nhận Xóa")
+                        .setMessage("Bạn có chắc chắn muốn xóa tài khoản \"" + account.serviceName + "\" không?")
+                        .setPositiveButton("Xóa", (dialog, which) -> {
+                            if (mListener != null) {
+                                mListener.onDelete(account);
+                            }
+                        })
+                        .setNegativeButton("Hủy", null)
+                        .setIcon(R.drawable.ic_warning)
+                        .show();
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
+    }
+
     static class AccountViewHolder extends RecyclerView.ViewHolder {
         private final ImageView ivServiceIcon;
         private final TextView tvServiceName;
@@ -74,9 +114,6 @@ public class AccountAdapter extends ListAdapter<AccountEntry, AccountAdapter.Acc
         }
     }
 
-    /**
-     * DiffUtil Callback
-     */
     private static final DiffUtil.ItemCallback<AccountEntry> DIFF_CALLBACK = new DiffUtil.ItemCallback<AccountEntry>() {
         @Override
         public boolean areItemsTheSame(@NonNull AccountEntry oldItem, @NonNull AccountEntry newItem) {

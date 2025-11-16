@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/tv_dialog_event_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sự kiện Mới"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tiêu đề"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Start Time -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bắt đầu"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_start_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:text="10:00, 16/11/2024" />
+
+            <Button
+                android:id="@+id/btn_select_start_time"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn" />
+        </LinearLayout>
+
+        <!-- End Time -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kết thúc"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_end_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:text="11:00, 16/11/2024" />
+
+            <Button
+                android:id="@+id/btn_select_end_time"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn" />
+        </LinearLayout>
+
+        <!-- Location -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Địa điểm (tùy chọn)"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Repeat -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lặp lại"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/spinner_repeat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+
+        <!-- Description -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Mô tả (tùy chọn)"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="top" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/btn_delete_event"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:text="Xóa sự kiện"
+            android:textColor="?attr/colorError"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>
