@@ -21,9 +21,9 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import dagger.hilt.android.scopes.ActivityRetainedScoped; // <-- THÊM IMPORT NÀY
 
-@Singleton
+@ActivityRetainedScoped // <-- THAY THẾ @Singleton BẰNG CÁI NÀY
 public class ProductivityRepository {
 
     private static final String TAG = "ProductivityRepo";
