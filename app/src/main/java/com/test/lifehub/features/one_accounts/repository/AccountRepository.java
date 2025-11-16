@@ -20,13 +20,9 @@ import com.test.lifehub.features.one_accounts.data.AccountEntry;
 import java.util.List;
 
 import javax.inject.Inject; // <-- THÊM IMPORT NÀY
-import javax.inject.Singleton; // <-- THÊM IMPORT NÀY
+import dagger.hilt.android.scopes.ActivityRetainedScoped; // <-- THÊM IMPORT NÀY
 
-/**
- * Repository (Kho chứa) cho Module Tài khoản.
- * (Phiên bản đã refactor để dùng Hilt)
- */
-@Singleton // <-- THÊM CHÚ THÍCH NÀY (Báo Hilt chỉ tạo 1 instance)
+@ActivityRetainedScoped // <-- THAY THẾ @Singleton BẰNG CÁI NÀY
 public class AccountRepository {
 
     private static final String TAG = "AccountRepository";
