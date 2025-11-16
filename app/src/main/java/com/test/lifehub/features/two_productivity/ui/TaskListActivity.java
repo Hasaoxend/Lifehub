@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback; // <-- Thư viện quan trọng
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -82,7 +83,7 @@ public class TaskListActivity extends AppCompatActivity
         setSupportActionBar(mToolbar);
         updateToolbarTitle();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mToolbar.setNavigationOnClickListener(v -> onBackPressed());
+        mToolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed()); // Cập nhật luôn ở đây cho nhất quán
 
         mAdapter = new TaskListAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
@@ -101,6 +102,37 @@ public class TaskListActivity extends AppCompatActivity
                 }
             }
         });
+
+        // ==================================================================
+        // BẮT ĐẦU SỬA LỖI onBackpressed
+        // 1. Tạo một OnBackPressedCallback
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                // Đây là logic cũ từ hàm onBackPressed() của bạn
+                if (mBottomSheetDialog != null && mBottomSheetDialog.isShowing()) {
+                    dismissBottomSheet();
+                } else if (mCurrentProjectId != null) {
+                    mCurrentProjectId = null;
+                    mCurrentProjectName = null;
+                    mViewModel.setCurrentProjectId(null);
+                    updateToolbarTitle();
+                } else {
+                    // Nếu không rơi vào 2 trường hợp trên, hãy vô hiệu hóa callback này
+                    // và gọi lại onBackPressed() để thực hiện hành vi mặc định (thoát Activity)
+                    setEnabled(false);
+
+                    // SỬA LỖI: Dùng getOnBackPressedDispatcher() cho Java
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        };
+
+        // 2. Thêm callback vào OnBackPressedDispatcher
+        getOnBackPressedDispatcher().addCallback(this, callback);
+        // KẾT THÚC SỬA LỖI
+        // ==================================================================
+
 
         mViewModel = new ViewModelProvider(this).get(ProductivityViewModel.class);
         mViewModel.setCurrentProjectId(mCurrentProjectId);
@@ -384,19 +416,9 @@ public class TaskListActivity extends AppCompatActivity
                 .show();
     }
 
-    @Override
-    public void onBackPressed() {
-        if (mBottomSheetDialog != null && mBottomSheetDialog.isShowing()) {
-            dismissBottomSheet();
-        } else if (mCurrentProjectId != null) {
-            mCurrentProjectId = null;
-            mCurrentProjectName = null;
-            mViewModel.setCurrentProjectId(null);
-            updateToolbarTitle();
-        } else {
-            super.onBackPressed();
-        }
-    }
+    //
+    // PHƯƠNG THỨC onBackPressed() CŨ ĐÃ BỊ XÓA VÀ THAY BẰNG CALLBACK TRONG onCreate()
+    //
 
     @Override
     protected void onPause() {
