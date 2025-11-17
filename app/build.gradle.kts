@@ -83,6 +83,9 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    //Material CalendarView (Recommended)
+    implementation("com.kizitonwose.calendar:view:2.4.1")
+
 
 }
 

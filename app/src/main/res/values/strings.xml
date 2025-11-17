@@ -7,4 +7,17 @@
     <item>Hàng tuần</item>
     <item>Hàng tháng</item>
     </string-array>
+
+    <!-- Calendar -->
+    <string name="calendar_week_view">Tuần</string>
+    <string name="calendar_month_view">Tháng</string>
+    <string name="calendar_today">Hôm nay</string>
+
+    <string name="day_sun">CN</string>
+    <string name="day_mon">T2</string>
+    <string name="day_tue">T3</string>
+    <string name="day_wed">T4</string>
+    <string name="day_thu">T5</string>
+    <string name="day_fri">T6</string>
+    <string name="day_sat">T7</string>
 </resources>
