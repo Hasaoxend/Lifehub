@@ -17,50 +17,82 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-
         android:label="@string/app_name"
-
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lifehub"
         tools:targetApi="33">
 
-        <activity android:name=".ui.LoginActivity" android:exported="true" android:windowSoftInputMode="adjustPan">
+        <!-- Main Launcher Activity -->
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.MainActivity" android:exported="false" />
-        <activity android:name=".ui.RegisterEmailActivity" android:exported="false" />
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="false" />
 
-        <activity android:name=".ui.CreatePasswordActivity" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="lifehub.page.link" />
-            </intent-filter>
-        </activity>
+        <!-- Registration Flow -->
+        <activity
+            android:name=".ui.RegisterEmailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
-        <activity android:name=".features.one_accounts.ui.AddEditAccountActivity" android:exported="false" />
+        <activity
+            android:name=".ui.RegisterPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
-        <activity android:name=".features.one_accounts.ui.AccountDetailActivity" android:exported="false" />
+        <!-- Account Management -->
+        <activity
+            android:name=".features.one_accounts.ui.AddEditAccountActivity"
+            android:exported="false" />
 
-        <activity android:name=".features.two_productivity.ui.AddEditNoteActivity" android:exported="false" />
-        <activity android:name=".features.two_productivity.ui.NotesListActivity" android:exported="false" />
-        <activity android:name=".features.two_productivity.ui.TaskListActivity" android:exported="false" />
-        <activity android:name=".features.two_productivity.ui.CalculatorActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".features.two_productivity.ui.WeatherActivity" android:exported="false" />
+        <activity
+            android:name=".features.one_accounts.ui.AccountDetailActivity"
+            android:exported="false" />
 
-        <activity android:name=".features.four_calendar.ui.CalendarActivity" android:exported="false" />
+        <!-- Productivity Features -->
+        <activity
+            android:name=".features.two_productivity.ui.AddEditNoteActivity"
+            android:exported="false" />
 
+        <activity
+            android:name=".features.two_productivity.ui.NotesListActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".features.two_productivity.ui.TaskListActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".features.two_productivity.ui.CalculatorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".features.two_productivity.ui.WeatherActivity"
+            android:exported="false" />
+
+        <!-- Calendar Feature -->
+        <activity
+            android:name=".features.four_calendar.ui.CalendarActivity"
+            android:exported="false" />
+
+        <!-- Background Services -->
         <service
             android:name=".core.services.ReminderService"
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Broadcast Receivers -->
         <receiver
             android:name=".core.receivers.AlarmReceiver"
             android:enabled="true"

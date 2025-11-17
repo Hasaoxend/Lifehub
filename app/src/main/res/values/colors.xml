@@ -76,4 +76,14 @@
     <color name="todoist_grey_p4">#808080</color>
 
     <color name="colorPrimary">#FF6200EE</color>
+
+    <color name="password_strength_default">#9E9E9E</color>
+    <color name="password_strength_weak">#F44336</color>
+    <color name="password_strength_weak_tint">#F44336</color>
+    <color name="password_strength_medium">#FF9800</color>
+    <color name="password_strength_medium_tint">#FF9800</color>
+    <color name="password_strength_good">#2196F3</color>
+    <color name="password_strength_good_tint">#2196F3</color>
+    <color name="password_strength_strong">#4CAF50</color>
+    <color name="password_strength_strong_tint">#4CAF50</color>
 </resources>
