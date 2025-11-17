@@ -85,6 +85,7 @@ dependencies {
 
     //Material CalendarView (Recommended)
     implementation("com.kizitonwose.calendar:view:2.4.1")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
 
 }
