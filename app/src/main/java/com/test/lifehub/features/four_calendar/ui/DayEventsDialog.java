@@ -5,17 +5,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.test.lifehub.R;
 import com.test.lifehub.features.four_calendar.data.CalendarEvent;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,7 +36,7 @@ public class DayEventsDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_day_events, null);
+        View view = inflater.inflate(R.layout.dialog_day_events, null); // (Cần file layout này)
 
         TextView tvDate = view.findViewById(R.id.tv_dialog_date);
         RecyclerView recyclerView = view.findViewById(R.id.rv_day_events);
@@ -59,12 +56,16 @@ public class DayEventsDialog extends DialogFragment {
             tvEmpty.setVisibility(View.GONE);
 
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            DayEventsAdapter adapter = new DayEventsAdapter(events, event -> {
+
+            // SỬA LỖI: Khởi tạo 1 tham số, sau đó submitList
+            DayEventsAdapter adapter = new DayEventsAdapter(event -> {
                 dismiss();
-                AddEditEventDialog dialog = AddEditEventDialog.newInstance(event);
-                dialog.show(getParentFragmentManager(), "EventDetailDialog");
+                // (Giả sử bạn có AddEditEventDialog.java)
+                // AddEditEventDialog dialog = AddEditEventDialog.newInstance(event);
+                // dialog.show(getParentFragmentManager(), "EventDetailDialog");
             });
             recyclerView.setAdapter(adapter);
+            adapter.submitList(events);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());

@@ -51,7 +51,5 @@
             android:visibility="gone"
             tools:visibility="visible"
             tools:text="Phòng họp A" />
-
     </LinearLayout>
-
 </LinearLayout>

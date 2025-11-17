@@ -13,4 +13,5 @@ plugins {
     alias(libs.plugins.google.dagger.hilt.android) apply false
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     alias(libs.plugins.jetbrains.kotlin.kapt) apply false
+
 }

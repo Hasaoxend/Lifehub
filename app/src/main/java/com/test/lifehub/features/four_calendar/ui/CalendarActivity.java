@@ -1,28 +1,18 @@
 package com.test.lifehub.features.four_calendar.ui;
 
 import android.os.Bundle;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.test.lifehub.R;
-import com.test.lifehub.features.four_calendar.data.CalendarEvent;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -33,35 +23,25 @@ public class CalendarActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private TabLayout mTabLayout;
-    private RecyclerView mRecyclerView;
-    private TextView mTvCurrentDate;
+    private FloatingActionButton mFab; // Nút FAB
     private MaterialButton mBtnPrevious, mBtnNext, mBtnToday;
-    private FloatingActionButton mFab;
-    private TextView mEmptyView;
+    private TextView mTvCurrentDate;
 
     private CalendarViewModel mViewModel;
-    private WeekViewAdapter mWeekAdapter;
-    private MonthViewAdapter mMonthAdapter;
-
-    private Calendar mCurrentCalendar = Calendar.getInstance();
     private int mCurrentView = VIEW_WEEK;
-
-    private List<CalendarEvent> mAllEvents = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calendar);
+        setContentView(R.layout.activity_calendar_google);
 
         mToolbar = findViewById(R.id.toolbar_calendar);
         mTabLayout = findViewById(R.id.tab_layout_calendar);
-        mRecyclerView = findViewById(R.id.recycler_view_calendar);
-        mTvCurrentDate = findViewById(R.id.tv_current_date);
+        mFab = findViewById(R.id.fab_add_event); // Tìm FAB
         mBtnPrevious = findViewById(R.id.btn_previous);
         mBtnNext = findViewById(R.id.btn_next);
         mBtnToday = findViewById(R.id.btn_today);
-        mFab = findViewById(R.id.fab_add_event);
-        mEmptyView = findViewById(R.id.empty_view_calendar);
+        mTvCurrentDate = findViewById(R.id.tv_current_date);
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Lịch");
@@ -71,16 +51,18 @@ public class CalendarActivity extends AppCompatActivity {
         mViewModel = new ViewModelProvider(this).get(CalendarViewModel.class);
 
         setupTabLayout();
-        setupRecyclerView();
-        setupButtons();
+        setupFab(); // *** ĐẢM BẢO GỌI HÀM NÀY ***
+        setupNavigationButtons();
 
-        updateDateDisplay();
-        loadEventsForCurrentRange();
+        if (savedInstanceState == null) {
+            loadFragment(new WeekViewFragment());
+        }
+    }
 
-        mViewModel.getAllEvents().observe(this, events -> {
-            mAllEvents = events != null ? events : new ArrayList<>();
-            filterAndDisplayEvents();
-        });
+    public void setCurrentDateTitle(String title) {
+        if (mTvCurrentDate != null) {
+            mTvCurrentDate.setText(title);
+        }
     }
 
     private void setupTabLayout() {
@@ -93,210 +75,84 @@ public class CalendarActivity extends AppCompatActivity {
                 mCurrentView = tab.getPosition();
                 switchView();
             }
-
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
-
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
-    private void setupRecyclerView() {
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        mWeekAdapter = new WeekViewAdapter(this, event -> {
-            // Click event
-            showEventDetailDialog(event);
-        });
-
-        mMonthAdapter = new MonthViewAdapter(this, date -> {
-            // Click date in month view
-            showEventsForDate(date);
-        });
-
-        mRecyclerView.setAdapter(mWeekAdapter);
-    }
-
-    private void setupButtons() {
-        mBtnPrevious.setOnClickListener(v -> {
-            if (mCurrentView == VIEW_WEEK) {
-                mCurrentCalendar.add(Calendar.WEEK_OF_YEAR, -1);
-            } else {
-                mCurrentCalendar.add(Calendar.MONTH, -1);
-            }
-            updateDateDisplay();
-            loadEventsForCurrentRange();
-        });
-
-        mBtnNext.setOnClickListener(v -> {
-            if (mCurrentView == VIEW_WEEK) {
-                mCurrentCalendar.add(Calendar.WEEK_OF_YEAR, 1);
-            } else {
-                mCurrentCalendar.add(Calendar.MONTH, 1);
-            }
-            updateDateDisplay();
-            loadEventsForCurrentRange();
-        });
-
-        mBtnToday.setOnClickListener(v -> {
-            mCurrentCalendar = Calendar.getInstance();
-            updateDateDisplay();
-            loadEventsForCurrentRange();
-        });
-
+    // *** HÀM SỬA LỖI CHO FAB ***
+    private void setupFab() {
         mFab.setOnClickListener(v -> {
+            // (Giả sử bạn có AddEditEventDialog.java)
             AddEditEventDialog dialog = AddEditEventDialog.newInstance(null);
             dialog.show(getSupportFragmentManager(), "AddEventDialog");
         });
     }
 
-    private void switchView() {
-        if (mCurrentView == VIEW_WEEK) {
-            mRecyclerView.setAdapter(mWeekAdapter);
-        } else {
-            mRecyclerView.setAdapter(mMonthAdapter);
-        }
-        updateDateDisplay();
-        loadEventsForCurrentRange();
-    }
+    private void setupNavigationButtons() {
+        mBtnToday.setOnClickListener(v -> scrollToToday());
 
-    private void updateDateDisplay() {
-        SimpleDateFormat sdf;
-        if (mCurrentView == VIEW_WEEK) {
-            Calendar weekStart = (Calendar) mCurrentCalendar.clone();
-            weekStart.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            Calendar weekEnd = (Calendar) weekStart.clone();
-            weekEnd.add(Calendar.DAY_OF_WEEK, 6);
-
-            sdf = new SimpleDateFormat("dd MMM", Locale.getDefault());
-            String text = sdf.format(weekStart.getTime()) + " - " + sdf.format(weekEnd.getTime());
-            mTvCurrentDate.setText(text);
-        } else {
-            sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
-            mTvCurrentDate.setText(sdf.format(mCurrentCalendar.getTime()));
-        }
-    }
-
-    private void loadEventsForCurrentRange() {
-        Date startDate, endDate;
-
-        if (mCurrentView == VIEW_WEEK) {
-            Calendar weekStart = (Calendar) mCurrentCalendar.clone();
-            weekStart.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            weekStart.set(Calendar.HOUR_OF_DAY, 0);
-            weekStart.set(Calendar.MINUTE, 0);
-            weekStart.set(Calendar.SECOND, 0);
-
-            Calendar weekEnd = (Calendar) weekStart.clone();
-            weekEnd.add(Calendar.DAY_OF_WEEK, 7);
-
-            startDate = weekStart.getTime();
-            endDate = weekEnd.getTime();
-        } else {
-            Calendar monthStart = (Calendar) mCurrentCalendar.clone();
-            monthStart.set(Calendar.DAY_OF_MONTH, 1);
-            monthStart.set(Calendar.HOUR_OF_DAY, 0);
-            monthStart.set(Calendar.MINUTE, 0);
-            monthStart.set(Calendar.SECOND, 0);
-
-            Calendar monthEnd = (Calendar) monthStart.clone();
-            monthEnd.add(Calendar.MONTH, 1);
-
-            startDate = monthStart.getTime();
-            endDate = monthEnd.getTime();
-        }
-
-        mViewModel.setDateRange(startDate, endDate);
-        filterAndDisplayEvents();
-    }
-
-    private void filterAndDisplayEvents() {
-        if (mCurrentView == VIEW_WEEK) {
-            List<WeekDayData> weekData = generateWeekData();
-            mWeekAdapter.submitList(weekData);
-        } else {
-            List<MonthDayData> monthData = generateMonthData();
-            mMonthAdapter.submitList(monthData);
-        }
-
-        updateEmptyView();
-    }
-
-    private List<WeekDayData> generateWeekData() {
-        List<WeekDayData> weekData = new ArrayList<>();
-        Calendar weekStart = (Calendar) mCurrentCalendar.clone();
-        weekStart.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-
-        for (int i = 0; i < 7; i++) {
-            Calendar dayCalendar = (Calendar) weekStart.clone();
-            dayCalendar.add(Calendar.DAY_OF_WEEK, i);
-
-            List<CalendarEvent> dayEvents = getEventsForDate(dayCalendar.getTime());
-            weekData.add(new WeekDayData(dayCalendar.getTime(), dayEvents));
-        }
-
-        return weekData;
-    }
-
-    private List<MonthDayData> generateMonthData() {
-        List<MonthDayData> monthData = new ArrayList<>();
-
-        Calendar monthStart = (Calendar) mCurrentCalendar.clone();
-        monthStart.set(Calendar.DAY_OF_MONTH, 1);
-
-        Calendar displayStart = (Calendar) monthStart.clone();
-        displayStart.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-
-        int weeksToShow = 6;
-
-        for (int i = 0; i < weeksToShow * 7; i++) {
-            Calendar dayCalendar = (Calendar) displayStart.clone();
-            dayCalendar.add(Calendar.DAY_OF_MONTH, i);
-
-            boolean isCurrentMonth = dayCalendar.get(Calendar.MONTH) == mCurrentCalendar.get(Calendar.MONTH);
-            List<CalendarEvent> dayEvents = getEventsForDate(dayCalendar.getTime());
-
-            monthData.add(new MonthDayData(dayCalendar.getTime(), dayEvents, isCurrentMonth));
-        }
-
-        return monthData;
-    }
-
-    private List<CalendarEvent> getEventsForDate(Date date) {
-        List<CalendarEvent> dayEvents = new ArrayList<>();
-        Calendar targetCal = Calendar.getInstance();
-        targetCal.setTime(date);
-
-        for (CalendarEvent event : mAllEvents) {
-            if (event.getStartTime() == null) continue;
-
-            Calendar eventCal = Calendar.getInstance();
-            eventCal.setTime(event.getStartTime());
-
-            if (eventCal.get(Calendar.YEAR) == targetCal.get(Calendar.YEAR) &&
-                    eventCal.get(Calendar.DAY_OF_YEAR) == targetCal.get(Calendar.DAY_OF_YEAR)) {
-                dayEvents.add(event);
+        mBtnPrevious.setOnClickListener(v -> {
+            Fragment current = getCurrentFragment();
+            if (current instanceof WeekViewFragment) {
+                ((WeekViewFragment) current).previousWeek();
+            } else if (current instanceof MonthViewFragment) {
+                ((MonthViewFragment) current).previousMonth();
             }
+        });
+
+        mBtnNext.setOnClickListener(v -> {
+            Fragment current = getCurrentFragment();
+            if (current instanceof WeekViewFragment) {
+                ((WeekViewFragment) current).nextWeek();
+            } else if (current instanceof MonthViewFragment) {
+                ((MonthViewFragment) current).nextMonth();
+            }
+        });
+    }
+
+    private Fragment getCurrentFragment() {
+        return getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_container_calendar);
+    }
+
+    private void scrollToToday() {
+        Fragment current = getCurrentFragment();
+        if (current instanceof WeekViewFragment) {
+            ((WeekViewFragment) current).scrollToToday();
+        } else if (current instanceof MonthViewFragment) {
+            ((MonthViewFragment) current).scrollToToday();
         }
-
-        return dayEvents;
     }
 
-    private void updateEmptyView() {
-        boolean isEmpty = mAllEvents.isEmpty();
-        mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        mRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+    private void switchView() {
+        Fragment fragment = (mCurrentView == VIEW_WEEK)
+                ? new WeekViewFragment()
+                : new MonthViewFragment();
+        loadFragment(fragment);
     }
 
-    private void showEventDetailDialog(CalendarEvent event) {
-        AddEditEventDialog dialog = AddEditEventDialog.newInstance(event);
-        dialog.show(getSupportFragmentManager(), "EventDetailDialog");
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container_calendar, fragment)
+                .commit();
     }
 
-    private void showEventsForDate(Date date) {
-        List<CalendarEvent> events = getEventsForDate(date);
-        DayEventsDialog dialog = DayEventsDialog.newInstance(date, (ArrayList<CalendarEvent>) events);
-        dialog.show(getSupportFragmentManager(), "DayEventsDialog");
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.calendar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_today) {
+            scrollToToday();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
