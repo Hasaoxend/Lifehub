@@ -1,25 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme for Light mode -->
     <style name="Theme.Lifehub" parent="Theme.Material3.Light.NoActionBar">
-        <!-- (Tất cả các item màu Sáng (Light) của bạn ở đây...) -->
 
         <item name="colorPrimary">@color/md_theme_light_primary</item>
         <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
         <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+
         <item name="colorSecondary">@color/md_theme_light_secondary</item>
         <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
         <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
         <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+
         <item name="colorTertiary">@color/md_theme_light_tertiary</item>
         <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
         <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
         <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
+
         <item name="colorError">@color/md_theme_light_error</item>
-        <item name="colorOnError">@color/md_theme_light_onError</item>
         <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
         <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
+
         <item name="android:colorBackground">@color/md_theme_light_background</item>
         <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
         <item name="colorSurface">@color/md_theme_light_surface</item>
@@ -29,14 +30,8 @@
         <item name="colorOutline">@color/md_theme_light_outline</item>
         <item name="colorOutlineVariant">@color/md_theme_light_outlineVariant</item>
 
-        <!--
-          SỬA LỖI: Cập nhật 2 dòng này
-          Chúng ta muốn Status Bar có cùng màu với nền
-          và chữ trên đó (giờ, pin) là màu ĐEN
-        -->
-        <item name="android:statusBarColor">@color/md_theme_light_surface</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@color/md_theme_light_background</item>
+        <item name="android:statusBarColor">@color/md_theme_light_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Widget.App.CalculatorButton" parent="Widget.MaterialComponents.Button.TextButton">
@@ -47,7 +42,8 @@
         <item name="android:layout_margin">6dp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">32sp</item>
-        <item name="cornerRadius">100dp</item> <item name="android:insetTop">0dp</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:paddingTop">16dp</item>
         <item name="android:paddingBottom">16dp</item>
@@ -63,8 +59,6 @@
     </style>
 
     <style name="Widget.App.CalculatorButton.Orange">
-        <item name="android:backgroundTint">#FF9F0A</item>
+        <item name="android:backgroundTint">@color/md_theme_light_primary</item>
     </style>
-
-
 </resources>

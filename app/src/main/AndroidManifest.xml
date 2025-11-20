@@ -23,23 +23,26 @@
         android:theme="@style/Theme.Lifehub"
         tools:targetApi="33">
 
-        <!-- Main Launcher Activity -->
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.IntroActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Lifehub">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Main Activity -->
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="false" />
 
-        <!-- Registration Flow -->
         <activity
             android:name=".ui.RegisterEmailActivity"
             android:exported="false"
@@ -50,7 +53,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Account Management -->
         <activity
             android:name=".features.one_accounts.ui.AddEditAccountActivity"
             android:exported="false" />
@@ -59,7 +61,6 @@
             android:name=".features.one_accounts.ui.AccountDetailActivity"
             android:exported="false" />
 
-        <!-- Productivity Features -->
         <activity
             android:name=".features.two_productivity.ui.AddEditNoteActivity"
             android:exported="false" />
@@ -81,23 +82,25 @@
             android:name=".features.two_productivity.ui.WeatherActivity"
             android:exported="false" />
 
-        <!-- Calendar Feature -->
         <activity
             android:name=".features.four_calendar.ui.CalendarActivity"
             android:exported="false" />
 
-        <!-- Background Services -->
+        <activity
+            android:name=".features.three_settings.ui.ChangePasswordActivity"
+            android:exported="false"
+            android:label="Đổi mật khẩu"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".core.services.ReminderService"
             android:enabled="true"
             android:exported="false" />
 
-        <!-- Broadcast Receivers -->
         <receiver
             android:name=".core.receivers.AlarmReceiver"
             android:enabled="true"
             android:exported="false" />
-
     </application>
 
 </manifest>

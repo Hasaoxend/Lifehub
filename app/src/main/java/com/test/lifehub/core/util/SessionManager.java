@@ -11,19 +11,21 @@ import java.security.GeneralSecurityException;
 public class SessionManager {
 
     private static final String TAG = "SessionManager";
-    private static final String PREF_NAME = "LifeHubUserSession_Secure"; // Đổi tên file để reset data cũ không an toàn
+    private static final String PREF_NAME = "LifeHubUserSession_Secure";
 
     // Key lưu trữ
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
-    private static final String KEY_USER_TOKEN = "user_token"; // Token này sẽ được MÃ HÓA tự động
+    private static final String KEY_USER_TOKEN = "user_token";
     private static final String KEY_BIOMETRIC_ENABLED = "is_biometric_enabled";
     private static final String KEY_THEME_MODE = "theme_mode";
+
+    // --- MỚI: Key lưu trạng thái lần đầu mở app ---
+    private static final String KEY_IS_FIRST_RUN = "is_first_run";
 
     private SharedPreferences sharedPreferences;
 
     public SessionManager(Context context) {
         try {
-            // Sử dụng MasterKey (Chuẩn mới thay cho MasterKeys deprecated)
             MasterKey masterKey = new MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
@@ -37,20 +39,16 @@ public class SessionManager {
             );
         } catch (GeneralSecurityException | IOException e) {
             Log.e(TAG, "CRITICAL: Không thể tạo bộ nhớ bảo mật.", e);
-            // TUYỆT ĐỐI KHÔNG fallback về MODE_PRIVATE.
-            // Nếu lỗi, ứng dụng nên crash hoặc thông báo lỗi thay vì lộ dữ liệu.
             sharedPreferences = null;
         }
     }
 
-    // Helper check lỗi
     private boolean isSecure() {
         return sharedPreferences != null;
     }
 
     public void createLoginSession(String token) {
         if (!isSecure()) return;
-        // EncryptedSharedPreferences sẽ tự động MÃ HÓA token bằng AES-256 trước khi lưu
         sharedPreferences.edit()
                 .putBoolean(KEY_IS_LOGGED_IN, true)
                 .putString(KEY_USER_TOKEN, token)
@@ -59,7 +57,6 @@ public class SessionManager {
 
     public String getUserToken() {
         if (!isSecure()) return null;
-        // Tự động GIẢI MÃ khi đọc ra
         return sharedPreferences.getString(KEY_USER_TOKEN, null);
     }
 
@@ -86,5 +83,25 @@ public class SessionManager {
 
     public boolean isBiometricEnabled() {
         return isSecure() && sharedPreferences.getBoolean(KEY_BIOMETRIC_ENABLED, false);
+    }
+
+    // --- CÁC HÀM MỚI CHO INTRO ---
+
+    /**
+     * Lưu trạng thái đã xem Intro hay chưa.
+     * @param isFirstRun true: Chưa xem (Lần đầu), false: Đã xem.
+     */
+    public void setFirstRun(boolean isFirstRun) {
+        if (isSecure()) {
+            sharedPreferences.edit().putBoolean(KEY_IS_FIRST_RUN, isFirstRun).apply();
+        }
+    }
+
+    /**
+     * Kiểm tra xem có phải lần đầu mở app không.
+     * Mặc định trả về TRUE nếu chưa có dữ liệu.
+     */
+    public boolean isFirstRun() {
+        return isSecure() && sharedPreferences.getBoolean(KEY_IS_FIRST_RUN, true);
     }
 }
