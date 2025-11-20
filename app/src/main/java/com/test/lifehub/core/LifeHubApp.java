@@ -27,6 +27,6 @@ public class LifeHubApp extends Application {
         int themeMode = sessionManager.getThemeMode();
 
         // 3. Áp dụng Giao diện đó cho toàn bộ ứng dụng
-        AppCompatDelegate.setDefaultNightMode(themeMode);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 }

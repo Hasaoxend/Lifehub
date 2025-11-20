@@ -8,6 +8,7 @@
     android:fitsSystemWindows="true"
     tools:context=".features.one_accounts.ui.AccountFragment">
 
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_accounts"
         android:layout_width="match_parent"
