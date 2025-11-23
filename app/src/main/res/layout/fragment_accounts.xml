@@ -8,7 +8,6 @@
     android:fitsSystemWindows="true"
     tools:context=".features.one_accounts.ui.AccountFragment">
 
-
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_accounts"
         android:layout_width="match_parent"
@@ -19,9 +18,9 @@
             android:id="@+id/toolbar_accounts"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Tài khoản" />
+            app:title="Accounts" />
 
-        <!-- Thanh tìm kiếm -->
+        <!-- Search bar -->
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view_accounts"
             android:layout_width="match_parent"
@@ -29,7 +28,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/search_background"
             app:iconifiedByDefault="false"
-            app:queryHint="Tìm kiếm tài khoản..."
+            app:queryHint="Search accounts..."
             app:closeIcon="@drawable/ic_close"
             app:searchIcon="@drawable/ic_search" />
 
@@ -41,19 +40,19 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_accounts"
+            android:id="@+id/rv_unified_accounts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:paddingBottom="80dp"
-            tools:listitem="@layout/item_account" />
+            tools:listitem="@layout/item_unified_account_totp" />
 
         <TextView
             android:id="@+id/tv_empty_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Chưa có tài khoản nào"
+            android:text="No accounts yet\n\nTap + to add"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:visibility="gone"
@@ -67,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Thêm tài khoản mới"
+        android:contentDescription="Add account"
         app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

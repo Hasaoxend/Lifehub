@@ -21,6 +21,10 @@ public class SessionManager {
 
     // --- MỚI: Key lưu trạng thái lần đầu mở app ---
     private static final String KEY_IS_FIRST_RUN = "is_first_run";
+    
+    // --- TOTP Keys ---
+    private static final String KEY_TOTP_ACCOUNTS = "totp_accounts"; // JSON array of accounts
+    private static final String KEY_TOTP_ENABLED = "totp_enabled";
 
     private SharedPreferences sharedPreferences;
 
@@ -103,5 +107,44 @@ public class SessionManager {
      */
     public boolean isFirstRun() {
         return isSecure() && sharedPreferences.getBoolean(KEY_IS_FIRST_RUN, true);
+    }
+
+    // --- CÁC HÀM CHO TOTP ---
+
+    /**
+     * Lưu danh sách tài khoản TOTP
+     * @param accountsJson JSON string chứa danh sách tài khoản
+     */
+    public void saveTotpAccounts(String accountsJson) {
+        if (isSecure()) {
+            sharedPreferences.edit().putString(KEY_TOTP_ACCOUNTS, accountsJson).apply();
+        }
+    }
+
+    /**
+     * Lấy danh sách tài khoản TOTP
+     * @return JSON string chứa danh sách tài khoản
+     */
+    public String getTotpAccounts() {
+        if (!isSecure()) return "[]";
+        return sharedPreferences.getString(KEY_TOTP_ACCOUNTS, "[]");
+    }
+
+    /**
+     * Bật/tắt tính năng TOTP
+     * @param enabled true để bật, false để tắt
+     */
+    public void setTotpEnabled(boolean enabled) {
+        if (isSecure()) {
+            sharedPreferences.edit().putBoolean(KEY_TOTP_ENABLED, enabled).apply();
+        }
+    }
+
+    /**
+     * Kiểm tra xem TOTP đã được bật chưa
+     * @return true nếu TOTP đã bật
+     */
+    public boolean isTotpEnabled() {
+        return isSecure() && sharedPreferences.getBoolean(KEY_TOTP_ENABLED, false);
     }
 }

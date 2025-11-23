@@ -72,6 +72,16 @@ dependencies {
 
     // Calendar
     implementation("com.kizitonwose.calendar:view:2.4.1")
+
+    // TOTP & QR Scanner
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.android)
+    implementation(libs.commons.codec)
+    implementation(libs.barcode.scanning)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 }
 
 kapt {

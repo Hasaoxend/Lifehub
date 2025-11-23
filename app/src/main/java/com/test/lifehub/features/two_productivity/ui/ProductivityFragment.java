@@ -31,7 +31,7 @@ public class ProductivityFragment extends Fragment {
         MaterialCardView cardShopping = view.findViewById(R.id.card_shopping);
         MaterialCardView cardCalculator = view.findViewById(R.id.card_calculator);
         MaterialCardView cardWeather = view.findViewById(R.id.card_weather);
-        MaterialCardView cardCalendar = view.findViewById(R.id.card_calendar); // ✅ THÊM
+        MaterialCardView cardCalendar = view.findViewById(R.id.card_calendar);
 
         // Ghi chú
         cardNotes.setOnClickListener(v -> {

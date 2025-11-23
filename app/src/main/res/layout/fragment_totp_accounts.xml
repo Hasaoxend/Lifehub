@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_totp_accounts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingVertical="8dp"
+        android:paddingBottom="80dp"
+        tools:listitem="@layout/item_totp_account" />
+
+    <!-- Empty state with large + button -->
+    <LinearLayout
+        android:id="@+id/layout_empty_totp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- Large + button for first time -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_add_first_totp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="auto"
+            app:fabCustomSize="120dp"
+            android:contentDescription="Thêm tài khoản TOTP đầu tiên"
+            app:srcCompat="@drawable/ic_add"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Chưa có tài khoản Authenticator"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textAlignment="center"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Nhấn vào nút + để thêm tài khoản đầu tiên"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textAlignment="center"
+            android:textColor="?android:attr/textColorSecondary" />
+
+    </LinearLayout>
+
+    <!-- Tutorial overlay (shown on first launch) -->
+    <RelativeLayout
+        android:id="@+id/tutorial_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <!-- Arrow pointing to FAB -->
+        <ImageView
+            android:id="@+id/arrow_to_fab"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="80dp"
+            android:layout_marginBottom="120dp"
+            android:src="@drawable/ic_arrow_down_right"
+            android:rotation="-45"
+            app:tint="@android:color/white"
+            android:contentDescription="Mũi tên chỉ" />
+
+        <!-- Tutorial text -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="@drawable/tutorial_background">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bắt đầu với Authenticator"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="1. Nhấn vào nút + bên dưới\n2. Chọn Quét QR hoặc Nhập thủ công\n3. Mã OTP sẽ tự động tạo mỗi 30 giây"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_got_it"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:text="Đã hiểu"
+                android:backgroundTint="?attr/colorPrimary" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
