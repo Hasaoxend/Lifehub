@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".core.LifeHubApp"
@@ -91,6 +92,22 @@
             android:exported="false"
             android:label="Đổi mật khẩu"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Authenticator Activities -->
+        <activity
+            android:name=".features.authenticator.ui.AuthenticatorActivity"
+            android:exported="false"
+            android:label="Authenticator" />
+
+        <activity
+            android:name=".features.authenticator.ui.AddTotpAccountActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".features.authenticator.ui.QRScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".core.services.ReminderService"
