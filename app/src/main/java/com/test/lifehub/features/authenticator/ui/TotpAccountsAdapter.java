@@ -1,6 +1,7 @@
 package com.test.lifehub.features.authenticator.ui;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import java.util.List;
  * Adapter cho danh sách tài khoản TOTP
  */
 public class TotpAccountsAdapter extends RecyclerView.Adapter<TotpAccountsAdapter.ViewHolder> {
+    
+    private static final String TAG = "TotpAccountsAdapter";
 
     private List<AuthenticatorActivity.TotpAccountItem> accounts;
     private OnAccountActionListener listener;
@@ -45,7 +48,9 @@ public class TotpAccountsAdapter extends RecyclerView.Adapter<TotpAccountsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Log.d(TAG, "onBindViewHolder called for position: " + position);
         AuthenticatorActivity.TotpAccountItem account = accounts.get(position);
+        Log.d(TAG, "Binding account: " + account.getIssuer() + " / " + account.getAccountName());
         
         holder.tvAccountName.setText(account.getAccountName());
         holder.tvIssuer.setText(account.getIssuer());
@@ -77,7 +82,9 @@ public class TotpAccountsAdapter extends RecyclerView.Adapter<TotpAccountsAdapte
 
     @Override
     public int getItemCount() {
-        return accounts.size();
+        int count = accounts.size();
+        Log.d(TAG, "getItemCount() returning: " + count);
+        return count;
     }
 
     /**

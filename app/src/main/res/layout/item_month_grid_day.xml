@@ -3,25 +3,29 @@
     android:layout_width="match_parent"
     android:layout_height="120dp"
     android:orientation="vertical"
-    android:padding="4dp"
+    android:padding="6dp"
+    android:gravity="center_horizontal"
     android:background="?attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/tv_month_day"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textStyle="bold"
         tools:text="16" />
 
     <TextView
         android:id="@+id/tv_holiday_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="8sp"
-        android:textColor="?attr/colorPrimary"
+        android:textSize="9sp"
+        android:textColor="@color/accent_red"
         android:maxLines="1"
         android:ellipsize="end"
+        android:gravity="center"
+        android:layout_marginTop="2dp"
         android:visibility="gone"
         tools:visibility="visible"
         tools:text="Tết Dương lịch" />
@@ -29,7 +33,8 @@
     <LinearLayout
         android:id="@+id/layout_day_events"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:layout_marginTop="4dp" />
 

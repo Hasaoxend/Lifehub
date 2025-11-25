@@ -39,26 +39,140 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_columnWeight">1</item>
         <item name="android:layout_gravity">fill_horizontal</item>
-        <item name="android:layout_margin">6dp</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:textSize">32sp</item>
-        <item name="cornerRadius">100dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textColor">@color/calculator_button_text_light</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="cornerRadius">80dp</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">16dp</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:minHeight">80dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">0dp</item>
     </style>
 
     <style name="Widget.App.CalculatorButton.DarkGray">
-        <item name="android:backgroundTint">#333333</item>
+        <item name="android:backgroundTint">@color/calculator_button_number</item>
+        <item name="android:textColor">@color/calculator_button_text_light</item>
     </style>
 
     <style name="Widget.App.CalculatorButton.LightGray">
-        <item name="android:backgroundTint">#A5A5A5</item>
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:backgroundTint">@color/calculator_button_function</item>
+        <item name="android:textColor">@color/calculator_button_text_dark</item>
     </style>
 
     <style name="Widget.App.CalculatorButton.Orange">
-        <item name="android:backgroundTint">@color/md_theme_light_primary</item>
+        <item name="android:backgroundTint">@color/calculator_button_operator</item>
+        <item name="android:textColor">@color/calculator_button_text_light</item>
+    </style>
+    
+    <!-- Professional Card Style -->
+    <style name="LifehubCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/corner_radius_medium</item>
+        <item name="cardElevation">@dimen/elevation_low</item>
+        <item name="contentPadding">@dimen/spacing_medium</item>
+        <item name="android:layout_margin">@dimen/spacing_small</item>
+    </style>
+    
+    <!-- Professional Button Styles -->
+    <style name="LifehubButtonPrimary" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="backgroundTint">@color/accent_blue</item>
+        <item name="cornerRadius">@dimen/corner_radius_medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+        <item name="android:paddingTop">@dimen/spacing_medium</item>
+        <item name="android:paddingBottom">@dimen/spacing_medium</item>
+    </style>
+    
+    <style name="LifehubButtonSecondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/accent_blue</item>
+        <item name="strokeColor">@color/accent_blue</item>
+        <item name="cornerRadius">@dimen/corner_radius_medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+    </style>
+    
+    <!-- Calendar Day Style -->
+    <style name="LifehubCalendarDay">
+        <item name="android:layout_width">@dimen/calendar_day_size</item>
+        <item name="android:layout_height">@dimen/calendar_day_size</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+    </style>
+    
+    <style name="LifehubCalendarDayToday" parent="LifehubCalendarDay">
+        <item name="android:background">@drawable/bg_calendar_today</item>
+        <item name="android:textColor">@color/calendar_today_text</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <!-- Professional List Item Card -->
+    <style name="LifehubListItemCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/corner_radius_medium</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="cardBackgroundColor">@color/ios_surface</item>
+        <item name="android:layout_marginStart">@dimen/spacing_medium</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_medium</item>
+        <item name="android:layout_marginTop">@dimen/spacing_tiny</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_tiny</item>
+    </style>
+    
+    <!-- Text Appearances -->
+    <style name="LifehubTextTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/ios_label_primary</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="LifehubTextSubtitle" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/ios_label_secondary</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+    
+    <style name="LifehubTextCaption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/ios_label_tertiary</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+    
+    <!-- Input Fields -->
+    <style name="LifehubTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/corner_radius_medium</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/corner_radius_medium</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/corner_radius_medium</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/corner_radius_medium</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeColor">@color/ios_divider</item>
+    </style>
+    
+    <!-- FAB Professional Style -->
+    <style name="LifehubFAB" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/accent_blue</item>
+        <item name="tint">@color/white</item>
+        <item name="elevation">@dimen/elevation_medium</item>
+        <item name="android:layout_margin">@dimen/spacing_medium</item>
+    </style>
+    
+    <!-- Toolbar Professional Style -->
+    <style name="LifehubToolbar" parent="Widget.Material3.Toolbar">
+        <item name="titleTextColor">@color/ios_label_primary</item>
+        <item name="android:background">@color/ios_surface</item>
+        <item name="elevation">0dp</item>
+    </style>
+    
+    <!-- Bottom Navigation Professional Style -->
+    <style name="LifehubBottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_color</item>
+        <item name="itemTextColor">@color/bottom_nav_color</item>
+        <item name="android:background">@color/ios_surface</item>
+        <item name="elevation">@dimen/elevation_medium</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+    
+    <!-- Divider -->
+    <style name="LifehubDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
+        <item name="android:background">@color/ios_divider</item>
     </style>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,25 +13,29 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.test.lifehub.R;
-import com.test.lifehub.core.util.SessionManager;
+import com.test.lifehub.core.security.EncryptionHelper;
 import com.test.lifehub.core.util.TotpManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.test.lifehub.features.authenticator.data.TotpAccount;
+import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.authenticator.viewmodel.AuthenticatorViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Activity hiển thị danh sách tài khoản TOTP
  * Tương tự như Google Authenticator
+ * Load dữ liệu từ Firestore
  */
+@AndroidEntryPoint
 public class AuthenticatorActivity extends AppCompatActivity {
 
     private static final String TAG = "AuthenticatorActivity";
@@ -43,26 +48,99 @@ public class AuthenticatorActivity extends AppCompatActivity {
 
     private TotpAccountsAdapter adapter;
     private List<TotpAccountItem> accounts;
-    private SessionManager sessionManager;
+    private AuthenticatorViewModel viewModel;
 
     private Handler handler;
     private Runnable updateRunnable;
 
+    @javax.inject.Inject
+    EncryptionHelper encryptionHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "==================== onCreate START ====================");
+        Log.d(TAG, "Activity instance: " + this.hashCode());
+        
         setContentView(R.layout.activity_authenticator);
+        Log.d(TAG, "setContentView done");
 
-        sessionManager = new SessionManager(this);
+        viewModel = new ViewModelProvider(this).get(AuthenticatorViewModel.class);
+        Log.d(TAG, "ViewModel created: " + viewModel.hashCode());
+        
         accounts = new ArrayList<>();
 
         findViews();
-        setupToolbar();
-        setupRecyclerView();
-        setupListeners();
+        Log.d(TAG, "findViews done");
         
-        loadAccounts();
+        setupToolbar();
+        Log.d(TAG, "setupToolbar done");
+        
+        setupRecyclerView();
+        Log.d(TAG, "setupRecyclerView done");
+        
+        setupListeners();
+        Log.d(TAG, "setupListeners done");
+        
+        // Observe accounts from Firestore
+        observeAccounts();
+        Log.d(TAG, "observeAccounts done");
+        
         startAutoUpdate();
+        Log.d(TAG, "==================== onCreate END ====================");
+    }
+
+    private void observeAccounts() {
+        Log.d(TAG, "Setting up Firestore observer... Activity instance: " + this.hashCode());
+        viewModel.getAllAccounts().observe(this, totpAccounts -> {
+            Log.d(TAG, "[Activity " + this.hashCode() + "] Observer triggered with " + (totpAccounts != null ? totpAccounts.size() : 0) + " accounts");
+            
+            if (totpAccounts != null) {
+                accounts.clear();
+                
+                // Kiểm tra EncryptionHelper
+                if (encryptionHelper == null) {
+                    Log.e(TAG, "EncryptionHelper is NULL! Cannot decrypt secrets.");
+                    updateEmptyView();
+                    return;
+                }
+                
+                // Convert TotpAccount to TotpAccountItem
+                for (TotpAccount account : totpAccounts) {
+                    try {
+                        Log.d(TAG, "Processing account: " + account.getIssuer() + " / " + account.getAccountName());
+                        
+                        // Giải mã secret key
+                        String decryptedSecret = encryptionHelper.decrypt(account.getSecretKey());
+                        
+                        if (decryptedSecret == null || decryptedSecret.isEmpty()) {
+                            Log.e(TAG, "Failed to decrypt secret for: " + account.getIssuer());
+                            continue;
+                        }
+                        
+                        accounts.add(new TotpAccountItem(
+                            account.getDocumentId(),
+                            account.getAccountName(),
+                            account.getIssuer(),
+                            decryptedSecret
+                        ));
+                        
+                        Log.d(TAG, "Successfully added account: " + account.getIssuer());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error decrypting secret for account: " + account.getIssuer(), e);
+                    }
+                }
+                
+                Log.d(TAG, "Calling updateEmptyView() and notifyDataSetChanged()");
+                updateEmptyView();
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "Final account count in UI: " + accounts.size());
+                Log.d(TAG, "RecyclerView visibility: " + (rvAccounts.getVisibility() == View.VISIBLE ? "VISIBLE" : "GONE"));
+                Log.d(TAG, "Empty view visibility: " + (tvEmpty.getVisibility() == View.VISIBLE ? "VISIBLE" : "GONE"));
+            } else {
+                Log.w(TAG, "totpAccounts is NULL");
+            }
+        });
     }
 
     private void findViews() {
@@ -104,49 +182,13 @@ public class AuthenticatorActivity extends AppCompatActivity {
         });
     }
 
-    private void loadAccounts() {
-        accounts.clear();
-        try {
-            String accountsJson = sessionManager.getTotpAccounts();
-            JSONArray jsonArray = new JSONArray(accountsJson);
-            
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                String accountName = obj.getString("accountName");
-                String issuer = obj.getString("issuer");
-                String secret = obj.getString("secret");
-                
-                accounts.add(new TotpAccountItem(accountName, issuer, secret));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        updateEmptyView();
-        adapter.notifyDataSetChanged();
-    }
-
-    private void saveAccounts() {
-        try {
-            JSONArray jsonArray = new JSONArray();
-            for (TotpAccountItem account : accounts) {
-                JSONObject obj = new JSONObject();
-                obj.put("accountName", account.getAccountName());
-                obj.put("issuer", account.getIssuer());
-                obj.put("secret", account.getSecret());
-                jsonArray.put(obj);
-            }
-            sessionManager.saveTotpAccounts(jsonArray.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void updateEmptyView() {
         if (accounts.isEmpty()) {
+            Log.d(TAG, "updateEmptyView: Showing empty view");
             tvEmpty.setVisibility(View.VISIBLE);
             rvAccounts.setVisibility(View.GONE);
         } else {
+            Log.d(TAG, "updateEmptyView: Showing RecyclerView with " + accounts.size() + " items");
             tvEmpty.setVisibility(View.GONE);
             rvAccounts.setVisibility(View.VISIBLE);
         }
@@ -167,12 +209,22 @@ public class AuthenticatorActivity extends AppCompatActivity {
     private void showDeleteConfirmDialog(TotpAccountItem account) {
         new AlertDialog.Builder(this)
             .setTitle("Xóa tài khoản")
-            .setMessage("Bạn có chắc muốn xóa tài khoản \"" + account.getAccountName() + "\"?")
+            .setMessage("Bạn có chắc muốn xóa tài khoản \"" + account.getDisplayName() + "\"?")
             .setPositiveButton("Xóa", (dialog, which) -> {
-                accounts.remove(account);
-                saveAccounts();
-                updateEmptyView();
-                adapter.notifyDataSetChanged();
+                // Xóa từ Firestore
+                viewModel.delete(account.getDocumentId(), new TotpRepository.OnCompleteListener() {
+                    @Override
+                    public void onSuccess(String documentId) {
+                        android.widget.Toast.makeText(AuthenticatorActivity.this, 
+                            "Đã xóa tài khoản", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        android.widget.Toast.makeText(AuthenticatorActivity.this, 
+                            "Lỗi: " + error, android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
             })
             .setNegativeButton("Hủy", null)
             .show();
@@ -192,7 +244,8 @@ public class AuthenticatorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ADD_ACCOUNT && resultCode == RESULT_OK) {
-            loadAccounts(); // Reload accounts after adding new one
+            // Firestore sẽ tự động update qua LiveData observer
+            Log.d(TAG, "Account added successfully");
         }
     }
 
@@ -217,14 +270,20 @@ public class AuthenticatorActivity extends AppCompatActivity {
      * Class đại diện cho một item tài khoản TOTP trong danh sách
      */
     public static class TotpAccountItem {
+        private String documentId;  // ID từ Firestore
         private String accountName;
         private String issuer;
         private String secret;
 
-        public TotpAccountItem(String accountName, String issuer, String secret) {
+        public TotpAccountItem(String documentId, String accountName, String issuer, String secret) {
+            this.documentId = documentId;
             this.accountName = accountName;
             this.issuer = issuer;
             this.secret = secret;
+        }
+
+        public String getDocumentId() {
+            return documentId;
         }
 
         public String getAccountName() {
@@ -237,6 +296,13 @@ public class AuthenticatorActivity extends AppCompatActivity {
 
         public String getSecret() {
             return secret;
+        }
+
+        public String getDisplayName() {
+            if (issuer != null && !issuer.isEmpty()) {
+                return issuer + " (" + accountName + ")";
+            }
+            return accountName;
         }
 
         public String getCurrentCode() {

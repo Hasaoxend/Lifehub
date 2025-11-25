@@ -13,13 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.test.lifehub.R;
+import com.test.lifehub.core.base.BaseActivity;
 import com.test.lifehub.core.util.SessionManager;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class IntroActivity extends AppCompatActivity {
+public class IntroActivity extends BaseActivity {
 
     @Inject
     SessionManager sessionManager;
@@ -61,9 +61,21 @@ public class IntroActivity extends AppCompatActivity {
 
     private void setupViewPager() {
         List<IntroItem> items = new ArrayList<>();
-        items.add(new IntroItem("Chào mừng đến LifeHub", "Ứng dụng quản lý tất cả trong một: Tài khoản, Công việc, Ghi chú và Lịch trình.", R.drawable.ic_lock)); // Thay icon phù hợp
-        items.add(new IntroItem("Bảo mật tuyệt đối", "Mật khẩu của bạn được mã hóa an toàn. Hỗ trợ đăng nhập bằng vân tay.", R.drawable.ic_fingerprint));
-        items.add(new IntroItem("Đừng bỏ lỡ thông báo", "LifeHub cần quyền thông báo để nhắc nhở lịch trình và công việc quan trọng của bạn.", R.drawable.ic_alarm));
+        items.add(new IntroItem(
+            getString(R.string.intro_welcome_title), 
+            getString(R.string.intro_welcome_desc), 
+            R.drawable.ic_lock
+        ));
+        items.add(new IntroItem(
+            getString(R.string.intro_security_title), 
+            getString(R.string.intro_security_desc), 
+            R.drawable.ic_fingerprint
+        ));
+        items.add(new IntroItem(
+            getString(R.string.intro_notification_title), 
+            getString(R.string.intro_notification_desc), 
+            R.drawable.ic_alarm
+        ));
 
         adapter = new IntroAdapter(items);
         viewPager.setAdapter(adapter);
@@ -73,9 +85,9 @@ public class IntroActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 if (position == items.size() - 1) {
-                    btnAction.setText("Cấp quyền & Bắt đầu");
+                    btnAction.setText(R.string.grant_permission_and_start);
                 } else {
-                    btnAction.setText("Tiếp tục");
+                    btnAction.setText(R.string.continue_text);
                 }
             }
         });

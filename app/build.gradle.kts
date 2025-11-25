@@ -63,12 +63,23 @@ dependencies {
 
     // HILT DEPENDENCIES
     implementation(libs.google.dagger.hilt.android)
+    implementation(libs.swiperefreshlayout)
     kapt(libs.google.dagger.hilt.compiler)
 
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    
+    // Mockito for unit testing
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    
+    // Android Architecture Components testing
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    
+    // Coroutines testing (if needed)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     // Calendar
     implementation("com.kizitonwose.calendar:view:2.4.1")

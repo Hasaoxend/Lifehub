@@ -14,12 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.test.lifehub.R;
 import com.test.lifehub.core.security.BiometricHelper;
+import com.test.lifehub.core.util.LocaleHelper;
 import com.test.lifehub.core.util.SessionManager;
+import com.test.lifehub.features.authenticator.repository.TotpRepository;
 import com.test.lifehub.ui.LoginActivity;
 
 import javax.inject.Inject;
@@ -30,11 +33,15 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
 
     private TextView tvUserEmail;
     private LinearLayout btnChangePassword;
+    private LinearLayout btnLanguage;
     private MaterialSwitch switchBiometric;
     private View btnLogout;
 
     @Inject
     SessionManager sessionManager;
+    
+    @Inject
+    TotpRepository totpRepository;
 
     private FirebaseAuth mAuth;
 
@@ -63,6 +70,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     private void findViews(View view) {
         tvUserEmail = view.findViewById(R.id.tv_user_email);
         btnChangePassword = view.findViewById(R.id.btn_change_password);
+        btnLanguage = view.findViewById(R.id.btn_language);
         switchBiometric = view.findViewById(R.id.switch_biometric);
         btnLogout = view.findViewById(R.id.btn_logout);
     }
@@ -83,6 +91,9 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     private void setupListeners() {
         // 1. Đăng xuất
         btnLogout.setOnClickListener(v -> {
+            // Stop Firestore listener to prevent memory leak
+            totpRepository.stopListening();
+            
             sessionManager.logoutUser();
             mAuth.signOut();
             Intent intent = new Intent(requireContext(), LoginActivity.class);
@@ -123,6 +134,39 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
                 openChangePasswordActivity();
             }
         });
+
+        // 4. Xử lý Chọn Ngôn ngữ
+        btnLanguage.setOnClickListener(v -> showLanguageDialog());
+    }
+
+    /**
+     * Hiển thị dialog chọn ngôn ngữ
+     */
+    private void showLanguageDialog() {
+        String currentLanguage = LocaleHelper.getLanguage(requireContext());
+        int selectedIndex = currentLanguage.equals(LocaleHelper.LANGUAGE_VIETNAMESE) ? 1 : 0;
+        
+        String[] languages = {"English", "Tiếng Việt"};
+        String[] languageCodes = {LocaleHelper.LANGUAGE_ENGLISH, LocaleHelper.LANGUAGE_VIETNAMESE};
+        
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Language / Ngôn ngữ")
+            .setSingleChoiceItems(languages, selectedIndex, (dialog, which) -> {
+                String selectedLanguage = languageCodes[which];
+                
+                // Lưu ngôn ngữ mới
+                LocaleHelper.saveLanguage(requireContext(), selectedLanguage);
+                
+                // Áp dụng ngôn ngữ mới
+                LocaleHelper.setLocale(requireContext(), selectedLanguage);
+                
+                // Khởi động lại activity để áp dụng ngôn ngữ mới
+                requireActivity().recreate();
+                
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel / Hủy", null)
+            .show();
     }
 
     // Hàm hỗ trợ trả lại trạng thái cũ cho Switch mà không kích hoạt Listener

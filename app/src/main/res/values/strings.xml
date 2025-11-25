@@ -1,25 +1,69 @@
 <resources>
     <string name="app_name">Lifehub</string>
 
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <string name="logout">Logout</string>
+    <string name="continue_text">Continue</string>
+    <string name="skip">Skip</string>
+    
+    <!-- Language Selection -->
+    <string name="language_selection_title">Welcome to Lifehub</string>
+    <string name="language_selection_subtitle">Choose your language</string>
+    <string name="language_english">English</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="please_select_language">Please select a language</string>
+    
+    <!-- Intro -->
+    <string name="intro_welcome_title">Welcome to LifeHub</string>
+    <string name="intro_welcome_desc">All-in-one life management app: Accounts, Tasks, Notes and Calendar.</string>
+    <string name="intro_security_title">Absolute Security</string>
+    <string name="intro_security_desc">Your passwords are encrypted securely. Supports fingerprint login.</string>
+    <string name="intro_notification_title">Don\'t miss notifications</string>
+    <string name="intro_notification_desc">LifeHub needs notification permission to remind you about important schedules and tasks.</string>
+    <string name="grant_permission_and_start">Grant Permission &amp; Start</string>
+    
+    <!-- Login -->
+    <string name="login_title">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+    <string name="or_login_with_biometric">Or login with fingerprint</string>
+    
+    <!-- Settings -->
+    <string name="change_password">Change Password</string>
+    <string name="biometric_login">Fingerprint Login</string>
+    <string name="language">Language</string>
+    <string name="theme">Theme</string>
+    <string name="account_info">Account Information</string>
+
     <string-array name="repeat_options">
-    <item>Không lặp lại</item>
-    <item>Hàng ngày</item>
-    <item>Hàng tuần</item>
-    <item>Hàng tháng</item>
+        <item>No repeat</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
     </string-array>
 
     <!-- Calendar -->
-    <string name="calendar_week_view">Tuần</string>
-    <string name="calendar_month_view">Tháng</string>
-    <string name="calendar_today">Hôm nay</string>
+    <string name="calendar_week_view">Week</string>
+    <string name="calendar_month_view">Month</string>
+    <string name="calendar_today">Today</string>
 
-    <string name="day_sun">CN</string>
-    <string name="day_mon">T2</string>
-    <string name="day_tue">T3</string>
-    <string name="day_wed">T4</string>
-    <string name="day_thu">T5</string>
-    <string name="day_fri">T6</string>
-    <string name="day_sat">T7</string>
+    <string name="day_sun">Sun</string>
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
 
     <string name="email_display_format">Email: %s</string>
     <string name="desc_password_requirement">Password requirement indicator</string>

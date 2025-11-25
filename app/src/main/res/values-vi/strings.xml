@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">Lifehub</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="save">Lưu</string>
+    <string name="delete">Xóa</string>
+    <string name="edit">Sửa</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="settings">Cài đặt</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="continue_text">Tiếp tục</string>
+    <string name="skip">Bỏ qua</string>
+    
+    <!-- Language Selection -->
+    <string name="language_selection_title">Chào mừng đến Lifehub</string>
+    <string name="language_selection_subtitle">Chọn ngôn ngữ của bạn</string>
+    <string name="language_english">English</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="please_select_language">Vui lòng chọn ngôn ngữ</string>
+    
+    <!-- Intro -->
+    <string name="intro_welcome_title">Chào mừng đến LifeHub</string>
+    <string name="intro_welcome_desc">Ứng dụng quản lý tất cả trong một: Tài khoản, Công việc, Ghi chú và Lịch trình.</string>
+    <string name="intro_security_title">Bảo mật tuyệt đối</string>
+    <string name="intro_security_desc">Mật khẩu của bạn được mã hóa an toàn. Hỗ trợ đăng nhập bằng vân tay.</string>
+    <string name="intro_notification_title">Đừng bỏ lỡ thông báo</string>
+    <string name="intro_notification_desc">LifeHub cần quyền thông báo để nhắc nhở lịch trình và công việc quan trọng của bạn.</string>
+    <string name="grant_permission_and_start">Cấp quyền &amp; Bắt đầu</string>
+    
+    <!-- Login -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="login">Đăng nhập</string>
+    <string name="dont_have_account">Chưa có tài khoản?</string>
+    <string name="register">Đăng ký</string>
+    <string name="or_login_with_biometric">Hoặc đăng nhập bằng vân tay</string>
+    
+    <!-- Settings -->
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="biometric_login">Đăng nhập bằng vân tay</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="theme">Giao diện</string>
+    <string name="account_info">Thông tin tài khoản</string>
+    
+    <!-- Calendar -->
+    <string-array name="repeat_options">
+        <item>Không lặp lại</item>
+        <item>Hàng ngày</item>
+        <item>Hàng tuần</item>
+        <item>Hàng tháng</item>
+    </string-array>
+
+    <string name="calendar_week_view">Tuần</string>
+    <string name="calendar_month_view">Tháng</string>
+    <string name="calendar_today">Hôm nay</string>
+
+    <string name="day_sun">CN</string>
+    <string name="day_mon">T2</string>
+    <string name="day_tue">T3</string>
+    <string name="day_wed">T4</string>
+    <string name="day_thu">T5</string>
+    <string name="day_fri">T6</string>
+    <string name="day_sat">T7</string>
+
+    <string name="email_display_format">Email: %s</string>
+    <string name="desc_password_requirement">Chỉ báo yêu cầu mật khẩu</string>
+</resources>

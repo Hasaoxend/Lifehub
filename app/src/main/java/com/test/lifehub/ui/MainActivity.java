@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.test.lifehub.R;
+import com.test.lifehub.features.authenticator.repository.TotpRepository;
 import com.test.lifehub.features.one_accounts.ui.AccountFragment;
 import com.test.lifehub.features.two_productivity.ui.ProductivityFragment;
 import com.test.lifehub.features.three_settings.ui.SettingsFragment;
@@ -29,6 +30,8 @@ import com.test.lifehub.core.util.SessionManager; // <-- XÓA IMPORT NÀY
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint; // <-- THÊM IMPORT NÀY
 
@@ -41,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
     // private SessionManager sessionManager; // <-- XÓA FIELD NÀY
     private BottomNavigationView bottomNav;
+    
+    @Inject
+    TotpRepository totpRepository;
 
     // ----- BỘ XIN QUYỀN MỚI (DÙNG CHO THÔNG BÁO) -----
     // (Giữ nguyên)
@@ -60,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Restart Firestore listener for current user
+        totpRepository.startListening();
 
         // --- XÓA LOGIC KIỂM TRA ĐĂNG NHẬP ---
         // LoginActivity đã xử lý việc này. Nếu user đến được đây

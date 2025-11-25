@@ -151,30 +151,55 @@ public class TotpManager {
             }
             
             String[] parts = uri.substring(15).split("\\?");
-            String label = parts[0];
+            if (parts.length < 2) {
+                return null;
+            }
+            
+            // Decode label
+            String label = java.net.URLDecoder.decode(parts[0], "UTF-8");
             String query = parts[1];
             
             String issuer = "";
             String accountName = label;
+            
+            // Parse label: có thể là "issuer:account" hoặc chỉ "account"
             if (label.contains(":")) {
                 String[] labelParts = label.split(":", 2);
-                issuer = labelParts[0];
-                accountName = labelParts[1];
+                issuer = labelParts[0].trim();
+                accountName = labelParts[1].trim();
             }
             
+            // Parse query parameters (ưu tiên issuer từ query params)
             String secret = "";
             String[] params = query.split("&");
             for (String param : params) {
-                String[] keyValue = param.split("=");
-                if (keyValue[0].equals("secret")) {
-                    secret = keyValue[1];
-                } else if (keyValue[0].equals("issuer") && issuer.isEmpty()) {
-                    issuer = keyValue[1];
+                String[] keyValue = param.split("=", 2);
+                if (keyValue.length == 2) {
+                    String key = keyValue[0].toLowerCase();
+                    String value = java.net.URLDecoder.decode(keyValue[1], "UTF-8");
+                    
+                    if (key.equals("secret")) {
+                        secret = value.toUpperCase().replaceAll("\\s", "");
+                    } else if (key.equals("issuer")) {
+                        issuer = value.trim(); // Override issuer from query param
+                    }
                 }
             }
             
             if (secret.isEmpty()) {
                 return null;
+            }
+            
+            // Nếu vẫn không có issuer, dùng accountName hoặc extract từ email
+            if (issuer.isEmpty()) {
+                if (accountName.contains("@")) {
+                    String domain = accountName.substring(accountName.indexOf("@") + 1);
+                    issuer = domain.split("\\.")[0]; // Lấy phần đầu của domain (gmail, facebook, etc)
+                    // Capitalize first letter
+                    issuer = issuer.substring(0, 1).toUpperCase() + issuer.substring(1);
+                } else {
+                    issuer = accountName;
+                }
             }
             
             return new TotpAccount(accountName, issuer, secret);

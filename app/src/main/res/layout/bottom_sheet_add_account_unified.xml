@@ -68,61 +68,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Scan QR Code -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_scan_qr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="?attr/colorOutline">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_qr_code_scanner"
-                app:tint="?attr/colorPrimary"
-                android:padding="8dp"
-                android:background="@drawable/circle_background" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Scan QR Code"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Add authenticator from QR"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?android:attr/textColorSecondary" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Manual Input -->
+    <!-- Add 2FA / Authenticator (with QR scan + Manual input) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_manual_input"
         android:layout_width="match_parent"
@@ -159,13 +105,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Manual Entry"
+                    android:text="Add 2FA / Authenticator"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enter authenticator key manually"
+                    android:text="Scan QR or enter code manually"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?android:attr/textColorSecondary" />
 

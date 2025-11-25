@@ -3,6 +3,7 @@ package com.test.lifehub.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -100,7 +101,32 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         });
     }
 
-    private void showForgotPasswordDialog() { /* Code cũ */ }
+    private void showForgotPasswordDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_forgot_password, null);
+        final TextInputEditText etEmailInput = dialogView.findViewById(R.id.et_dialog_email);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Khôi phục Mật khẩu")
+                .setMessage("Nhập email của bạn để nhận link khôi phục.\n\nMật khẩu mới phải đáp ứng:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ in hoa\n• Ít nhất 1 chữ thường\n• Ít nhất 1 số\n• Ít nhất 1 ký tự đặc biệt")
+                .setView(dialogView)
+                .setPositiveButton("Gửi", (dialog, which) -> {
+                    String email = etEmailInput.getText().toString().trim();
+                    if (TextUtils.isEmpty(email)) {
+                        Toast.makeText(this, "Email không được để trống", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    mAuth.sendPasswordResetEmail(email)
+                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Đã gửi link khôi phục, vui lòng kiểm tra email.", Toast.LENGTH_LONG).show())
+                            .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
 
     private void navigateToMain() {
         Intent intent = new Intent(this, MainActivity.class);
