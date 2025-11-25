@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.test.lifehub">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -26,6 +30,12 @@
 
         <activity
             android:name=".ui.IntroActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Lifehub" />
+
+        <activity
+            android:name=".ui.LanguageSelectionActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Lifehub">

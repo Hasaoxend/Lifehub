@@ -1,9 +1,11 @@
 package com.test.lifehub.core;
 
 import android.app.Application;
+import android.content.Context;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.test.lifehub.core.util.LocaleHelper;
 import com.test.lifehub.core.util.SessionManager;
 
 import dagger.hilt.android.HiltAndroidApp; // <-- THÊM IMPORT NÀY
@@ -23,10 +25,21 @@ public class LifeHubApp extends Application {
         // 1. Khởi tạo SessionManager
         SessionManager sessionManager = new SessionManager(this);
 
-        // 2. Lấy lựa chọn Giao diện (Theme) đã lưu
+        // 2. Áp dụng ngôn ngữ đã lưu
+        String language = LocaleHelper.getLanguage(this);
+        LocaleHelper.setLocale(this, language);
+
+        // 3. Lấy lựa chọn Giao diện (Theme) đã lưu
         int themeMode = sessionManager.getThemeMode();
 
-        // 3. Áp dụng Giao diện đó cho toàn bộ ứng dụng
+        // 4. Áp dụng Giao diện đó cho toàn bộ ứng dụng
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        // Áp dụng ngôn ngữ trước khi khởi tạo context
+        String language = LocaleHelper.getLanguage(base);
+        super.attachBaseContext(LocaleHelper.setLocale(base, language));
     }
 }

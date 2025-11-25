@@ -100,8 +100,20 @@ public class ChangePasswordActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(newPass)) {
             layoutNewPass.setError("Vui lòng nhập mật khẩu mới");
             isValid = false;
-        } else if (newPass.length() < 6) {
-            layoutNewPass.setError("Mật khẩu phải từ 6 ký tự trở lên");
+        } else if (newPass.length() < 8) {
+            layoutNewPass.setError("Mật khẩu phải có ít nhất 8 ký tự");
+            isValid = false;
+        } else if (!newPass.matches(".*[A-Z].*")) {
+            layoutNewPass.setError("Mật khẩu phải có ít nhất 1 chữ in hoa");
+            isValid = false;
+        } else if (!newPass.matches(".*[a-z].*")) {
+            layoutNewPass.setError("Mật khẩu phải có ít nhất 1 chữ thường");
+            isValid = false;
+        } else if (!newPass.matches(".*\\d.*")) {
+            layoutNewPass.setError("Mật khẩu phải có ít nhất 1 chữ số");
+            isValid = false;
+        } else if (!newPass.matches(".*[@#$%^&+=!].*")) {
+            layoutNewPass.setError("Mật khẩu phải có ít nhất 1 ký tự đặc biệt (@#$%^&+=!)");
             isValid = false;
         } else if (newPass.equals(oldPass)) {
             layoutNewPass.setError("Mật khẩu mới không được trùng với mật khẩu cũ");

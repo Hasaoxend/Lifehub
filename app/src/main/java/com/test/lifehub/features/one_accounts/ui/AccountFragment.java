@@ -1,14 +1,12 @@
 package com.test.lifehub.features.one_accounts.ui;
 
-import android.Manifest;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,22 +16,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.test.lifehub.R;
-import com.test.lifehub.features.one_accounts.data.AccountEntry;
-import com.test.lifehub.features.authenticator.ui.AddTotpAccountActivity;
-import com.test.lifehub.features.authenticator.ui.QRScannerActivity;
 import com.test.lifehub.core.util.TotpManager;
+import com.test.lifehub.features.authenticator.ui.AddTotpAccountActivity;
+import com.test.lifehub.features.one_accounts.data.AccountEntry;
 import com.test.lifehub.features.one_accounts.data.UnifiedAccountItem;
 import com.test.lifehub.features.one_accounts.viewmodel.UnifiedAccountViewModel;
 
@@ -45,8 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class AccountFragment extends Fragment implements UnifiedAccountAdapter.OnItemClickListener {
 
-    private static final int REQUEST_CAMERA_PERMISSION = 1005;
-    private static final int REQUEST_SCAN_QR = 1006;
+    private static final String TAG = "AccountFragment";
     private static final int REQUEST_ADD_TOTP_MANUAL = 1007;
 
     private RecyclerView recyclerView;
@@ -54,6 +49,7 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
     private TextView emptyListText;
     private SearchView searchView;
     private FloatingActionButton fab;
+    private SwipeRefreshLayout swipeRefreshLayout;
     
     private UnifiedAccountViewModel viewModel;
     
@@ -74,6 +70,7 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
         setupRecyclerView();
         setupSearchView();
         setupFab();
+        setupSwipeRefresh();
         setupTotpUpdater();
 
         return view;
@@ -84,6 +81,7 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
         emptyListText = view.findViewById(R.id.tv_empty_list);
         searchView = view.findViewById(R.id.search_view_accounts);
         fab = view.findViewById(R.id.fab_add_account);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
     }
 
     private void setupViewModel() {
@@ -120,6 +118,23 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
 
     private void setupFab() {
         fab.setOnClickListener(v -> showAddAccountBottomSheet());
+    }
+
+    private void setupSwipeRefresh() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            Log.d(TAG, "Refreshing accounts...");
+            viewModel.refreshAccounts();
+            // Stop refreshing after a short delay
+            swipeRefreshLayout.postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
+        });
+        
+        // Set color scheme
+        swipeRefreshLayout.setColorSchemeResources(
+            android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light
+        );
     }
 
     private void setupTotpUpdater() {
@@ -168,18 +183,12 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
         bottomSheet.setContentView(sheetView);
 
         MaterialCardView cardAddPassword = sheetView.findViewById(R.id.card_add_password);
-        MaterialCardView cardScanQR = sheetView.findViewById(R.id.card_scan_qr);
         MaterialCardView cardManualInput = sheetView.findViewById(R.id.card_manual_input);
 
         cardAddPassword.setOnClickListener(v -> {
             bottomSheet.dismiss();
             Intent intent = new Intent(getActivity(), AddEditAccountActivity.class);
             startActivity(intent);
-        });
-
-        cardScanQR.setOnClickListener(v -> {
-            bottomSheet.dismiss();
-            checkCameraPermissionAndScan();
         });
 
         cardManualInput.setOnClickListener(v -> {
@@ -191,47 +200,16 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
     }
 
 
-    private void checkCameraPermissionAndScan() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(),
-                new String[]{Manifest.permission.CAMERA},
-                REQUEST_CAMERA_PERMISSION);
-        } else {
-            startQRScanner();
-        }
-    }
-
-    private void startQRScanner() {
-        Intent intent = new Intent(getContext(), QRScannerActivity.class);
-        startActivityForResult(intent, REQUEST_SCAN_QR);
-    }
-
     private void openManualInputActivity() {
         Intent intent = new Intent(getContext(), AddTotpAccountActivity.class);
-        intent.putExtra("SHOW_MANUAL_TAB", true);
         startActivityForResult(intent, REQUEST_ADD_TOTP_MANUAL);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                          @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startQRScanner();
-            } else {
-                Toast.makeText(getContext(), "Camera permission needed to scan QR code",
-                    Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == REQUEST_SCAN_QR || requestCode == REQUEST_ADD_TOTP_MANUAL) 
-                && resultCode == getActivity().RESULT_OK) {
+        
+        if (requestCode == REQUEST_ADD_TOTP_MANUAL && resultCode == getActivity().RESULT_OK) {
             viewModel.refreshAccounts();
         }
     }
@@ -291,21 +269,45 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
 
     @Override
     public void onTotpAccountMenuClick(UnifiedAccountItem item, View anchor) {
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "Delete TOTP account clicked");
+        Log.d(TAG, "Service: " + item.getServiceName());
+        Log.d(TAG, "Username: " + item.getUsername());
+        Log.d(TAG, "Document ID: " + item.getId());
+        Log.d(TAG, "========================================");
+        
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Delete Authenticator")
             .setMessage("Are you sure you want to delete this authenticator account?")
             .setPositiveButton("Delete", (dialog, which) -> {
                 try {
-                    viewModel.deleteTotpAccount(item.getServiceName(), item.getUsername());
+                    String documentId = item.getId();
+                    if (documentId == null || documentId.isEmpty()) {
+                        Log.e(TAG, "✗ Cannot delete: Document ID is null or empty");
+                        Toast.makeText(getContext(), "Error: Invalid document ID", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     
-                    // Post delayed to ensure the deletion completes and UI updates
-                    // Also check if fragment is still attached before showing toast
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (isAdded() && getContext() != null) {
-                            Toast.makeText(getContext(), "Authenticator deleted", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Calling viewModel.deleteTotpAccount with ID: " + documentId);
+                    viewModel.deleteTotpAccount(documentId, new com.test.lifehub.features.authenticator.repository.TotpRepository.OnCompleteListener() {
+                        @Override
+                        public void onSuccess(String documentId) {
+                            Log.d(TAG, "✓ Delete successful: " + documentId);
+                            if (isAdded() && getContext() != null) {
+                                Toast.makeText(getContext(), "Authenticator deleted", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }, 100);
+
+                        @Override
+                        public void onFailure(String error) {
+                            Log.e(TAG, "✗ Delete failed: " + error);
+                            if (isAdded() && getContext() != null) {
+                                Toast.makeText(getContext(), "Failed to delete authenticator: " + error, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 } catch (Exception e) {
+                    Log.e(TAG, "✗ Exception during delete", e);
                     if (isAdded() && getContext() != null) {
                         Toast.makeText(getContext(), "Failed to delete authenticator", Toast.LENGTH_SHORT).show();
                     }

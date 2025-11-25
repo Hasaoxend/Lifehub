@@ -22,6 +22,9 @@ public class SessionManager {
     // --- MỚI: Key lưu trạng thái lần đầu mở app ---
     private static final String KEY_IS_FIRST_RUN = "is_first_run";
     
+    // --- Key lưu ngôn ngữ ---
+    private static final String KEY_LANGUAGE = "app_language";
+    
     // --- TOTP Keys ---
     private static final String KEY_TOTP_ACCOUNTS = "totp_accounts"; // JSON array of accounts
     private static final String KEY_TOTP_ENABLED = "totp_enabled";
@@ -146,5 +149,26 @@ public class SessionManager {
      */
     public boolean isTotpEnabled() {
         return isSecure() && sharedPreferences.getBoolean(KEY_TOTP_ENABLED, false);
+    }
+
+    // --- CÁC HÀM CHO NGÔN NGỮ ---
+
+    /**
+     * Lưu ngôn ngữ đã chọn
+     * @param language Mã ngôn ngữ ("en" hoặc "vi")
+     */
+    public void setLanguage(String language) {
+        if (isSecure()) {
+            sharedPreferences.edit().putString(KEY_LANGUAGE, language).apply();
+        }
+    }
+
+    /**
+     * Lấy ngôn ngữ đã lưu
+     * @return Mã ngôn ngữ đã lưu, hoặc null nếu chưa có
+     */
+    public String getLanguage() {
+        if (!isSecure()) return null;
+        return sharedPreferences.getString(KEY_LANGUAGE, null);
     }
 }

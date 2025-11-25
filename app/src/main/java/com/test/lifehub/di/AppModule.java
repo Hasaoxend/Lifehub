@@ -3,8 +3,9 @@ package com.test.lifehub.di;
 import android.content.Context;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.test.lifehub.core.security.EncryptionHelper;
 import com.test.lifehub.core.util.PreferenceManager;
-import com.test.lifehub.core.util.SessionManager; // <-- Đảm bảo đã import
+import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.two_productivity.data.WeatherApiService;
 
 import javax.inject.Singleton;
@@ -25,6 +26,12 @@ public class AppModule {
     @Singleton
     public SessionManager provideSessionManager(@ApplicationContext Context context) {
         return new SessionManager(context);
+    }
+    
+    @Provides
+    @Singleton
+    public EncryptionHelper provideEncryptionHelper(@ApplicationContext Context context) {
+        return new EncryptionHelper(context);
     }
     // ======================================
 

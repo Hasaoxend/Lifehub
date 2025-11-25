@@ -15,21 +15,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.test.lifehub.R;
-import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.core.util.TotpManager;
+import com.test.lifehub.features.authenticator.data.TotpAccount;
+import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.authenticator.viewmodel.AuthenticatorViewModel;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Activity thêm tài khoản TOTP mới
  * Có 2 cách: Quét QR code hoặc nhập thủ công
+ * Lưu lên Firestore thay vì chỉ local
  */
+@AndroidEntryPoint
 public class AddTotpAccountActivity extends AppCompatActivity {
 
     private static final String TAG = "AddTotpAccountActivity";
@@ -50,14 +53,14 @@ public class AddTotpAccountActivity extends AppCompatActivity {
     private View layoutScan;
     private Button btnScanQR;
 
-    private SessionManager sessionManager;
+    private AuthenticatorViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_totp);
 
-        sessionManager = new SessionManager(this);
+        viewModel = new ViewModelProvider(this).get(AuthenticatorViewModel.class);
 
         findViews();
         setupToolbar();
@@ -171,40 +174,25 @@ public class AddTotpAccountActivity extends AppCompatActivity {
     }
 
     private void addAccount(String accountName, String issuer, String secret) {
-        try {
-            // Load existing accounts
-            String accountsJson = sessionManager.getTotpAccounts();
-            JSONArray jsonArray = new JSONArray(accountsJson);
-            
-            // Check if account already exists
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.getString("accountName").equals(accountName) && 
-                    obj.getString("issuer").equals(issuer)) {
-                    Toast.makeText(this, "Tài khoản này đã tồn tại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // Tạo TotpAccount object
+        TotpAccount account = new TotpAccount(accountName, issuer, secret);
+        
+        // Lưu lên Firestore
+        viewModel.insert(account, new TotpRepository.OnCompleteListener() {
+            @Override
+            public void onSuccess(String documentId) {
+                Toast.makeText(AddTotpAccountActivity.this, 
+                    "Đã thêm tài khoản thành công", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
             }
-            
-            // Add new account
-            JSONObject newAccount = new JSONObject();
-            newAccount.put("accountName", accountName);
-            newAccount.put("issuer", issuer);
-            newAccount.put("secret", secret);
-            jsonArray.put(newAccount);
-            
-            // Save
-            sessionManager.saveTotpAccounts(jsonArray.toString());
-            
-            Toast.makeText(this, "Đã thêm tài khoản thành công", Toast.LENGTH_SHORT).show();
-            
-            setResult(RESULT_OK);
-            finish();
-            
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Lỗi khi thêm tài khoản", Toast.LENGTH_SHORT).show();
-        }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(AddTotpAccountActivity.this, 
+                    "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -229,6 +217,21 @@ public class AddTotpAccountActivity extends AppCompatActivity {
             if (qrContent != null) {
                 TotpManager.TotpAccount account = TotpManager.parseOtpAuthUri(qrContent);
                 if (account != null) {
+                    // Hiển thị thông tin: ưu tiên Issuer, fallback là AccountName
+                    String displayName;
+                    if (account.getIssuer() != null && !account.getIssuer().isEmpty()) {
+                        if (account.getAccountName() != null && !account.getAccountName().isEmpty() 
+                            && !account.getIssuer().equals(account.getAccountName())) {
+                            displayName = account.getIssuer() + " (" + account.getAccountName() + ")";
+                        } else {
+                            displayName = account.getIssuer();
+                        }
+                    } else {
+                        displayName = account.getAccountName();
+                    }
+                    
+                    Toast.makeText(this, "Đang thêm: " + displayName, Toast.LENGTH_LONG).show();
+                    
                     addAccount(account.getAccountName(), account.getIssuer(), account.getSecret());
                 } else {
                     Toast.makeText(this, "QR code không hợp lệ", Toast.LENGTH_SHORT).show();

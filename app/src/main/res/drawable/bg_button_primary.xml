@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Professional button background with ripple -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/overlay_light">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/accent_blue" />
+            <corners android:radius="@dimen/corner_radius_medium" />
+        </shape>
+    </item>
+</ripple>

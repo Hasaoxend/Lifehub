@@ -10,20 +10,27 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_calendar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Lịch" />
+            app:title="Lịch"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout_calendar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/surface_light"
             app:tabMode="fixed"
-            app:tabGravity="fill" />
+            app:tabGravity="fill"
+            app:tabTextAppearance="@style/TextAppearance.Material3.LabelLarge"
+            app:tabIndicatorColor="@color/accent_blue"
+            app:tabSelectedTextColor="@color/accent_blue"
+            app:tabTextColor="@color/text_secondary" />
 
         <!-- Navigation bar -->
         <LinearLayout
@@ -31,14 +38,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="8dp">
+            android:padding="8dp"
+            android:background="@color/surface_light"
+            android:elevation="2dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_previous"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="8dp"
                 app:icon="@drawable/ic_arrow_back"
+                app:iconTint="@color/accent_blue"
                 android:contentDescription="Trước" />
 
             <TextView
@@ -48,21 +61,31 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
                 tools:text="16 - 22 Nov" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_today"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hôm nay" />
+                android:layout_height="48dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Hôm nay"
+                android:textColor="@color/accent_blue"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_next"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="8dp"
                 app:icon="@drawable/ic_arrow_forward"
+                app:iconTint="@color/accent_blue"
                 android:contentDescription="Sau" />
 
         </LinearLayout>
@@ -72,6 +95,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/surface_dim"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -79,7 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="80dp" />
+            android:paddingBottom="88dp" />
 
         <TextView
             android:id="@+id/empty_view_calendar"
@@ -88,6 +112,8 @@
             android:layout_gravity="center"
             android:text="Chưa có sự kiện nào"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textColor="@color/text_secondary"
+            android:drawablePadding="16dp"
             android:visibility="gone"
             tools:visibility="visible" />
 
@@ -100,6 +126,10 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         app:srcCompat="@drawable/ic_add"
+        app:tint="@android:color/white"
+        app:backgroundTint="@color/accent_blue"
+        app:elevation="6dp"
+        app:hoveredFocusedTranslationZ="8dp"
         android:contentDescription="Thêm sự kiện" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

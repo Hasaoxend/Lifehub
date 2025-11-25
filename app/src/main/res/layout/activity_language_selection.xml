@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/ios_background"
+    android:gravity="center"
+    android:padding="@dimen/spacing_large">
+
+    <!-- Logo hoặc Icon -->
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_marginBottom="@dimen/spacing_xlarge"
+        android:contentDescription="@string/app_name" />
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to Lifehub\nChào mừng đến Lifehub"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/ios_label_primary"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/spacing_small" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose your language\nChọn ngôn ngữ của bạn"
+        android:textSize="16sp"
+        android:textColor="@color/ios_label_secondary"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/spacing_xlarge" />
+
+    <!-- Card chứa các lựa chọn ngôn ngữ -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="@dimen/card_elevation"
+        android:layout_marginBottom="@dimen/spacing_xlarge">
+
+        <RadioGroup
+            android:id="@+id/radio_group_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_medium">
+
+            <RadioButton
+                android:id="@+id/radio_english"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="English"
+                android:textSize="18sp"
+                android:textColor="@color/ios_label_primary"
+                android:padding="@dimen/spacing_medium"
+                android:buttonTint="@color/accent_blue" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ios_separator"
+                android:layout_marginVertical="@dimen/spacing_small" />
+
+            <RadioButton
+                android:id="@+id/radio_vietnamese"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tiếng Việt"
+                android:textSize="18sp"
+                android:textColor="@color/ios_label_primary"
+                android:padding="@dimen/spacing_medium"
+                android:buttonTint="@color/accent_blue" />
+
+        </RadioGroup>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Nút tiếp tục -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Continue / Tiếp tục"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:cornerRadius="@dimen/button_corner_radius"
+        app:backgroundTint="@color/accent_blue"
+        android:elevation="@dimen/button_elevation" />
+
+</LinearLayout>

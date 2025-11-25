@@ -8,16 +8,82 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="?attr/colorSurfaceVariant">
+        android:padding="12dp"
+        android:background="?attr/colorSurfaceVariant"
+        android:elevation="2dp">
 
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="CN" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T2" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T3" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T4" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T5" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T6" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T7" android:textAppearance="@style/TextAppearance.Material3.LabelSmall" android:textStyle="bold" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="CN" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:textColor="@color/calendar_weekend"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T2" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T3" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T4" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T5" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T6" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:padding="4dp" />
+        <TextView 
+            android:layout_width="0dp" 
+            android:layout_height="wrap_content" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:text="T7" 
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium" 
+            android:textStyle="bold"
+            android:textColor="@color/calendar_weekend"
+            android:minWidth="40dp"
+            android:padding="4dp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -59,4 +59,63 @@
     <color name="todoist_grey_p4">#808080</color>
     
     <color name="icon_background_tint">#E3F2FD</color>
+    
+    <!-- iPhone Calculator Colors -->
+    <color name="calculator_background">#000000</color>
+    <color name="calculator_display">#FFFFFF</color>
+    <color name="calculator_button_number">#333333</color>
+    <color name="calculator_button_function">#A5A5A5</color>
+    <color name="calculator_button_operator">#FF9500</color>
+    <color name="calculator_button_text_dark">#000000</color>
+    <color name="calculator_button_text_light">#FFFFFF</color>
+    
+    <!-- Professional UI Colors -->
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_dim">#F5F5F5</color>
+    <color name="text_primary">#1C1C1E</color>
+    <color name="text_secondary">#8E8E93</color>
+    <color name="divider_light">#E5E5EA</color>
+    <color name="accent_blue">#007AFF</color>
+    <color name="accent_green">#34C759</color>
+    <color name="accent_red">#FF3B30</color>
+    <color name="accent_orange">#FF9500</color>
+    
+    <!-- Calendar Colors -->
+    <color name="calendar_today_bg">#007AFF</color>
+    <color name="calendar_today_text">#FFFFFF</color>
+    <color name="calendar_selected_bg">#E5E5EA</color>
+    <color name="calendar_weekend">#FF3B30</color>
+    <color name="calendar_event_indicator">#FF9500</color>
+    
+    <!-- iOS-Style Professional Colors -->
+    <color name="ios_background">#F2F2F7</color>
+    <color name="ios_surface">#FFFFFF</color>
+    <color name="ios_surface_secondary">#F9F9F9</color>
+    <color name="ios_separator">#C6C6C8</color>
+    <color name="ios_divider">#E5E5EA</color>
+    <color name="ios_label_primary">#000000</color>
+    <color name="ios_label_secondary">#3C3C43</color>
+    <color name="ios_label_tertiary">#8E8E93</color>
+    <color name="ios_label_quaternary">#C7C7CC</color>
+    
+    <!-- Bitwarden-Style Professional Colors -->
+    <color name="bitwarden_primary">#175DDC</color>
+    <color name="bitwarden_surface">#FFFFFF</color>
+    <color name="bitwarden_background">#F5F5F5</color>
+    <color name="bitwarden_border">#E0E0E0</color>
+    <color name="bitwarden_text_primary">#000000</color>
+    <color name="bitwarden_text_secondary">#888888</color>
+    <color name="bitwarden_success">#00A651</color>
+    <color name="bitwarden_warning">#F9A825</color>
+    
+    <!-- Status Colors -->
+    <color name="status_success">#34C759</color>
+    <color name="status_warning">#FF9500</color>
+    <color name="status_error">#FF3B30</color>
+    <color name="status_info">#007AFF</color>
+    
+    <!-- Overlay & Shadows -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40000000</color>
+    <color name="shadow">#1A000000</color>
 </resources>

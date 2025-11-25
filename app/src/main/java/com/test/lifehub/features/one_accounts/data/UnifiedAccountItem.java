@@ -92,6 +92,25 @@ public class UnifiedAccountItem {
         this.timestamp = System.currentTimeMillis();
     }
     
+    /**
+     * Constructor cho TÀI KHOẢN TOTP từ Firestore (có documentId)
+     * 
+     * @param documentId ID của document trong Firestore
+     * @param serviceName Tên dịch vụ (VD: "Google", "GitHub")
+     * @param username Email hoặc tên người dùng
+     * @param secret Mã bí mật Base32 (từ QR code hoặc nhập tay)
+     * @param issuer Nhà phát hành (thường giống serviceName)
+     */
+    public UnifiedAccountItem(String documentId, String serviceName, String username, String secret, String issuer) {
+        this.type = AccountType.TOTP;
+        this.id = documentId; // Sử dụng documentId từ Firestore
+        this.serviceName = serviceName;
+        this.username = username;
+        this.secret = secret;
+        this.issuer = issuer;
+        this.timestamp = System.currentTimeMillis();
+    }
+    
     // ===== Getters =====
     
     public AccountType getType() {
