@@ -100,36 +100,23 @@ public class IntroActivity extends BaseActivity {
                 // Chưa đến trang cuối -> Chuyển trang kế
                 viewPager.setCurrentItem(currentItem + 1);
             } else {
-                // Trang cuối -> Xin quyền và kết thúc
-                requestNotificationPermission();
+                // Trang cuối -> Chuyển đến màn hình xin quyền
+                navigateToPermissionRequest();
             }
         });
 
-        tvSkip.setOnClickListener(v -> finishIntro());
+        tvSkip.setOnClickListener(v -> {
+            // Dù bấm Skip vẫn phải qua màn hình xin quyền
+            navigateToPermissionRequest();
+        });
     }
 
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                finishIntro();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
-            }
-        } else {
-            finishIntro();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Dù người dùng đồng ý hay từ chối, ta vẫn cho vào app
-        finishIntro();
-    }
-
-    private void finishIntro() {
+    private void navigateToPermissionRequest() {
         sessionManager.setFirstRun(false); // Đánh dấu đã xong intro
-        navigateToLogin();
+        Intent intent = new Intent(this, PermissionRequestActivity.class);
+        intent.putExtra("from_intro", true);
+        startActivity(intent);
+        finish();
     }
 
     private void navigateToLogin() {

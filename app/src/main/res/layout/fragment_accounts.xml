@@ -18,7 +18,7 @@
             android:id="@+id/toolbar_accounts"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Accounts" />
+            app:title="@string/accounts" />
 
         <!-- Search bar -->
         <androidx.appcompat.widget.SearchView
@@ -28,7 +28,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/search_background"
             app:iconifiedByDefault="false"
-            app:queryHint="Search accounts..."
+            app:queryHint="@string/search_accounts"
             app:closeIcon="@drawable/ic_close"
             app:searchIcon="@drawable/ic_search" />
 
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No accounts yet\n\nTap + to add"
+            android:text="@string/no_accounts_yet"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:visibility="gone"

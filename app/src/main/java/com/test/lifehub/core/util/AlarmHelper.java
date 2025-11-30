@@ -50,12 +50,21 @@ public class AlarmHelper {
         );
 
         try {
-            // Kiểm tra quyền (mặc dù đã check ở MainActivity)
+            // Kiểm tra quyền SCHEDULE_EXACT_ALARM (Android 12+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (!alarmManager.canScheduleExactAlarms()) {
                     Log.w(TAG, "Không có quyền SCHEDULE_EXACT_ALARM");
-                    Toast.makeText(context, "Cần cấp quyền Báo thức để nhắc nhở hoạt động", Toast.LENGTH_LONG).show();
-                    // Không return, vẫn cố gắng đặt lịch (có thể thất bại)
+                    Toast.makeText(context, "Vui lòng cấp quyền Báo thức trong Cài đặt > Ứng dụng > LifeHub > Quyền", Toast.LENGTH_LONG).show();
+                    
+                    // Mở cài đặt để cấp quyền
+                    try {
+                        Intent settingsIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(settingsIntent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Không thể mở cài đặt quyền", e);
+                    }
+                    return; // Dừng lại, không đặt alarm
                 }
             }
 

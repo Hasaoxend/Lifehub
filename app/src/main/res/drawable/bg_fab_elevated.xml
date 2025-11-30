@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Elevated FAB background with shadow -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer shadow -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#30000000" />
+        </shape>
+    </item>
+    <!-- Main FAB background -->
+    <item
+        android:top="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:bottom="4dp">
+        <shape android:shape="oval">
+            <gradient
+                android:startColor="@color/md_theme_light_primary"
+                android:endColor="@color/colorPrimaryVariant"
+                android:angle="135"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list>

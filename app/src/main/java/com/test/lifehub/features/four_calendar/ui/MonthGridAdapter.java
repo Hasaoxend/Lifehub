@@ -75,6 +75,7 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
         holder.tvDate.setAlpha(alpha);
         holder.layoutEvents.setAlpha(alpha);
         holder.tvHoliday.setAlpha(alpha);
+        holder.tvLunarDate.setAlpha(alpha);
 
         holder.tvDate.setBackground(null);
         holder.tvDate.setTextColor(defaultTextColor);
@@ -90,6 +91,14 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
             holder.tvDate.setTypeface(Typeface.DEFAULT_BOLD);
         }
         // (Xóa logic highlight "isSelected")
+
+        // Hiển thị ngày âm lịch
+        if (day.lunarDate != null && !day.lunarDate.isEmpty() && day.isCurrentMonth) {
+            holder.tvLunarDate.setText(day.lunarDate);
+            holder.tvLunarDate.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvLunarDate.setVisibility(View.GONE);
+        }
 
         // Hiển thị ngày lễ
         if (day.holidayName != null && day.isCurrentMonth) {
@@ -148,12 +157,13 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
 
     // (ViewHolder và DiffUtil giữ nguyên)
     static class DayViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDate, tvHoliday;
+        TextView tvDate, tvHoliday, tvLunarDate;
         LinearLayout layoutEvents;
         public DayViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDate = itemView.findViewById(R.id.tv_month_day);
             tvHoliday = itemView.findViewById(R.id.tv_holiday_name);
+            tvLunarDate = itemView.findViewById(R.id.tv_lunar_date);
             layoutEvents = itemView.findViewById(R.id.layout_day_events);
         }
     }

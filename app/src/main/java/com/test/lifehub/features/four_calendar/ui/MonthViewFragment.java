@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.test.lifehub.features.four_calendar.utils.LunarCalendar;
 import com.test.lifehub.R;
 import com.test.lifehub.features.four_calendar.data.CalendarEvent;
 import java.text.SimpleDateFormat;
@@ -109,6 +111,7 @@ public class MonthViewFragment extends Fragment {
             dayData.isCurrentMonth = cal.get(Calendar.MONTH) == mCurrentMonth.get(Calendar.MONTH);
             dayData.events = getEventsForDay(allEvents, cal);
             dayData.holidayName = getVietnameseHolidayName(cal);
+            dayData.lunarDate = LunarCalendar.getLunarDateString(cal.getTime());
             days.add(dayData);
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
@@ -118,10 +121,59 @@ public class MonthViewFragment extends Fragment {
     private String getVietnameseHolidayName(Calendar day) {
         int month = day.get(Calendar.MONTH);
         int date = day.get(Calendar.DAY_OF_MONTH);
+        
+        // Solar calendar holidays
         if (month == Calendar.JANUARY && date == 1) return "Tết Dương lịch";
+        if (month == Calendar.FEBRUARY && date == 14) return "Valentine";
+        if (month == Calendar.MARCH && date == 8) return "Quốc tế Phụ nữ";
         if (month == Calendar.APRIL && date == 30) return "Ngày Chiến thắng";
         if (month == Calendar.MAY && date == 1) return "Quốc tế Lao động";
+        if (month == Calendar.JUNE && date == 1) return "Quốc tế Thiếu nhi";
         if (month == Calendar.SEPTEMBER && date == 2) return "Quốc khánh";
+        if (month == Calendar.OCTOBER && date == 20) return "Ngày Phụ nữ VN";
+        if (month == Calendar.NOVEMBER && date == 20) return "Ngày Nhà giáo VN";
+        if (month == Calendar.DECEMBER && date == 25) return "Giáng sinh";
+        
+        // Lunar calendar holidays
+        LunarCalendar.LunarDate lunar = LunarCalendar.convertSolarToLunar(day.getTime());
+        if (lunar.isValid) {
+            // Tết Nguyên Đán (Lunar New Year) - 1/1 to 3/1 lunar
+            if (lunar.month == 1 && lunar.day >= 1 && lunar.day <= 3) {
+                if (lunar.day == 1) return "Tết Nguyên Đán";
+                return "Tết (Mùng " + lunar.day + ")";
+            }
+            
+            // Tết Nguyên Tiêu (Lantern Festival) - 15/1 lunar
+            if (lunar.month == 1 && lunar.day == 15) return "Tết Nguyên Tiêu";
+            
+            // Tết Hàn Thực (Cold Food Festival) - 3/3 lunar
+            if (lunar.month == 3 && lunar.day == 3) return "Tết Hàn Thực";
+            
+            // Giỗ Tổ Hùng Vương - 10/3 lunar
+            if (lunar.month == 3 && lunar.day == 10) return "Giỗ Tổ Hùng Vương";
+            
+            // Phật Đản (Buddha's Birthday) - 15/4 lunar
+            if (lunar.month == 4 && lunar.day == 15) return "Phật Đản";
+            
+            // Tết Đoan Ngọ (Dragon Boat Festival) - 5/5 lunar
+            if (lunar.month == 5 && lunar.day == 5) return "Tết Đoan Ngọ";
+            
+            // Vu Lan (Ghost Festival) - 15/7 lunar
+            if (lunar.month == 7 && lunar.day == 15) return "Vu Lan";
+            
+            // Tết Trung Thu (Mid-Autumn Festival) - 15/8 lunar
+            if (lunar.month == 8 && lunar.day == 15) return "Tết Trung Thu";
+            
+            // Tết Trùng Cửu - 9/9 lunar
+            if (lunar.month == 9 && lunar.day == 9) return "Tết Trùng Cửu";
+            
+            // Tết Đông Chí (Winter Solstice) - around 22/12 solar, but marking 23/11 lunar
+            if (lunar.month == 11 && lunar.day == 23) return "Tết Ông Công Ông Táo";
+            
+            // Tết Âm lịch (Lunar New Year's Eve) - 30/12 lunar (or 29/12 in short month)
+            if (lunar.month == 12 && (lunar.day == 30 || lunar.day == 29)) return "Giao Thừa";
+        }
+        
         return null;
     }
 

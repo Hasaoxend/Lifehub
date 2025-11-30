@@ -15,6 +15,12 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <application
         android:name=".core.LifeHubApp"
@@ -30,6 +36,12 @@
 
         <activity
             android:name=".ui.IntroActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Lifehub" />
+
+        <activity
+            android:name=".ui.PermissionRequestActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Lifehub" />
@@ -102,6 +114,11 @@
             android:exported="false"
             android:label="Đổi mật khẩu"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".features.three_settings.ui.PermissionsSettingsActivity"
+            android:exported="false"
+            android:label="Quản lý quyền" />
 
         <!-- Authenticator Activities -->
         <activity

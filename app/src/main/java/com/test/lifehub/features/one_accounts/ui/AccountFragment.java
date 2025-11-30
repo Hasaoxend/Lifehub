@@ -218,7 +218,7 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
     @Override
     public void onPasswordAccountClick(UnifiedAccountItem item) {
         Intent intent = new Intent(getContext(), AccountDetailActivity.class);
-        intent.putExtra("account_id", item.getId());
+        intent.putExtra(AccountDetailActivity.EXTRA_ACCOUNT_ID, item.getId());
         startActivity(intent);
     }
 

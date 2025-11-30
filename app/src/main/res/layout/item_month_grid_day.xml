@@ -17,6 +17,20 @@
         tools:text="16" />
 
     <TextView
+        android:id="@+id/tv_lunar_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="8sp"
+        android:textColor="@color/md_theme_light_onSurfaceVariant"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:layout_marginTop="1dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="15/8" />
+
+    <TextView
         android:id="@+id/tv_holiday_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

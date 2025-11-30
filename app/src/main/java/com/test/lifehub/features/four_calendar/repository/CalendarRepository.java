@@ -9,9 +9,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.test.lifehub.features.four_calendar.data.CalendarEvent;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,25 +31,97 @@ public class CalendarRepository {
     private CollectionReference mEventsCollection;
 
     private final MutableLiveData<List<CalendarEvent>> mAllEvents = new MutableLiveData<>();
+    
+    // ✅ THÊM: Track listener để quản lý lifecycle
+    private boolean isListening = false;
+    private String currentUserId = null;
+    private ListenerRegistration listenerRegistration = null;
 
     @Inject
     public CalendarRepository(FirebaseAuth auth, FirebaseFirestore db) {
         this.mAuth = auth;
         this.mDb = db;
+        startListening();
+    }
+
+    private CollectionReference getEventsCollection() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            String uid = user.getUid();
-            mEventsCollection = mDb.collection("users").document(uid).collection(COLLECTION_EVENTS);
-            listenForEventChanges();
+            return mDb.collection("users").document(user.getUid()).collection(COLLECTION_EVENTS);
         }
+        return null;
+    }
+
+    /**
+     * ✅ SỬA LỖI: Bắt đầu lắng nghe thay đổi từ Firestore
+     * Tương tự AccountRepository - kiểm tra user thay đổi và reset listener
+     */
+    public void startListening() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Log.w(TAG, "User not logged in, cannot listen to events");
+            stopListening();
+            mAllEvents.setValue(new ArrayList<>());
+            return;
+        }
+        
+        String newUserId = currentUser.getUid();
+        
+        // Nếu user thay đổi, dừng listener cũ và xóa dữ liệu
+        if (currentUserId != null && !currentUserId.equals(newUserId)) {
+            Log.d(TAG, "User changed from " + currentUserId + " to " + newUserId + ", stopping old listener");
+            stopListening();
+            mAllEvents.setValue(new ArrayList<>());
+        }
+        
+        // Nếu đã đang lắng nghe cho cùng user, không làm gì
+        if (isListening && newUserId.equals(currentUserId)) {
+            Log.d(TAG, "Already listening to Firestore for user: " + newUserId);
+            return;
+        }
+        
+        currentUserId = newUserId;
+        mEventsCollection = getEventsCollection();
+        
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "Starting Firestore listener for calendar events");
+        Log.d(TAG, "User ID: " + currentUserId);
+        Log.d(TAG, "========================================");
+        
+        if (mEventsCollection == null) {
+            Log.w(TAG, "CollectionReference is null");
+            return;
+        }
+        
+        listenForEventChanges();
+    }
+    
+    /**
+     * ✅ THÊM: Dừng lắng nghe Firestore
+     */
+    public void stopListening() {
+        if (listenerRegistration != null) {
+            Log.d(TAG, "Removing Firestore listener for user: " + currentUserId);
+            listenerRegistration.remove();
+            listenerRegistration = null;
+        }
+        isListening = false;
+        currentUserId = null;
+        mAllEvents.setValue(new ArrayList<>());
     }
 
     private void listenForEventChanges() {
-        if (mEventsCollection == null) return;
-        mEventsCollection.orderBy("startTime", Query.Direction.ASCENDING)
+        if (mEventsCollection == null || mAuth.getCurrentUser() == null) return;
+        String currentUserId = mAuth.getCurrentUser().getUid();
+        
+        // ✅ SỬA LỖI: Chỉ dùng whereEqualTo, không orderBy để tránh cần composite index
+        // Sẽ sắp xếp ở client-side (trong Fragment/ViewModel)
+        listenerRegistration = mEventsCollection
+                .whereEqualTo("userOwnerId", currentUserId)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
-                        Log.w(TAG, "Error listening to events", e);
+                        Log.w(TAG, "❌ Error listening to events", e);
+                        Log.w(TAG, "Error details: " + e.getMessage());
                         return;
                     }
                     if (snapshot != null) {
@@ -56,9 +130,12 @@ public class CalendarRepository {
                             events.get(i).documentId = snapshot.getDocuments().get(i).getId();
                         }
                         mAllEvents.setValue(events);
-                        Log.d(TAG, "Events updated: " + events.size() + " items");
+                        Log.d(TAG, "✅ Events updated: " + events.size() + " items");
                     }
                 });
+        
+        isListening = true;
+        Log.d(TAG, "Firestore listener started successfully");
     }
 
     public LiveData<List<CalendarEvent>> getAllEvents() {
@@ -67,15 +144,16 @@ public class CalendarRepository {
 
     public LiveData<List<CalendarEvent>> getEventsForDateRange(Date startDate, Date endDate) {
         MutableLiveData<List<CalendarEvent>> eventsData = new MutableLiveData<>();
-        if (mEventsCollection == null) return eventsData;
+        if (mEventsCollection == null || mAuth.getCurrentUser() == null) return eventsData;
+        String currentUserId = mAuth.getCurrentUser().getUid();
 
+        // ✅ SỬA LỖI: Chỉ filter theo userOwnerId, loại bỏ orderBy để tránh cần index
+        // Filter theo date range sẽ làm ở client-side
         mEventsCollection
-                .whereGreaterThanOrEqualTo("startTime", startDate)
-                .whereLessThan("startTime", endDate)
-                .orderBy("startTime", Query.Direction.ASCENDING)
+                .whereEqualTo("userOwnerId", currentUserId)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
-                        Log.w(TAG, "Error getting events for range", e);
+                        Log.w(TAG, "❌ Error getting events for range", e);
                         return;
                     }
                     if (snapshot != null) {
@@ -83,7 +161,20 @@ public class CalendarRepository {
                         for (int i = 0; i < snapshot.getDocuments().size(); i++) {
                             events.get(i).documentId = snapshot.getDocuments().get(i).getId();
                         }
-                        eventsData.setValue(events);
+                        
+                        // ✅ Filter theo date range ở client-side
+                        List<CalendarEvent> filteredEvents = new java.util.ArrayList<>();
+                        for (CalendarEvent event : events) {
+                            if (event.getStartTime() != null) {
+                                long eventTime = event.getStartTime().getTime();
+                                if (eventTime >= startDate.getTime() && eventTime < endDate.getTime()) {
+                                    filteredEvents.add(event);
+                                }
+                            }
+                        }
+                        
+                        eventsData.setValue(filteredEvents);
+                        Log.d(TAG, "✅ Events for range: " + filteredEvents.size() + " items");
                     }
                 });
         return eventsData;
@@ -109,21 +200,21 @@ public class CalendarRepository {
         if (mEventsCollection == null || mAuth.getCurrentUser() == null) return;
         event.setUserOwnerId(mAuth.getCurrentUser().getUid());
         mEventsCollection.add(event)
-                .addOnSuccessListener(ref -> Log.d(TAG, "Event added: " + ref.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
+                .addOnSuccessListener(ref -> Log.d(TAG, "✅ Event added: " + ref.getId()))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Error adding event", e));
     }
 
     public void updateEvent(CalendarEvent event) {
         if (mEventsCollection == null || event.documentId == null) return;
         mEventsCollection.document(event.documentId).set(event)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Event updated"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error updating event", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Event updated"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Error updating event", e));
     }
 
     public void deleteEvent(CalendarEvent event) {
         if (mEventsCollection == null || event.documentId == null) return;
         mEventsCollection.document(event.documentId).delete()
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Event deleted"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error deleting event", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Event deleted"))
+                .addOnFailureListener(e -> Log.w(TAG, "❌ Error deleting event", e));
     }
 }

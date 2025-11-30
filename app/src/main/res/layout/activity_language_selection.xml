@@ -6,7 +6,8 @@
     android:orientation="vertical"
     android:background="@color/ios_background"
     android:gravity="center"
-    android:padding="@dimen/spacing_large">
+    android:padding="@dimen/spacing_large"
+    android:fitsSystemWindows="true">
 
     <!-- Logo hoặc Icon -->
     <ImageView

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ios_background">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Quyền ứng dụng" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Cấp quyền để sử dụng đầy đủ tính năng"
+                        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="LifeHub cần một số quyền để hoạt động tốt nhất. Các quyền được đánh dấu (Bắt buộc) cần phải được cấp để tiếp tục."
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Đã cấp: 0/5 quyền"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="@color/colorPrimary"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Danh sách quyền"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_permissions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_grant_all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cấp tất cả quyền"
+                android:textSize="16sp"
+                android:paddingVertical="14dp"
+                android:layout_marginBottom="8dp"
+                app:icon="@drawable/ic_shield"
+                app:iconGravity="textStart"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_continue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tiếp tục"
+                android:textSize="16sp"
+                android:paddingVertical="14dp"
+                android:enabled="false"
+                style="@style/Widget.Material3.Button.TonalButton"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

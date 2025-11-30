@@ -278,8 +278,14 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
         }
         account.customFields = customMap;
 
-        if (mAccountDocumentId == null) mViewModel.insert(account);
-        else { account.documentId = mAccountDocumentId; mViewModel.update(account); }
+        if (mAccountDocumentId == null) {
+            // Tạo mới - không set documentId
+            mViewModel.insert(account);
+        } else {
+            // Cập nhật - giữ nguyên documentId từ mCurrentAccount
+            account.documentId = mAccountDocumentId;
+            mViewModel.update(account);
+        }
 
         Toast.makeText(this, "Đã lưu (Bảo mật)", Toast.LENGTH_SHORT).show();
         finish();

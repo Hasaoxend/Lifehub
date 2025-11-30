@@ -24,23 +24,31 @@
         android:focusable="true"
         android:minHeight="80dp"
         app:cardElevation="2dp"
-        app:cardCornerRadius="16dp"> <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_add_note"
-            app:tint="?attr/colorPrimary"/> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ghi chú"
-        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-        android:layout_marginStart="16dp"/>
-    </LinearLayout>
+        app:cardCornerRadius="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_add_note"
+                    app:tint="?attr/colorPrimary"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ghi chú"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
@@ -52,23 +60,31 @@
         android:focusable="true"
         android:minHeight="80dp"
         app:cardElevation="2dp"
-        app:cardCornerRadius="16dp"> <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_list"
-            app:tint="?attr/colorPrimary"/> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Công việc (To-do)"
-        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-        android:layout_marginStart="16dp"/>
-    </LinearLayout>
+        app:cardCornerRadius="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_list"
+                    app:tint="?attr/colorPrimary"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Công việc (To-do)"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
@@ -82,22 +98,29 @@
         app:cardElevation="2dp"
         app:cardCornerRadius="16dp">
         <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_shopping_cart"
-            app:tint="?attr/colorPrimary"/><TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Danh sách Mua sắm"
-        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-        android:layout_marginStart="16dp"/>
-    </LinearLayout>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_shopping_cart"
+                    app:tint="?attr/colorPrimary"/>
+            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Danh sách Mua sắm"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
@@ -117,11 +140,17 @@
             android:gravity="center_vertical"
             android:padding="16dp">
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_calculator"
-                app:tint="?attr/colorPrimary" />
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_calculator"
+                    app:tint="?attr/colorPrimary" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -149,12 +178,18 @@
             android:gravity="center_vertical"
             android:padding="16dp">
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_weather"
-                app:tint="?attr/colorPrimary"
-                android:contentDescription="Thời tiết" />
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_weather"
+                    app:tint="?attr/colorPrimary"
+                    android:contentDescription="Thời tiết" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -182,12 +217,18 @@
             android:gravity="center_vertical"
             android:padding="16dp">
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_calendar"
-                app:tint="?attr/colorPrimary"
-                android:contentDescription="Lịch" />
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_circle_elevated">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="?attr/colorPrimary"
+                    android:contentDescription="Lịch" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"

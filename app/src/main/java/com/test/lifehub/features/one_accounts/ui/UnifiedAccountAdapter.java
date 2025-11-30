@@ -103,7 +103,8 @@ public class UnifiedAccountAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         PasswordViewHolder(View itemView) {
             super(itemView);
-            ivServiceIcon = itemView.findViewById(R.id.iv_service_icon);
+            // Find ImageView inside FrameLayout
+            ivServiceIcon = itemView.findViewById(R.id.iv_service_icon_image);
             tvServiceName = itemView.findViewById(R.id.tv_service_name);
             tvUsername = itemView.findViewById(R.id.tv_username);
             btnMenu = itemView.findViewById(R.id.btn_menu);
@@ -143,7 +144,8 @@ public class UnifiedAccountAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         TotpViewHolder(View itemView) {
             super(itemView);
-            ivServiceIcon = itemView.findViewById(R.id.iv_service_icon);
+            // Find ImageView inside FrameLayout
+            ivServiceIcon = itemView.findViewById(R.id.iv_service_icon_image);
             tvServiceName = itemView.findViewById(R.id.tv_service_name);
             tvUsername = itemView.findViewById(R.id.tv_username);
             tvTotpCode = itemView.findViewById(R.id.tv_totp_code);

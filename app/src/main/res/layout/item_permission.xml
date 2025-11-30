@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_permission_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="?android:attr/textColorPrimary"
+                    tools:text="Camera" />
+
+                <TextView
+                    android:id="@+id/tv_permission_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    tools:text="Đã cấp"
+                    tools:textColor="@color/green_500" />
+
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_permission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_permission_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="Cho phép chụp ảnh QR code để thêm tài khoản xác thực 2 bước" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -114,6 +114,10 @@
     <color name="status_error">#FF3B30</color>
     <color name="status_info">#007AFF</color>
     
+    <!-- Permission Status Colors -->
+    <color name="green_500">#4CAF50</color>
+    <color name="orange_500">#FF9800</color>
+    
     <!-- Overlay & Shadows -->
     <color name="overlay_dark">#80000000</color>
     <color name="overlay_light">#40000000</color>

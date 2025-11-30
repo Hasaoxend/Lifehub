@@ -48,7 +48,7 @@ dependencies {
     // API WEATHER & GSON (Giữ lại 1 bản chuẩn từ libs version catalog)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    // XÓA các dòng hardcode com.squareup... để tránh xung đột
+
 
     // FIREBASE
     implementation(platform(libs.firebase.bom))

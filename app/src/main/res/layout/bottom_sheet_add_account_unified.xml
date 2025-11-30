@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Account"
+        android:text="@string/add_account"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
         android:textAlignment="center"
         android:paddingBottom="16dp" />
@@ -52,13 +52,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add Password"
+                    android:text="@string/add_password_account"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Save website credentials"
+                    android:text="@string/add_password_account_desc"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?android:attr/textColorSecondary" />
 
@@ -105,13 +105,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add 2FA / Authenticator"
+                    android:text="@string/add_authenticator_account"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Scan QR or enter code manually"
+                    android:text="@string/add_authenticator_desc"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?android:attr/textColorSecondary" />
 

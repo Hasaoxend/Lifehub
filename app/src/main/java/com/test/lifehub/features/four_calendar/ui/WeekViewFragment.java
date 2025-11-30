@@ -86,6 +86,19 @@ public class WeekViewFragment extends Fragment {
         for (int i = 0; i < 7; i++) {
             LinearLayout dayColumn = createDayColumn(cal);
             mWeekDaysContainer.addView(dayColumn);
+            
+            // Thêm đường kẻ dọc giữa các ngày (trừ ngày cuối)
+            if (i < 6) {
+                View divider = new View(requireContext());
+                LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
+                    dpToPx(1), 
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                );
+                divider.setLayoutParams(dividerParams);
+                divider.setBackgroundResource(R.drawable.week_day_divider);
+                mWeekDaysContainer.addView(divider);
+            }
+            
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
@@ -182,9 +195,25 @@ public class WeekViewFragment extends Fragment {
 
     private void renderEvents(List<CalendarEvent> events) {
         if (events == null) events = new ArrayList<>();
+        
+        // ✅ SỬA LỖI: Sắp xếp events theo startTime (do Repository không còn orderBy)
+        List<CalendarEvent> sortedEvents = new ArrayList<>(events);
+        java.util.Collections.sort(sortedEvents, new java.util.Comparator<CalendarEvent>() {
+            @Override
+            public int compare(CalendarEvent e1, CalendarEvent e2) {
+                if (e1.getStartTime() == null) return 1;
+                if (e2.getStartTime() == null) return -1;
+                return e1.getStartTime().compareTo(e2.getStartTime());
+            }
+        });
 
-        for (int i = 0; i < mWeekDaysContainer.getChildCount(); i++) {
-            View dayColumn = mWeekDaysContainer.getChildAt(i);
+        // Clear events từ tất cả các cột ngày (bỏ qua dividers)
+        for (int i = 0; i < 7; i++) {
+            int actualIndex = i * 2; // Index thực tế khi có dividers
+            if (actualIndex >= mWeekDaysContainer.getChildCount()) break;
+            
+            View dayColumn = mWeekDaysContainer.getChildAt(actualIndex);
+            if (dayColumn == null) continue;
             FrameLayout eventsContainer = dayColumn.findViewById(R.id.events_container);
             if (eventsContainer != null) eventsContainer.removeAllViews();
         }
@@ -199,7 +228,7 @@ public class WeekViewFragment extends Fragment {
 
         // --- PASS 1: PHÂN ĐOẠN ---
         Map<Integer, List<EventSegment>> segmentsPerDay = new HashMap<>();
-        for (CalendarEvent event : events) {
+        for (CalendarEvent event : sortedEvents) { // ✅ Dùng sortedEvents
             Calendar eventStart = Calendar.getInstance();
             eventStart.setTime(event.getStartTime());
             Calendar eventEnd = Calendar.getInstance();
@@ -264,7 +293,13 @@ public class WeekViewFragment extends Fragment {
     }
 
     private void renderEventSegment(EventSegment segment, int dayColumnIndex) {
-        View dayColumn = mWeekDaysContainer.getChildAt(dayColumnIndex);
+        // Tính toán index thực tế khi có dividers
+        // Với mỗi ngày: 0,2,4,6,8,10,12 (ngày 0 ở index 0, ngày 1 ở index 2,...)
+        int actualIndex = dayColumnIndex * 2; // Nhân 2 vì có divider giữa các ngày
+        
+        if (actualIndex >= mWeekDaysContainer.getChildCount()) return;
+        
+        View dayColumn = mWeekDaysContainer.getChildAt(actualIndex);
         if (dayColumn == null) return;
         FrameLayout eventsContainer = dayColumn.findViewById(R.id.events_container);
         if (eventsContainer == null) return;

@@ -92,13 +92,13 @@ public class AddTotpAccountActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Thêm tài khoản");
+            getSupportActionBar().setTitle(R.string.add_account);
         }
     }
 
     private void setupTabs() {
-        tabLayout.addTab(tabLayout.newTab().setText("Quét QR"));
-        tabLayout.addTab(tabLayout.newTab().setText("Nhập thủ công"));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.scan_qr_code));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.manual_entry));
         
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -151,18 +151,18 @@ public class AddTotpAccountActivity extends AppCompatActivity {
         String secret = etSecret.getText().toString().trim().toUpperCase().replaceAll(" ", "");
 
         if (TextUtils.isEmpty(accountName)) {
-            etAccountName.setError("Vui lòng nhập tên tài khoản");
+            etAccountName.setError(getString(R.string.please_enter_account_name));
             return;
         }
 
         if (TextUtils.isEmpty(secret)) {
-            etSecret.setError("Vui lòng nhập secret key");
+            etSecret.setError(getString(R.string.please_enter_secret));
             return;
         }
 
         // Validate secret (must be Base32)
         if (!secret.matches("[A-Z2-7]+")) {
-            etSecret.setError("Secret key không hợp lệ (chỉ chứa A-Z và 2-7)");
+            etSecret.setError(getString(R.string.invalid_secret_format));
             return;
         }
 
@@ -182,7 +182,7 @@ public class AddTotpAccountActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String documentId) {
                 Toast.makeText(AddTotpAccountActivity.this, 
-                    "Đã thêm tài khoản thành công", Toast.LENGTH_SHORT).show();
+                    R.string.account_added_success, Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             }
@@ -190,7 +190,7 @@ public class AddTotpAccountActivity extends AppCompatActivity {
             @Override
             public void onFailure(String error) {
                 Toast.makeText(AddTotpAccountActivity.this, 
-                    "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+                    getString(R.string.error) + ": " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -203,7 +203,7 @@ public class AddTotpAccountActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startQRScanner();
             } else {
-                Toast.makeText(this, "Cần quyền camera để quét QR code", 
+                Toast.makeText(this, R.string.error_camera_permission, 
                     Toast.LENGTH_SHORT).show();
             }
         }
@@ -230,11 +230,11 @@ public class AddTotpAccountActivity extends AppCompatActivity {
                         displayName = account.getAccountName();
                     }
                     
-                    Toast.makeText(this, "Đang thêm: " + displayName, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.adding_account, displayName), Toast.LENGTH_LONG).show();
                     
                     addAccount(account.getAccountName(), account.getIssuer(), account.getSecret());
                 } else {
-                    Toast.makeText(this, "QR code không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.invalid_qr_code, Toast.LENGTH_SHORT).show();
                 }
             }
         }

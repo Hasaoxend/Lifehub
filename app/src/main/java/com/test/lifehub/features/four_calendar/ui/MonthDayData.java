@@ -10,4 +10,5 @@ public class MonthDayData {
     public List<CalendarEvent> events = new ArrayList<>();
     public boolean isCurrentMonth;
     public String holidayName = null;
+    public String lunarDate = null; // Lunar calendar date string (e.g., "15/8")
 }

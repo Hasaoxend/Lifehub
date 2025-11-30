@@ -34,6 +34,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     private TextView tvUserEmail;
     private LinearLayout btnChangePassword;
     private LinearLayout btnLanguage;
+    private LinearLayout btnPermissions;
     private MaterialSwitch switchBiometric;
     private View btnLogout;
 
@@ -71,6 +72,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
         tvUserEmail = view.findViewById(R.id.tv_user_email);
         btnChangePassword = view.findViewById(R.id.btn_change_password);
         btnLanguage = view.findViewById(R.id.btn_language);
+        btnPermissions = view.findViewById(R.id.btn_permissions);
         switchBiometric = view.findViewById(R.id.switch_biometric);
         btnLogout = view.findViewById(R.id.btn_logout);
     }
@@ -137,6 +139,12 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
 
         // 4. Xử lý Chọn Ngôn ngữ
         btnLanguage.setOnClickListener(v -> showLanguageDialog());
+
+        // 5. Xử lý Quản lý quyền
+        btnPermissions.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), PermissionsSettingsActivity.class);
+            startActivity(intent);
+        });
     }
 
     /**
@@ -153,15 +161,27 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
             .setTitle("Language / Ngôn ngữ")
             .setSingleChoiceItems(languages, selectedIndex, (dialog, which) -> {
                 String selectedLanguage = languageCodes[which];
+                String previousLanguage = LocaleHelper.getLanguage(requireContext());
                 
-                // Lưu ngôn ngữ mới
-                LocaleHelper.saveLanguage(requireContext(), selectedLanguage);
-                
-                // Áp dụng ngôn ngữ mới
-                LocaleHelper.setLocale(requireContext(), selectedLanguage);
-                
-                // Khởi động lại activity để áp dụng ngôn ngữ mới
-                requireActivity().recreate();
+                // Chỉ thực hiện nếu thay đổi ngôn ngữ
+                if (!selectedLanguage.equals(previousLanguage)) {
+                    // Lưu ngôn ngữ mới
+                    LocaleHelper.saveLanguage(requireContext(), selectedLanguage);
+                    
+                    // Áp dụng ngôn ngữ mới
+                    LocaleHelper.setLocale(requireContext(), selectedLanguage);
+                    
+                    // Hiển thị thông báo restart
+                    new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Language Changed / Đã đổi ngôn ngữ")
+                        .setMessage(getString(R.string.language_changed_restart))
+                        .setPositiveButton("OK", (restartDialog, w) -> {
+                            // Khởi động lại activity để áp dụng ngôn ngữ mới
+                            requireActivity().recreate();
+                        })
+                        .setCancelable(false)
+                        .show();
+                }
                 
                 dialog.dismiss();
             })

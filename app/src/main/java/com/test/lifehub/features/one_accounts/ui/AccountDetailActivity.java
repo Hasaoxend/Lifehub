@@ -103,10 +103,10 @@ public class AccountDetailActivity extends AppCompatActivity {
     }
 
     private void displayData(AccountEntry account) {
-        tvServiceName.setText(account.serviceName);
-        tvUsername.setText(account.username);
-        tvWebsite.setText(account.websiteUrl);
-        tvNotes.setText(account.notes);
+        tvServiceName.setText(account.serviceName != null ? account.serviceName : "");
+        tvUsername.setText(account.username != null ? account.username : "");
+        tvWebsite.setText(account.websiteUrl != null ? account.websiteUrl : "");
+        tvNotes.setText(account.notes != null ? account.notes : "");
 
         tvPassword.setText("••••••••");
         isPasswordVisible = false;
