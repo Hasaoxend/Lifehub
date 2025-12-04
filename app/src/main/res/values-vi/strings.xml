@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Lifehub</string>
 
+    <!-- Menu Items -->
+    <string name="menu_refresh">Làm mới</string>
+    <string name="menu_rename">Đổi tên</string>
+    <string name="menu_today">Hôm nay</string>
+    <string name="menu_productivity">Năng suất</string>
+    <string name="menu_account">Tài khoản</string>
+    
     <!-- Common -->
     <string name="ok">OK</string>
     <string name="cancel">Hủy</string>
@@ -18,6 +25,22 @@
     <string name="loading">Đang tải...</string>
     <string name="retry">Thử lại</string>
     <string name="close">Đóng</string>
+    <string name="send">Gửi</string>
+    <string name="later">Để sau</string>
+    <string name="go_to_settings">Đi đến Cài đặt</string>
+    <string name="granted_status">Đã cấp: %1$d/%2$d quyền</string>
+    <string name="understood">Đã hiểu</string>
+    <string name="password_length_format">Độ dài: %d</string>
+    <string name="password_requirement_8_chars">Ít nhất 8 ký tự</string>
+    <string name="already_have_account">Đã có tài khoản? </string>
+    <string name="login">Đăng nhập</string>
+    <string name="already_have_account_return">Đã có tài khoản? Quay lại Đăng nhập</string>
+    <string name="qr_scan_instruction">Đặt mã QR vào trong khung</string>
+    <string name="biometric_login_label">Đăng nhập bằng vân tay</string>
+    <string name="change_password_security_note">Để bảo mật, vui lòng nhập mật khẩu hiện tại và mật khẩu mới.</string>
+    <string name="change_password_verify_note">Để bảo mật tài khoản, vui lòng nhập mật khẩu hiện tại của bạn.</string>
+    <string name="humidity_format">Độ ẩm: %d%%</string>
+    <string name="remind_at">Nhắc lúc: </string>
     
     <!-- Language Selection -->
     <string name="language_selection_title">Chào mừng đến Lifehub</string>
@@ -39,7 +62,6 @@
     <string name="login_title">Đăng nhập</string>
     <string name="email">Email</string>
     <string name="password">Mật khẩu</string>
-    <string name="login">Đăng nhập</string>
     <string name="dont_have_account">Chưa có tài khoản?</string>
     <string name="register">Đăng ký</string>
     <string name="or_login_with_biometric">Hoặc đăng nhập bằng vân tay</string>
@@ -52,8 +74,14 @@
     <string name="account_info">Thông tin tài khoản</string>
     <string name="accounts">Tài khoản</string>
     <string name="search_accounts">Tìm kiếm tài khoản...</string>
-    <string name="no_accounts_yet">Chưa có tài khoản\n\nNhấn + để thêm</string>
-    <string name="language_changed_restart">Đã đổi ngôn ngữ!\n\nVui lòng thoát và mở lại ứng dụng để thay đổi có hiệu lực.</string>
+    <string name="no_accounts_yet">Chưa có tài khoản nào\n\nNhấn + để thêm</string>
+    <string name="language_changed_restart">Đã đổi ngôn ngữ!\n\nVui lòng đóng và khởi động lại ứng dụng để thay đổi có hiệu lực.</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="account_section">Tài khoản</string>
+    <string name="security_section">Bảo mật</string>
+    <string name="change_login_password">Đổi mật khẩu đăng nhập</string>
+    <string name="manage_permissions">Quản lý quyền</string>
+    <string name="use_biometric">Sử dụng Vân tay / Khuôn mặt</string>
     
     <!-- Calendar -->
     <string-array name="repeat_options">
@@ -130,6 +158,17 @@
     <string name="weak">Yếu</string>
     <string name="medium">Trung bình</string>
     <string name="strong">Mạnh</string>
+    
+    <!-- Toolbar Titles -->
+    <string name="title_weather">Thời tiết</string>
+    <string name="title_qr_scanner">Quét mã QR</string>
+    <string name="title_app_permissions">Quyền ứng dụng</string>
+    <string name="title_notes">Ghi chú</string>
+    <string name="title_calendar">Lịch</string>
+    <string name="title_add_account">Thêm tài khoản</string>
+    <string name="title_account_detail">Chi tiết tài khoản</string>
+    <string name="title_change_password_step1">Đổi mật khẩu - Xác thực</string>
+    <string name="title_change_password_step2">Đổi mật khẩu - Tạo mật khẩu mới</string>
     <string name="very_strong">Rất mạnh</string>
     
     <!-- Tasks -->
@@ -196,6 +235,11 @@
     <string name="nav_notes">Ghi chú</string>
     <string name="nav_calendar">Lịch</string>
     <string name="nav_weather">Thời tiết</string>
+    <string name="nav_productivity">Năng suất</string>
+    <string name="login_prompt">Vui lòng nhập thông tin đăng nhập để tiếp tục</string>
+    <string name="forgot_password">Quên mật khẩu</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="privacy_policy">Chính sách quyền riêng tư</string>
     
     <!-- QR Scanner -->
     <string name="scan_qr_title">Quét mã QR</string>
@@ -373,13 +417,36 @@
     <string name="error_with_message">Lỗi: %s</string>
     <string name="sent_to_email">Gửi tới: %s</string>
     
+    <!-- Weak Password Detection -->
+    <string name="title_weak_password_detected">Phát hiện Mật khẩu Yếu</string>
+    <string name="msg_weak_password_detected">Mật khẩu hiện tại của bạn không đáp ứng yêu cầu bảo mật.\n\nVì an toàn tài khoản, vui lòng đổi sang mật khẩu mạnh hơn ngay.</string>
+    <string name="btn_change_password_now">Đổi Mật Khẩu Ngay</string>
+    <string name="btn_remind_later">Nhắc Lại Sau</string>
+    
+    <!-- Reset Password Activity -->
+    <string name="reset_password_title">Đặt Lại Mật Khẩu</string>
+    <string name="reset_password_instruction">Nhập mật khẩu mới đủ mạnh cho tài khoản của bạn</string>
+    <string name="hint_new_password">Mật khẩu mới</string>
+    <string name="hint_confirm_password">Xác nhận mật khẩu</string>
+    <string name="password_requirements_title">Yêu cầu mật khẩu:</string>
+    <string name="requirement_min_length">Ít nhất 8 ký tự</string>
+    <string name="requirement_uppercase">Ít nhất 1 chữ in hoa (A-Z)</string>
+    <string name="requirement_lowercase">Ít nhất 1 chữ thường (a-z)</string>
+    <string name="requirement_number">Ít nhất 1 số (0-9)</string>
+    <string name="requirement_special_char">Ít nhất 1 ký tự đặc biệt (!@#$%^&amp;*)</string>
+    <string name="btn_reset_password">Đặt Lại Mật Khẩu</string>
+    <string name="error_invalid_reset_link">Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn</string>
+    <string name="error_reset_link_expired">Link đã hết hạn. Vui lòng yêu cầu link mới.</string>
+    <string name="reset_password_success_title">Đã Đổi Mật Khẩu!</string>
+    <string name="reset_password_success_message">Mật khẩu của bạn đã được thay đổi thành công.\n\nVui lòng đăng nhập bằng mật khẩu mới.</string>
+    
     <!-- Dialog Titles & Messages -->
     <string name="title_manage_permissions">Quản lý quyền</string>
     <string name="title_grant_permission">Cấp quyền %s</string>
     <string name="title_revoke_permission">Thu hồi quyền</string>
     <string name="msg_revoke_permission_instructions">Để thu hồi quyền này, vui lòng vào Cài đặt hệ thống > Ứng dụng > LifeHub > Quyền</string>
     <string name="title_password_recovery">Khôi phục Mật khẩu</string>
-    <string name="msg_password_recovery">Nhập email của bạn để nhận link khôi phục.\n\nMật khẩu mới phải đáp ứng:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ in hoa\n• Ít nhất 1 chữ thường\n• Ít nhất 1 số\n• Ít nhất 1 ký tự đặc biệt</string>
+    <string name="msg_password_recovery">Link đặt lại mật khẩu sẽ được gửi tới email của bạn.\n\n⚠️ LƯU Ý: Để bảo mật, vui lòng tạo mật khẩu MẠNH có:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ IN HOA (A-Z)\n• Ít nhất 1 chữ thường (a-z)\n• Ít nhất 1 chữ SỐ (0-9)\n• Ít nhất 1 ký tự đặc biệt (!@#$%^&amp;*)\n\nMật khẩu yếu sẽ yêu cầu đổi sau lần đăng nhập đầu.</string>
     <string name="title_delete_account">Xóa tài khoản</string>
     <string name="msg_delete_account">Bạn có chắc chắn muốn xóa tài khoản này?</string>
     <string name="title_delete_authenticator">Xóa Authenticator</string>
@@ -405,11 +472,8 @@
     
     <!-- Activity Titles -->
     <string name="title_authenticator">Authenticator</string>
-    <string name="title_qr_scanner">Quét mã QR</string>
-    <string name="title_notes">Ghi chú</string>
     <string name="title_edit_note">Sửa Ghi chú</string>
     <string name="title_new_note">Ghi chú Mới</string>
-    <string name="title_add_account">Thêm tài khoản mới</string>
     <string name="title_edit_account">Sửa tài khoản</string>
     
     <!-- Calculator Buttons -->

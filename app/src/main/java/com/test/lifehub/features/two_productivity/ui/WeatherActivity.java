@@ -268,7 +268,7 @@ public class WeatherActivity extends AppCompatActivity {
     private void updateUI(WeatherResponse data) {
         tvCityName.setText(data.name);
         tvTemperature.setText(String.format(Locale.US, "%.0f°C", data.main.temp));
-        tvHumidity.setText(String.format(Locale.US, "Độ ẩm: %d%%", data.main.humidity));
+        tvHumidity.setText(getString(R.string.humidity_format, data.main.humidity));
 
         if (data.weather != null && !data.weather.isEmpty()) {
             tvCondition.setText(data.weather.get(0).description);

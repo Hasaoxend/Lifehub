@@ -110,14 +110,6 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
             ));
         }
 
-        // Biometric (không phải runtime permission, chỉ hiển thị thông tin)
-        permissionItems.add(new PermissionItem(
-            "Sinh trắc học",
-            "Sử dụng vân tay hoặc khuôn mặt để xác thực",
-            "android.permission.USE_BIOMETRIC",
-            true // Là quyền đặc biệt, không cần request
-        ));
-
         updatePermissionsStatus();
     }
 

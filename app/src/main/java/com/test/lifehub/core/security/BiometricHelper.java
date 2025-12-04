@@ -1,10 +1,9 @@
 package com.test.lifehub.core.security;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity; // Sử dụng AppCompatActivity thay vì Context
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;

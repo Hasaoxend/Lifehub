@@ -23,7 +23,7 @@
             style="@style/LifehubToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Tài khoản"
+            app:title="@string/accounts"
             app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
         <!-- Professional Search Bar -->

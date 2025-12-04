@@ -146,12 +146,12 @@ public class MainActivity extends AppCompatActivity {
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.permission_alarm_title)
                         .setMessage(R.string.permission_alarm_message)
-                        .setPositiveButton("Đi đến Cài đặt", (dialog, which) -> {
+                        .setPositiveButton(R.string.go_to_settings, (dialog, which) -> {
                             Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
                                     Uri.parse("package:" + getPackageName()));
                             startActivity(intent);
                         })
-                        .setNegativeButton("Để sau", null)
+                        .setNegativeButton(R.string.later, null)
                         .show();
             }
         }

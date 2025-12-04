@@ -94,7 +94,7 @@
             android:id="@+id/tv_go_to_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đã có tài khoản? Quay lại Đăng nhập"
+            android:text="@string/already_have_account_return"
             android:layout_marginTop="32dp"
             android:padding="8dp"
             android:textColor="?attr/colorPrimary"

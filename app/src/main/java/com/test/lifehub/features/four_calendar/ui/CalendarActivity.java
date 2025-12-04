@@ -163,8 +163,7 @@ public class CalendarActivity extends AppCompatActivity {
         mCurrentView = VIEW_MONTH;
         mTabLayout.selectTab(mTabLayout.getTabAt(VIEW_MONTH));
         
-        MonthViewFragment fragment = new MonthViewFragment();
-        // TODO: Truyền tháng được chọn qua Bundle
+        MonthViewFragment fragment = MonthViewFragment.newInstance(month);
         loadFragment(fragment);
     }
 
@@ -175,8 +174,7 @@ public class CalendarActivity extends AppCompatActivity {
         mCurrentView = VIEW_DAY;
         mTabLayout.selectTab(mTabLayout.getTabAt(VIEW_DAY));
         
-        DayViewFragment fragment = new DayViewFragment();
-        // TODO: Truyền ngày được chọn qua Bundle
+        DayViewFragment fragment = DayViewFragment.newInstance(day);
         loadFragment(fragment);
     }
 

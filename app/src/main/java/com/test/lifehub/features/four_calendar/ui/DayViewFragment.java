@@ -39,6 +39,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class DayViewFragment extends Fragment {
 
+    private static final String ARG_YEAR = "arg_year";
+    private static final String ARG_MONTH = "arg_month";
+    private static final String ARG_DAY = "arg_day";
+
     private TabLayout mWeekDaysTabLayout;
     private ViewPager2 mDayPager;
     private DayPagerAdapter mPagerAdapter;
@@ -49,6 +53,23 @@ public class DayViewFragment extends Fragment {
     
     private Handler mTimeUpdateHandler;
     private Runnable mTimeUpdateRunnable;
+
+    /**
+     * Tạo DayViewFragment với ngày cụ thể
+     */
+    public static DayViewFragment newInstance(java.util.Date date) {
+        DayViewFragment fragment = new DayViewFragment();
+        if (date != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            Bundle args = new Bundle();
+            args.putInt(ARG_YEAR, cal.get(Calendar.YEAR));
+            args.putInt(ARG_MONTH, cal.get(Calendar.MONTH));
+            args.putInt(ARG_DAY, cal.get(Calendar.DAY_OF_MONTH));
+            fragment.setArguments(args);
+        }
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -70,7 +91,22 @@ public class DayViewFragment extends Fragment {
         mViewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);
         
         // Khởi tạo tuần hiện tại (bắt đầu từ thứ 2)
-        mCurrentWeekStart = Calendar.getInstance();
+        Calendar targetDay = Calendar.getInstance();
+        
+        // Lấy ngày từ Bundle (nếu có)
+        if (getArguments() != null) {
+            int year = getArguments().getInt(ARG_YEAR, -1);
+            int month = getArguments().getInt(ARG_MONTH, -1);
+            int day = getArguments().getInt(ARG_DAY, -1);
+            if (year != -1 && month != -1 && day != -1) {
+                targetDay.set(Calendar.YEAR, year);
+                targetDay.set(Calendar.MONTH, month);
+                targetDay.set(Calendar.DAY_OF_MONTH, day);
+            }
+        }
+        
+        // Tính tuần bắt đầu (Thứ 2) của ngày target
+        mCurrentWeekStart = (Calendar) targetDay.clone();
         mCurrentWeekStart.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         mCurrentWeekStart.set(Calendar.HOUR_OF_DAY, 0);
         mCurrentWeekStart.clear(Calendar.MINUTE);
@@ -78,8 +114,7 @@ public class DayViewFragment extends Fragment {
         mCurrentWeekStart.clear(Calendar.MILLISECOND);
         
         // Tính index ngày hiện tại trong tuần
-        Calendar today = Calendar.getInstance();
-        int dayOfWeek = today.get(Calendar.DAY_OF_WEEK);
+        int dayOfWeek = targetDay.get(Calendar.DAY_OF_WEEK);
         mCurrentDayIndex = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
 
         setupViewPager();

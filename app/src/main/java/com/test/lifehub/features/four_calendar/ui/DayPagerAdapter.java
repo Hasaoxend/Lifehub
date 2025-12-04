@@ -82,6 +82,7 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
 
     class DayPageHolder extends RecyclerView.ViewHolder {
         LinearLayout mTimeEventsContainer;
+        FrameLayout mEventsOverlayContainer;
         ScrollView mScrollView;
         View mCurrentTimeLine;
         Calendar mDayCalendar;
@@ -91,6 +92,16 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
             mTimeEventsContainer = itemView.findViewById(R.id.time_events_container);
             mScrollView = itemView.findViewById(R.id.scroll_view);
             mCurrentTimeLine = itemView.findViewById(R.id.current_time_line);
+            
+            // Tạo overlay container cho events (nằm trên lưới giờ)
+            FrameLayout parent = (FrameLayout) mTimeEventsContainer.getParent();
+            mEventsOverlayContainer = new FrameLayout(itemView.getContext());
+            mEventsOverlayContainer.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            ));
+            mEventsOverlayContainer.setPadding(dpToPx(68), 0, dpToPx(8), 0); // 60dp label + 8dp padding
+            parent.addView(mEventsOverlayContainer);
         }
 
         void bind(Calendar day) {
@@ -123,15 +134,15 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
                         ViewGroup.LayoutParams.MATCH_PARENT));
                 hourLabel.setGravity(android.view.Gravity.CENTER_VERTICAL);
                 
-                // Container cho events
-                FrameLayout eventSlot = new FrameLayout(itemView.getContext());
-                eventSlot.setLayoutParams(new LinearLayout.LayoutParams(
+                // Time slot area (clickable)
+                View timeSlot = new View(itemView.getContext());
+                timeSlot.setLayoutParams(new LinearLayout.LayoutParams(
                         0, 
                         ViewGroup.LayoutParams.MATCH_PARENT, 
                         1f));
                 
                 final int currentHour = hour;
-                eventSlot.setOnClickListener(v -> {
+                timeSlot.setOnClickListener(v -> {
                     Calendar eventTime = (Calendar) mDayCalendar.clone();
                     eventTime.set(Calendar.HOUR_OF_DAY, currentHour);
                     eventTime.set(Calendar.MINUTE, 0);
@@ -139,7 +150,7 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
                 });
                 
                 hourRow.addView(hourLabel);
-                hourRow.addView(eventSlot);
+                hourRow.addView(timeSlot);
                 mTimeEventsContainer.addView(hourRow);
             }
         }
@@ -178,19 +189,103 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
         }
 
         private void renderEvents(List<CalendarEvent> allEvents) {
-            // Clear các events cũ trong tất cả các slots
-            for (int i = 0; i < mTimeEventsContainer.getChildCount(); i++) {
-                View hourRow = mTimeEventsContainer.getChildAt(i);
-                if (hourRow instanceof LinearLayout) {
-                    FrameLayout eventSlot = (FrameLayout) ((LinearLayout) hourRow).getChildAt(1);
-                    eventSlot.removeAllViews();
-                }
+            // Clear overlay container
+            if (mEventsOverlayContainer != null) {
+                mEventsOverlayContainer.removeAllViews();
             }
             
             List<CalendarEvent> dayEvents = getEventsForDay(allEvents);
             
+            // Tạo segments và tính toán layout
+            List<EventSegment> segments = createSegmentsForDay(dayEvents);
+            calculateOverlappingLayout(segments);
+            
+            // Render từng segment
+            for (EventSegment segment : segments) {
+                renderEventSegment(segment);
+            }
+        }
+        
+        /**
+         * Tạo segments cho tất cả events trong ngày
+         */
+        private List<EventSegment> createSegmentsForDay(List<CalendarEvent> dayEvents) {
+            List<EventSegment> segments = new ArrayList<>();
+            
+            Calendar dayStart = (Calendar) mDayCalendar.clone();
+            dayStart.set(Calendar.HOUR_OF_DAY, 0);
+            dayStart.clear(Calendar.MINUTE);
+            dayStart.clear(Calendar.SECOND);
+            
+            Calendar dayEnd = (Calendar) dayStart.clone();
+            dayEnd.add(Calendar.DAY_OF_MONTH, 1);
+            
             for (CalendarEvent event : dayEvents) {
-                renderEvent(event);
+                Calendar eventStart = Calendar.getInstance();
+                eventStart.setTime(event.getStartTime());
+                Calendar eventEnd = Calendar.getInstance();
+                eventEnd.setTime(event.getEndTime());
+                
+                // Cắt segment theo biên của ngày
+                Calendar segmentStart = eventStart.after(dayStart) ? (Calendar) eventStart.clone() : (Calendar) dayStart.clone();
+                Calendar segmentEnd = eventEnd.before(dayEnd) ? (Calendar) eventEnd.clone() : (Calendar) dayEnd.clone();
+                
+                EventSegment segment = new EventSegment(event, segmentStart, segmentEnd);
+                segments.add(segment);
+            }
+            
+            return segments;
+        }
+        
+        /**
+         * Tính toán layout cho các events overlap
+         */
+        private void calculateOverlappingLayout(List<EventSegment> segments) {
+            // Sắp xếp theo thời gian bắt đầu
+            Collections.sort(segments, (s1, s2) -> {
+                int startCompare = s1.segmentStart.compareTo(s2.segmentStart);
+                if (startCompare != 0) return startCompare;
+                return s1.segmentEnd.compareTo(s2.segmentEnd);
+            });
+            
+            // Gán column cho từng segment
+            for (EventSegment segment : segments) {
+                int column = 0;
+                boolean columnFound = false;
+                
+                while (!columnFound) {
+                    columnFound = true;
+                    
+                    // Kiểm tra column này có bị chiếm không
+                    for (EventSegment other : segments) {
+                        if (other == segment) continue;
+                        if (other.layoutColumn != column) continue;
+                        
+                        // Kiểm tra overlap
+                        if (segment.overlaps(other)) {
+                            column++;
+                            columnFound = false;
+                            break;
+                        }
+                    }
+                }
+                
+                segment.layoutColumn = column;
+            }
+            
+            // Tính totalLayoutColumns cho từng segment
+            for (EventSegment segment : segments) {
+                int maxColumnInGroup = segment.layoutColumn + 1;
+                
+                for (EventSegment other : segments) {
+                    if (other == segment) continue;
+                    
+                    if (segment.overlaps(other)) {
+                        maxColumnInGroup = Math.max(maxColumnInGroup, other.layoutColumn + 1);
+                    }
+                }
+                
+                segment.totalLayoutColumns = maxColumnInGroup;
             }
         }
 
@@ -222,44 +317,150 @@ public class DayPagerAdapter extends RecyclerView.Adapter<DayPagerAdapter.DayPag
             return dayEvents;
         }
 
-        private void renderEvent(CalendarEvent event) {
-            TextView eventView = new TextView(itemView.getContext());
-            eventView.setText(event.getTitle());
-            eventView.setTextSize(11);
-            eventView.setPadding(dpToPx(4), dpToPx(2), dpToPx(4), dpToPx(2));
-            eventView.setMaxLines(2);
-            eventView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        /**
+         * Render một event segment với iOS-style (bán trong suốt + cột màu bên trái)
+         */
+        private void renderEventSegment(EventSegment segment) {
+            if (mEventsOverlayContainer == null) return;
             
-            GradientDrawable eventBackground = new GradientDrawable();
-            eventBackground.setShape(GradientDrawable.RECTANGLE);
-            eventBackground.setCornerRadius(dpToPx(4));
+            CalendarEvent event = segment.originalEvent;
             
-            int eventColor = generateColorFromEvent(event);
-            eventBackground.setColor(eventColor);
-            eventView.setTextColor(isColorDark(eventColor) ? Color.WHITE : Color.BLACK);
-            eventView.setBackground(eventBackground);
-            
+            // Xác định xem event có kéo dài nhiều ngày không
             Calendar eventStart = Calendar.getInstance();
             eventStart.setTime(event.getStartTime());
-            int startHour = eventStart.get(Calendar.HOUR_OF_DAY);
+            Calendar eventEnd = Calendar.getInstance();
+            eventEnd.setTime(event.getEndTime());
             
-            // Tìm slot tương ứng với giờ bắt đầu
-            if (startHour >= 0 && startHour < mTimeEventsContainer.getChildCount()) {
-                View hourRow = mTimeEventsContainer.getChildAt(startHour);
-                if (hourRow instanceof LinearLayout) {
-                    FrameLayout eventSlot = (FrameLayout) ((LinearLayout) hourRow).getChildAt(1);
-                    
-                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                    );
-                    params.setMargins(dpToPx(2), dpToPx(2), dpToPx(2), dpToPx(2));
-                    eventView.setLayoutParams(params);
-                    
-                    eventView.setOnClickListener(v -> showEventDetail(event));
-                    eventSlot.addView(eventView);
+            boolean isMultiDay = !isSameDay(eventStart, eventEnd);
+            boolean isFirstSegment = isSameDay(segment.segmentStart, eventStart);
+            boolean isLastSegment = false;
+            
+            if (isMultiDay) {
+                Calendar compareDate = (Calendar) segment.segmentEnd.clone();
+                if (segment.segmentEnd.get(Calendar.HOUR_OF_DAY) == 0 && 
+                    segment.segmentEnd.get(Calendar.MINUTE) == 0) {
+                    compareDate.add(Calendar.DAY_OF_MONTH, -1);
+                }
+                isLastSegment = !compareDate.before(eventEnd);
+            }
+            
+            // Container cho event (để chứa cột màu + background)
+            FrameLayout eventContainer = new FrameLayout(itemView.getContext());
+            
+            // Background bán trong suốt (iOS-style)
+            View backgroundView = new View(itemView.getContext());
+            int eventColor = generateColorFromEvent(event);
+            int transparentColor = Color.argb(40, Color.red(eventColor), Color.green(eventColor), Color.blue(eventColor));
+            
+            GradientDrawable background = new GradientDrawable();
+            background.setShape(GradientDrawable.RECTANGLE);
+            background.setColor(transparentColor);
+            background.setCornerRadius(dpToPx(4));
+            background.setStroke(dpToPx(1), Color.argb(100, Color.red(eventColor), Color.green(eventColor), Color.blue(eventColor)));
+            backgroundView.setBackground(background);
+            
+            FrameLayout.LayoutParams bgParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            backgroundView.setLayoutParams(bgParams);
+            eventContainer.addView(backgroundView);
+            
+            // Cột màu rõ nét bên trái (iOS-style)
+            View colorBar = new View(itemView.getContext());
+            colorBar.setBackgroundColor(eventColor);
+            FrameLayout.LayoutParams barParams = new FrameLayout.LayoutParams(
+                dpToPx(4),
+                ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            barParams.leftMargin = dpToPx(2);
+            barParams.topMargin = dpToPx(2);
+            barParams.bottomMargin = dpToPx(2);
+            colorBar.setLayoutParams(barParams);
+            eventContainer.addView(colorBar);
+            
+            // Text
+            TextView eventText = new TextView(itemView.getContext());
+            String text = event.getTitle();
+            if (isMultiDay) {
+                if (!isFirstSegment && !isLastSegment) {
+                    text = "◄ " + text + " ►";
+                } else if (!isFirstSegment) {
+                    text = "◄ " + text;
+                } else if (!isLastSegment) {
+                    text = text + " ►";
                 }
             }
+            
+            eventText.setText(text);
+            eventText.setTextSize(11);
+            eventText.setTextColor(isColorDark(eventColor) ? eventColor : Color.BLACK);
+            eventText.setMaxLines(3);
+            eventText.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            
+            FrameLayout.LayoutParams textParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            textParams.leftMargin = dpToPx(10); // Để cách cột màu
+            textParams.topMargin = dpToPx(4);
+            textParams.rightMargin = dpToPx(4);
+            eventText.setLayoutParams(textParams);
+            eventContainer.addView(eventText);
+            
+            // Tính toán vị trí và kích thước
+            int startHour = segment.segmentStart.get(Calendar.HOUR_OF_DAY);
+            int startMinute = segment.segmentStart.get(Calendar.MINUTE);
+            int startMinutesFromMidnight = startHour * 60 + startMinute;
+            
+            // Duration
+            long durationMillis = segment.segmentEnd.getTimeInMillis() - segment.segmentStart.getTimeInMillis();
+            int durationMinutes = (int) (durationMillis / 60000);
+            
+            // Xử lý segment kéo dài đến 00:00 ngày sau
+            if (durationMinutes <= 0 && 
+                segment.segmentEnd.get(Calendar.HOUR_OF_DAY) == 0 && 
+                segment.segmentEnd.get(Calendar.MINUTE) == 0) {
+                durationMinutes = (24 * 60) - startMinutesFromMidnight;
+            }
+            
+            if (durationMinutes < 15) durationMinutes = 15; // Tối thiểu 15 phút
+            
+            // Top position và height
+            int topMarginDp = (startMinutesFromMidnight * HOUR_HEIGHT_DP) / 60;
+            int heightDp = (durationMinutes * HOUR_HEIGHT_DP) / 60;
+            
+            // Width dựa trên overlapping
+            int containerWidth = mEventsOverlayContainer.getWidth();
+            if (containerWidth == 0) {
+                containerWidth = dpToPx(250);
+            }
+            containerWidth -= mEventsOverlayContainer.getPaddingLeft() + mEventsOverlayContainer.getPaddingRight();
+            
+            int eventWidth = containerWidth / segment.totalLayoutColumns;
+            int leftMargin = eventWidth * segment.layoutColumn;
+            
+            if (segment.layoutColumn > 0) {
+                leftMargin += dpToPx(2);
+                eventWidth -= dpToPx(2);
+            }
+            
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                    eventWidth,
+                    dpToPx(heightDp)
+            );
+            params.topMargin = dpToPx(topMarginDp);
+            params.leftMargin = leftMargin;
+            
+            eventContainer.setLayoutParams(params);
+            eventContainer.setOnClickListener(v -> showEventDetail(event));
+            
+            mEventsOverlayContainer.addView(eventContainer);
+        }
+        
+        private boolean isSameDay(Calendar cal1, Calendar cal2) {
+            return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                   cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
         }
 
         private void showCreateEventDialog(Calendar time) {

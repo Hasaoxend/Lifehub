@@ -214,7 +214,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
         }
 
         int total = permissionItems.size();
-        tvStatus.setText(String.format("Đã cấp: %d/%d quyền", granted, total));
+        tvStatus.setText(getString(R.string.granted_status, granted, total));
 
         // Chỉ cho phép tiếp tục nếu tất cả quyền bắt buộc đã được cấp
         boolean allRequiredGranted = true;

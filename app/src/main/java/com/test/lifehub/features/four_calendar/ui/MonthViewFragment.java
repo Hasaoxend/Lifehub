@@ -48,10 +48,27 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class MonthViewFragment extends Fragment {
 
+    private static final String ARG_YEAR = "arg_year";
+    private static final String ARG_MONTH = "arg_month";
+
     private RecyclerView mMonthRecyclerView; // RecyclerView hiển thị lưới tháng
     private MonthGridAdapter mMonthAdapter;   // Adapter quản lý 42 ô ngày
     private CalendarViewModel mViewModel;     // ViewModel chứa dữ liệu sự kiện
     private Calendar mCurrentMonth;           // Tháng đang hiển thị
+
+    /**
+     * Tạo MonthViewFragment với tháng cụ thể
+     */
+    public static MonthViewFragment newInstance(Calendar month) {
+        MonthViewFragment fragment = new MonthViewFragment();
+        if (month != null) {
+            Bundle args = new Bundle();
+            args.putInt(ARG_YEAR, month.get(Calendar.YEAR));
+            args.putInt(ARG_MONTH, month.get(Calendar.MONTH));
+            fragment.setArguments(args);
+        }
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -73,7 +90,18 @@ public class MonthViewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mViewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);
+        
+        // Lấy tháng từ Bundle (nếu có)
         mCurrentMonth = Calendar.getInstance();
+        if (getArguments() != null) {
+            int year = getArguments().getInt(ARG_YEAR, -1);
+            int month = getArguments().getInt(ARG_MONTH, -1);
+            if (year != -1 && month != -1) {
+                mCurrentMonth.set(Calendar.YEAR, year);
+                mCurrentMonth.set(Calendar.MONTH, month);
+                mCurrentMonth.set(Calendar.DAY_OF_MONTH, 1);
+            }
+        }
 
         setupRecyclerView(); // Đổi tên
 

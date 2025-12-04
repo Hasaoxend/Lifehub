@@ -86,8 +86,8 @@ public class AddEditProjectDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setView(view)
-                .setPositiveButton("Lưu", null)
-                .setNegativeButton("Hủy", (dialog, which) -> dismiss());
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dismiss());
 
         if (getArguments() != null) {
             mCurrentProjectId = getArguments().getString(ARG_PROJECT_ID);

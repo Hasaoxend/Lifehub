@@ -16,7 +16,7 @@
             android:id="@+id/toolbar_notes_list"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Ghi chú" />
+            app:title="@string/title_notes" />
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view_notes"

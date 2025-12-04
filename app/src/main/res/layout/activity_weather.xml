@@ -16,7 +16,7 @@
             android:id="@+id/toolbar_weather"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Thời tiết" />
+            app:title="@string/title_weather" />
 
         <TextView
             android:id="@+id/textView"

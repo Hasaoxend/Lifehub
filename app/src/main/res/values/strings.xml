@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Lifehub</string>
 
+    <!-- Menu Items -->
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_today">Today</string>
+    <string name="menu_productivity">Productivity</string>
+    <string name="menu_account">Account</string>
+    
     <!-- Common -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -18,6 +25,22 @@
     <string name="loading">Loading...</string>
     <string name="retry">Retry</string>
     <string name="close">Close</string>
+    <string name="send">Send</string>
+    <string name="later">Later</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="granted_status">Granted: %1$d/%2$d permissions</string>
+    <string name="understood">Got it</string>
+    <string name="password_length_format">Length: %d</string>
+    <string name="password_requirement_8_chars">At least 8 characters</string>
+    <string name="already_have_account">Already have an account? </string>
+    <string name="login">Login</string>
+    <string name="already_have_account_return">Already have an account? Return to Login</string>
+    <string name="qr_scan_instruction">Place QR code inside the frame</string>
+    <string name="biometric_login_label">Fingerprint login</string>
+    <string name="change_password_security_note">For security, please enter your current password and new password.</string>
+    <string name="change_password_verify_note">To secure your account, please enter your current password.</string>
+    <string name="humidity_format">Humidity: %d%%</string>
+    <string name="remind_at">Remind at: </string>
     
     <!-- Language Selection -->
     <string name="language_selection_title">Welcome to Lifehub</string>
@@ -39,7 +62,6 @@
     <string name="login_title">Login</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="login">Login</string>
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="register">Register</string>
     <string name="or_login_with_biometric">Or login with fingerprint</string>
@@ -54,6 +76,12 @@
     <string name="search_accounts">Search accounts...</string>
     <string name="no_accounts_yet">No accounts yet\n\nTap + to add</string>
     <string name="language_changed_restart">Language changed!\n\nPlease close and restart the app for changes to take effect.</string>
+    <string name="settings_title">Settings</string>
+    <string name="account_section">Account</string>
+    <string name="security_section">Security</string>
+    <string name="change_login_password">Change Login Password</string>
+    <string name="manage_permissions">Manage Permissions</string>
+    <string name="use_biometric">Use Fingerprint / Face</string>
 
     <string-array name="repeat_options">
         <item>No repeat</item>
@@ -130,6 +158,17 @@
     <string name="weak">Weak</string>
     <string name="medium">Medium</string>
     <string name="strong">Strong</string>
+    
+    <!-- Toolbar Titles -->
+    <string name="title_weather">Weather</string>
+    <string name="title_qr_scanner">Scan QR Code</string>
+    <string name="title_app_permissions">App Permissions</string>
+    <string name="title_notes">Notes</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_add_account">Add Account</string>
+    <string name="title_account_detail">Account Detail</string>
+    <string name="title_change_password_step1">Change Password - Verify</string>
+    <string name="title_change_password_step2">Change Password - New Password</string>
     <string name="very_strong">Very Strong</string>
     
     <!-- Tasks -->
@@ -196,6 +235,11 @@
     <string name="nav_notes">Notes</string>
     <string name="nav_calendar">Calendar</string>
     <string name="nav_weather">Weather</string>
+    <string name="nav_productivity">Productivity</string>
+    <string name="login_prompt">Please enter your login information to continue</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="create_account">Create account</string>
+    <string name="privacy_policy">Privacy Policy</string>
     
     <!-- QR Scanner -->
     <string name="scan_qr_title">Scan QR Code</string>
@@ -373,13 +417,36 @@
     <string name="error_with_message">Error: %s</string>
     <string name="sent_to_email">Sent to: %s</string>
     
+    <!-- Weak Password Detection -->
+    <string name="title_weak_password_detected">Weak Password Detected</string>
+    <string name="msg_weak_password_detected">Your current password does not meet security requirements.\n\nFor your account safety, please change it to a stronger password now.</string>
+    <string name="btn_change_password_now">Change Password Now</string>
+    <string name="btn_remind_later">Remind Me Later</string>
+    
+    <!-- Reset Password Activity -->
+    <string name="reset_password_title">Reset Password</string>
+    <string name="reset_password_instruction">Enter a new strong password for your account</string>
+    <string name="hint_new_password">New Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="password_requirements_title">Password Requirements:</string>
+    <string name="requirement_min_length">At least 8 characters</string>
+    <string name="requirement_uppercase">At least 1 uppercase letter (A-Z)</string>
+    <string name="requirement_lowercase">At least 1 lowercase letter (a-z)</string>
+    <string name="requirement_number">At least 1 number (0-9)</string>
+    <string name="requirement_special_char">At least 1 special character (!@#$%^&amp;*)</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="error_invalid_reset_link">Invalid or expired reset link</string>
+    <string name="error_reset_link_expired">Reset link has expired. Please request a new one.</string>
+    <string name="reset_password_success_title">Password Changed!</string>
+    <string name="reset_password_success_message">Your password has been successfully changed.\n\nPlease log in with your new password.</string>
+    
     <!-- Dialog Titles & Messages -->
     <string name="title_manage_permissions">Manage Permissions</string>
     <string name="title_grant_permission">Grant Permission %s</string>
     <string name="title_revoke_permission">Revoke Permission</string>
     <string name="msg_revoke_permission_instructions">To revoke this permission, please go to System Settings > Apps > LifeHub > Permissions</string>
     <string name="title_password_recovery">Password Recovery</string>
-    <string name="msg_password_recovery">Enter your email to receive recovery link.\n\nNew password must meet:\n• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number\n• At least 1 special character</string>
+    <string name="msg_password_recovery">A password reset link will be sent to your email.\n\n⚠️ IMPORTANT: For security, please create a STRONG password with:\n• Minimum 8 characters\n• At least 1 uppercase letter (A-Z)\n• At least 1 lowercase letter (a-z)\n• At least 1 number (0-9)\n• At least 1 special character (!@#$%^&amp;*)\n\nWeak passwords will require changing after first login.</string>
     <string name="title_delete_account">Delete Account</string>
     <string name="msg_delete_account">Are you sure you want to delete this account?</string>
     <string name="title_delete_authenticator">Delete Authenticator</string>
@@ -405,11 +472,8 @@
     
     <!-- Activity Titles -->
     <string name="title_authenticator">Authenticator</string>
-    <string name="title_qr_scanner">Scan QR Code</string>
-    <string name="title_notes">Notes</string>
     <string name="title_edit_note">Edit Note</string>
     <string name="title_new_note">New Note</string>
-    <string name="title_add_account">Add New Account</string>
     <string name="title_edit_account">Edit Account</string>
     
     <!-- Calculator Buttons -->

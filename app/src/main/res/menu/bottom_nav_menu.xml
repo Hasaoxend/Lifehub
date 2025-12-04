@@ -4,16 +4,16 @@
     <item
         android:id="@+id/navigation_accounts"
         android:icon="@drawable/ic_lock"
-        android:title="Tài khoản" />
+        android:title="@string/nav_accounts" />
 
     <item
         android:id="@+id/navigation_productivity"
         android:icon="@drawable/ic_list"
-        android:title="Năng suất" />
+        android:title="@string/nav_productivity" />
 
     <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/ic_settings"
-        android:title="Cài đặt" />
+        android:title="@string/settings" />
 
 </menu>

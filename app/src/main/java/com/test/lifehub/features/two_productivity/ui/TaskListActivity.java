@@ -408,7 +408,7 @@ public class TaskListActivity extends AppCompatActivity
         new AlertDialog.Builder(this)
                 .setTitle(R.string.title_confirm_delete)
                 .setMessage(getString(R.string.msg_delete_project_confirm, project.getName()))
-                .setPositiveButton("Xóa", (dialog, which) -> {
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
                     mViewModel.deleteProject(project);
                 })
                 .setNegativeButton("Hủy", null)

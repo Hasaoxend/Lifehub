@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:text="Năng suất"
+        android:text="@string/productivity_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
     <com.google.android.material.card.MaterialCardView
@@ -45,7 +45,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ghi chú"
+                android:text="@string/productivity_notes"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_marginStart="16dp"/>
         </LinearLayout>
@@ -81,7 +81,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Công việc (To-do)"
+                android:text="@string/productivity_tasks"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_marginStart="16dp"/>
         </LinearLayout>
@@ -117,7 +117,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Danh sách Mua sắm"
+                android:text="@string/productivity_shopping"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_marginStart="16dp"/>
         </LinearLayout>
@@ -156,7 +156,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Máy tính"
+                android:text="@string/productivity_calculator"
                 android:textAppearance="?attr/textAppearanceHeadline6" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -195,7 +195,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Thời tiết"
+                android:text="@string/productivity_weather"
                 android:textAppearance="?attr/textAppearanceHeadline6" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -234,7 +234,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Lịch"
+                android:text="@string/productivity_calendar"
                 android:textAppearance="?attr/textAppearanceHeadline6" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

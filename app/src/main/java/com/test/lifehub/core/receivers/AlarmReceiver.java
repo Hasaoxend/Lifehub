@@ -18,7 +18,6 @@ import com.test.lifehub.ui.MainActivity;
 
 /**
  * BroadcastReceiver để "bắt" Alarm đã được lên lịch.
- * ✅ SỬA LỖI: Hiển thị notification trực tiếp thay vì start service
  * để tránh lỗi ForegroundServiceDidNotStartInTimeException
  */
 public class AlarmReceiver extends BroadcastReceiver {

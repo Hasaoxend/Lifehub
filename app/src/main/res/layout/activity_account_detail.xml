@@ -16,7 +16,7 @@
             android:id="@+id/toolbar_account_detail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Chi tiết tài khoản" />
+            app:title="@string/title_account_detail" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

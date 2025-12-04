@@ -14,7 +14,7 @@
             android:id="@+id/toolbar_settings"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Cài đặt"
+            app:title="@string/settings_title"
             app:titleTextColor="@color/black"
             android:background="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tài khoản"
+                android:text="@string/account_section"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"/>
@@ -89,7 +89,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Đổi mật khẩu đăng nhập"
+                            android:text="@string/change_login_password"
                             android:textSize="16sp"
                             android:layout_marginStart="16dp"/>
 
@@ -173,7 +173,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Quản lý quyền"
+                            android:text="@string/manage_permissions"
                             android:textSize="16sp"
                             android:layout_marginStart="16dp"/>
 
@@ -189,7 +189,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bảo mật"
+                android:text="@string/security_section"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"/>
@@ -211,7 +211,7 @@
                         android:id="@+id/switch_biometric"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Sử dụng Vân tay / Khuôn mặt"
+                        android:text="@string/use_biometric"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -220,7 +220,7 @@
                 android:id="@+id/btn_logout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Đăng xuất"
+                android:text="@string/logout"
                 android:backgroundTint="@color/colorPrimary"
                 style="@style/Widget.Material3.Button"/>
 

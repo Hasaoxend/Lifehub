@@ -92,8 +92,8 @@ public class AddEditTaskDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setView(view)
-                .setPositiveButton("Lưu", null)
-                .setNegativeButton("Hủy", (dialog, which) -> dismiss());
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dismiss());
 
         if (getArguments() != null) {
             mTaskType = getArguments().getInt(ARG_TASK_TYPE, Constants.TASK_TYPE_GENERAL);

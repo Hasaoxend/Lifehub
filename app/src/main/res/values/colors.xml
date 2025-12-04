@@ -116,6 +116,13 @@
     <color name="status_error">#FF3B30</color>
     <color name="status_info">#007AFF</color>
     
+    <!-- Password Validation Colors -->
+    <color name="success_green">#34C759</color>
+    <color name="text_disabled">#C7C7CC</color>
+    <color name="card_background">#F9F9F9</color>
+    <color name="background_color">#F2F2F7</color>
+    <color name="primary_color">#175DDC</color>
+    
     <!-- Permission Status Colors -->
     <color name="green_500">#4CAF50</color>
     <color name="orange_500">#FF9800</color>

@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.Material3.Dark"
-        app:title="Quét mã QR"
+        app:title="@string/title_qr_scanner"
         app:titleTextColor="@android:color/white" />
 
     <FrameLayout
@@ -38,7 +38,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đặt mã QR vào trong khung"
+                android:text="@string/qr_scan_instruction"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center" />

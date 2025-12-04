@@ -107,8 +107,8 @@ public class AddEditEventDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setView(view)
-                .setPositiveButton("Lưu", null)
-                .setNegativeButton("Hủy", (dialog, which) -> dismiss());
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dismiss());
 
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {

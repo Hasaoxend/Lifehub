@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.Material3.Dark"
-        app:title="Thêm tài khoản"
+        app:title="@string/title_add_account"
         app:titleTextColor="@android:color/white" />
 
     <com.google.android.material.tabs.TabLayout

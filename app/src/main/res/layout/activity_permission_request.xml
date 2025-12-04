@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/ios_background">
@@ -13,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Quyền ứng dụng" />
+            app:title="@string/title_app_permissions" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -61,9 +62,9 @@
                         android:id="@+id/tv_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Đã cấp: 0/5 quyền"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/colorPrimary"/>
+                        android:textColor="@color/colorPrimary"
+                        tools:text="Granted: 3/5 permissions"/>
 
                 </LinearLayout>
 

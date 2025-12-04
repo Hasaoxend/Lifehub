@@ -100,14 +100,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đã có tài khoản? "
+            android:text="@string/already_have_account"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
         <TextView
             android:id="@+id/tv_go_to_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đăng nhập"
+            android:text="@string/login"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="?attr/colorPrimary"
             android:textStyle="bold" />

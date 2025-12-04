@@ -1,6 +1,7 @@
 package com.test.lifehub.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,13 +20,27 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.test.lifehub.R;
 import com.test.lifehub.core.security.BiometricHelper;
+import com.test.lifehub.features.three_settings.ui.ChangePasswordActivity;
+
+import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity implements BiometricHelper.BiometricAuthListener {
+
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_WEAK_PASSWORD_CHECKED = "weak_password_checked_";
+    
+    // Password validation patterns
+    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final Pattern UPPERCASE_PATTERN = Pattern.compile("[A-Z]");
+    private static final Pattern LOWERCASE_PATTERN = Pattern.compile("[a-z]");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9]");
+    private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*(),.?\":{}|<>]");
 
     private Toolbar mToolbar;
     private TextInputEditText etEmail, etPassword;
@@ -96,9 +111,78 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         mViewModel.loginState.observe(this, state -> {
             if(state==null) return;
             if(state == LoginViewModel.LoginState.LOADING) setLoading(true);
-            else if(state == LoginViewModel.LoginState.SUCCESS) { setLoading(false); navigateToMain(); }
+            else if(state == LoginViewModel.LoginState.SUCCESS) { 
+                setLoading(false); 
+                checkPasswordStrengthBeforeNavigate();
+            }
             else { setLoading(false); Toast.makeText(this, R.string.error_login_failed, Toast.LENGTH_SHORT).show(); }
         });
+    }
+    
+    private void checkPasswordStrengthBeforeNavigate() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            navigateToMain();
+            return;
+        }
+        
+        // Check if already prompted for this user
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String key = KEY_WEAK_PASSWORD_CHECKED + user.getUid();
+        
+        if (prefs.getBoolean(key, false)) {
+            // Already checked, proceed
+            navigateToMain();
+            return;
+        }
+        
+        // Get entered password to validate
+        String password = etPassword.getText() != null ? etPassword.getText().toString() : "";
+        
+        if (isPasswordStrong(password)) {
+            // Strong password, mark as checked and proceed
+            prefs.edit().putBoolean(key, true).apply();
+            navigateToMain();
+        } else {
+            // Weak password detected
+            showWeakPasswordDialog();
+        }
+    }
+    
+    private boolean isPasswordStrong(String password) {
+        if (TextUtils.isEmpty(password) || password.length() < MIN_PASSWORD_LENGTH) {
+            return false;
+        }
+        
+        boolean hasUppercase = UPPERCASE_PATTERN.matcher(password).find();
+        boolean hasLowercase = LOWERCASE_PATTERN.matcher(password).find();
+        boolean hasNumber = NUMBER_PATTERN.matcher(password).find();
+        boolean hasSpecialChar = SPECIAL_CHAR_PATTERN.matcher(password).find();
+        
+        return hasUppercase && hasLowercase && hasNumber && hasSpecialChar;
+    }
+    
+    private void showWeakPasswordDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.title_weak_password_detected)
+            .setMessage(R.string.msg_weak_password_detected)
+            .setCancelable(false)
+            .setPositiveButton(R.string.btn_change_password_now, (dialog, which) -> {
+                // Navigate to ChangePasswordActivity
+                Intent intent = new Intent(this, ChangePasswordActivity.class);
+                startActivity(intent);
+                finish();
+            })
+            .setNegativeButton(R.string.btn_remind_later, (dialog, which) -> {
+                // Mark as checked to avoid repeated prompts this session
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                    prefs.edit().putBoolean(KEY_WEAK_PASSWORD_CHECKED + user.getUid(), true).apply();
+                }
+                navigateToMain();
+            })
+            .show();
     }
 
     private void showForgotPasswordDialog() {
@@ -110,7 +194,7 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
                 .setTitle(R.string.title_password_recovery)
                 .setMessage(R.string.msg_password_recovery)
                 .setView(dialogView)
-                .setPositiveButton("Gửi", (dialog, which) -> {
+                .setPositiveButton(R.string.send, (dialog, which) -> {
                     String email = etEmailInput.getText().toString().trim();
                     if (TextUtils.isEmpty(email)) {
                         Toast.makeText(this, R.string.error_email_empty, Toast.LENGTH_SHORT).show();
@@ -120,11 +204,19 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
                         Toast.makeText(this, R.string.error_email_invalid, Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    
+                    // Send password reset email (sẽ redirect về ResetPasswordActivity)
                     mAuth.sendPasswordResetEmail(email)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, R.string.password_reset_sent, Toast.LENGTH_LONG).show())
+                            .addOnSuccessListener(aVoid -> {
+                                new AlertDialog.Builder(LoginActivity.this)
+                                    .setTitle(R.string.title_email_sent)
+                                    .setMessage(getString(R.string.msg_email_sent_check))
+                                    .setPositiveButton("OK", null)
+                                    .show();
+                            })
                             .addOnFailureListener(e -> Toast.makeText(this, getString(R.string.error_with_message, e.getMessage()), Toast.LENGTH_LONG).show());
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 

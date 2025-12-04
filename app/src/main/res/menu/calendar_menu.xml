@@ -4,13 +4,13 @@
     <item
         android:id="@+id/action_today"
         android:icon="@drawable/ic_today"
-        android:title="Hôm nay"
-        app:showAsAction="always" />
+        android:title="@string/menu_today"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search"
-        android:title="Tìm kiếm"
+        android:title="@string/search"
         app:showAsAction="ifRoom" />
 
 </menu>
