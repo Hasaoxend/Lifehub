@@ -9,6 +9,8 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import com.test.lifehub.R;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -70,9 +72,9 @@ public class BiometricHelper {
                         super.onAuthenticationError(errorCode, errString);
                         // Xử lý các lỗi nghiêm trọng hoặc khi người dùng hủy
                         if (errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
-                            listener.onBiometricAuthError("Người dùng đã hủy");
+                            listener.onBiometricAuthError(activity.getString(R.string.biometric_error_user_canceled));
                         } else {
-                            listener.onBiometricAuthError("Lỗi xác thực: " + errString);
+                            listener.onBiometricAuthError(activity.getString(R.string.biometric_error_auth, errString));
                         }
                     }
 
@@ -96,10 +98,10 @@ public class BiometricHelper {
 
         // Cấu hình thông tin hiển thị trên hộp thoại
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Xác thực LifeHub")
-                .setSubtitle("Vui lòng xác thực để mở khóa")
-                .setDescription("Sử dụng vân tay hoặc khuôn mặt của bạn")
-                .setNegativeButtonText("Hủy") // Cho phép người dùng hủy
+                .setTitle(activity.getString(R.string.title_biometric_auth))
+                .setSubtitle(activity.getString(R.string.biometric_subtitle))
+                .setDescription(activity.getString(R.string.biometric_description))
+                .setNegativeButtonText(activity.getString(R.string.biometric_cancel))
                 .build();
 
         // Hiển thị hộp thoại

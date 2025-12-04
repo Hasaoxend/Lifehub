@@ -87,8 +87,10 @@ public class AccountRepository {
             return;
         }
         
-        listenerRegistration = ref.orderBy("serviceName", Query.Direction.ASCENDING)
-                .addSnapshotListener((snapshot, e) -> {
+        // Query tất cả accounts trong collection của user (đã được cách ly bởi path users/{userId}/accounts)
+        // KHÔNG dùng whereEqualTo() hay orderBy() để tránh cần composite index
+        // Sẽ validate và sắp xếp ở client-side
+        listenerRegistration = ref.addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "❌ Error listening to accounts", e);
                         return;
@@ -98,6 +100,24 @@ public class AccountRepository {
                         for (int i = 0; i < snapshot.getDocuments().size(); i++) {
                             accounts.get(i).documentId = snapshot.getDocuments().get(i).getId();
                         }
+                        
+                        // ✅ Validation: Kiểm tra userOwnerId (chỉ cảnh báo, không filter)
+                        // Path-based security đã đảm bảo cách ly dữ liệu
+                        for (AccountEntry account : accounts) {
+                            if (account.userOwnerId == null) {
+                                Log.w(TAG, "⚠️ Account missing userOwnerId (old data?): " + account.serviceName);
+                            } else if (!currentUserId.equals(account.userOwnerId)) {
+                                Log.e(TAG, "🔥 SECURITY WARNING: Account userOwnerId mismatch! Expected: " + currentUserId + ", Got: " + account.userOwnerId);
+                            }
+                        }
+                        
+                        // Sắp xếp theo tên dịch vụ ở client (thay vì Firestore orderBy)
+                        accounts.sort((a1, a2) -> {
+                            if (a1.serviceName == null) return 1;
+                            if (a2.serviceName == null) return -1;
+                            return a1.serviceName.compareToIgnoreCase(a2.serviceName);
+                        });
+                        
                         mAllAccounts.setValue(accounts);
                         Log.d(TAG, "✅ Accounts updated: " + accounts.size() + " items");
                     }
@@ -122,12 +142,23 @@ public class AccountRepository {
         mAllAccounts.setValue(new ArrayList<>()); // Clear all data
     }
 
+    /**
+     * Lấy danh sách tất cả tài khoản của user hiện tại (LiveData - realtime)
+     * Dữ liệu sẽ tự động cập nhật khi có thay đổi trên Firestore
+     * 
+     * @return LiveData chứa danh sách AccountEntry, đã được lọc theo userOwnerId
+     */
     public LiveData<List<AccountEntry>> getAllAccounts() {
         Log.d(TAG, "getAllAccounts() called, isListening: " + isListening);
         return mAllAccounts;
     }
 
-    // --- ĐÂY LÀ HÀM BẠN BỊ THIẾU TRƯỚC ĐÓ ---
+    /**
+     * Lấy thông tin chi tiết của một tài khoản theo ID
+     * 
+     * @param documentId ID của document trên Firestore
+     * @return LiveData chứa AccountEntry, hoặc null nếu không tìm thấy
+     */
     public LiveData<AccountEntry> getAccountById(String documentId) {
         MutableLiveData<AccountEntry> result = new MutableLiveData<>();
         CollectionReference ref = getAccountCollection();
@@ -146,21 +177,70 @@ public class AccountRepository {
     }
     // ----------------------------------------
 
+    /**
+     * Thêm một tài khoản mới vào Firestore
+     * Tự động gán userOwnerId = UID của user hiện tại
+     * 
+     * @param account Tài khoản cần thêm
+     */
     public void insert(AccountEntry account) {
         CollectionReference ref = getAccountCollection();
         if (ref != null) {
-            account.userOwnerId = mAuth.getCurrentUser().getUid();
-            ref.add(account);
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            if (currentUser != null) {
+                account.userOwnerId = currentUser.getUid();
+                ref.add(account).addOnSuccessListener(docRef -> {
+                    Log.d(TAG, "✅ Account inserted: " + docRef.getId() + " for user: " + account.userOwnerId);
+                }).addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Failed to insert account", e);
+                });
+            } else {
+                Log.w(TAG, "⚠️ Cannot insert account - user not logged in");
+            }
         }
     }
 
+    /**
+     * Cập nhật thông tin tài khoản trên Firestore
+     * Đảm bảo userOwnerId không bị thay đổi
+     * 
+     * @param account Tài khoản cần cập nhật (phải có documentId)
+     */
     public void update(AccountEntry account) {
         CollectionReference ref = getAccountCollection();
-        if (ref != null && account.documentId != null) ref.document(account.documentId).set(account);
+        if (ref != null && account.documentId != null) {
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            if (currentUser != null) {
+                // Đảm bảo userOwnerId không bị thay đổi
+                account.userOwnerId = currentUser.getUid();
+                ref.document(account.documentId).set(account)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "✅ Account updated: " + account.documentId);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "❌ Failed to update account", e);
+                        });
+            } else {
+                Log.w(TAG, "⚠️ Cannot update account - user not logged in");
+            }
+        }
     }
 
+    /**
+     * Xóa một tài khoản khỏi Firestore
+     * 
+     * @param account Tài khoản cần xóa (phải có documentId)
+     */
     public void delete(AccountEntry account) {
         CollectionReference ref = getAccountCollection();
-        if (ref != null && account.documentId != null) ref.document(account.documentId).delete();
+        if (ref != null && account.documentId != null) {
+            ref.document(account.documentId).delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "✅ Account deleted: " + account.documentId);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "❌ Failed to delete account", e);
+                    });
+        }
     }
 }

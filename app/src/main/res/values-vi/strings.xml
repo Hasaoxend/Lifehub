@@ -63,10 +63,14 @@
         <item>Hàng tháng</item>
     </string-array>
 
-    <string name="calendar_week_view">Tuần</string>
+    <string name="calendar_year_view">Năm</string>
     <string name="calendar_month_view">Tháng</string>
+    <string name="calendar_day_view">Ngày</string>
+    <string name="calendar_week_view">Tuần</string>
     <string name="calendar_today">Hôm nay</string>
-
+    <string name="calendar_title">Lịch</string>
+    
+    <!-- Day names (short) -->
     <string name="day_sun">CN</string>
     <string name="day_mon">T2</string>
     <string name="day_tue">T3</string>
@@ -198,4 +202,217 @@
     <string name="scan_qr_instruction">Hướng máy ảnh vào mã QR</string>
     <string name="invalid_qr_code">Mã QR không hợp lệ</string>
     <string name="qr_scan_success">Đã quét mã QR thành công</string>
+    
+    <!-- Password Strength Levels -->
+    <string name="password_strength_not_entered">Chưa nhập</string>
+    <string name="password_strength_weak">Yếu</string>
+    <string name="password_strength_fair">Khá</string>
+    <string name="password_strength_good">Tốt</string>
+    <string name="password_strength_strong">Mạnh</string>
+    
+    <!-- Registration Errors -->
+    <string name="error_email_not_found">Lỗi: Không tìm thấy email</string>
+    <string name="error_password_no_spaces">Mật khẩu không được chứa khoảng trắng</string>
+    <string name="error_password_mismatch">Mật khẩu không khớp</string>
+    <string name="error_password_not_strong">Mật khẩu chưa đủ mạnh</string>
+    <string name="error_create_account_failed">Tạo tài khoản thất bại</string>
+    <string name="error_email_already_used">Email đã được sử dụng</string>
+    <string name="error_network_connection">Lỗi kết nối mạng</string>
+    <string name="error_password_too_weak">Mật khẩu quá yếu</string>
+    <string name="error_email_empty">Vui lòng nhập email</string>
+    <string name="error_email_invalid">Email không hợp lệ</string>
+    <string name="error_email_check_failed">Lỗi kiểm tra email: %s</string>
+    <string name="error_login_failed">Đăng nhập thất bại</string>
+    
+    <!-- Registration Success -->
+    <string name="registration_success_title">Đăng ký Thành công!</string>
+    <string name="registration_success_message">Một email xác thực đã được gửi đến %s\n\nVui lòng kiểm tra hộp thư và nhấn vào link xác thực để kích hoạt tài khoản.</string>
+    <string name="registration_success_ok">OK, đã hiểu</string>
+    
+    <!-- Permissions -->
+    <string name="permission_alarms_required">Vui lòng bật quyền \'Alarms &amp; reminders\'</string>
+    <string name="permission_request_required">Vui lòng cấp quyền bắt buộc</string>
+    <string name="permission_granted">✓ Đã cấp</string>
+    <string name="permission_not_granted">✗ Chưa cấp</string>
+    <string name="permission_notification_granted">Đã cấp quyền thông báo!</string>
+    <string name="permission_notification_denied">Bạn đã từ chối quyền thông báo. Tính năng nhắc nhở có thể không hoạt động.</string>
+    <string name="permission_alarm_title">Cần cấp quyền Báo thức</string>
+    <string name="permission_alarm_message">Để tính năng Nhắc nhở hoạt động chính xác, LifeHub cần quyền \"Đặt báo thức và lời nhắc\".</string>
+    <string name="permission_alarm_settings">Vui lòng cấp quyền Báo thức trong Cài đặt > Ứng dụng > LifeHub > Quyền</string>
+    <string name="permission_alarm_failed">Không thể đặt báo thức do thiếu quyền</string>
+    <string name="permission_system_managed">Quyền này được quản lý tự động bởi hệ thống</string>
+    <string name="permission_granted_short">Đã cấp quyền</string>
+    
+    <!-- Calculator -->
+    <string name="calc_clear">C</string>
+    <string name="calc_all_clear">AC</string>
+    <string name="calc_error">Lỗi</string>
+    <string name="calc_history_cleared">Đã xóa lịch sử</string>
+    
+    <!-- Weather -->
+    <string name="weather_refreshing">Đang làm mới thời tiết...</string>
+    <string name="weather_select_city_first">Vui lòng chọn một thành phố trước</string>
+    <string name="weather_search_error">Lỗi tìm kiếm: %s</string>
+    <string name="weather_not_found">Không tìm thấy thời tiết cho: %s</string>
+    <string name="weather_network_error">Lỗi mạng: %s</string>
+    
+    <!-- Tasks & Projects -->
+    <string name="task_edit">Sửa Công việc</string>
+    <string name="task_add_shopping">Thêm Đồ Mua sắm</string>
+    <string name="task_add_new">Thêm Công việc Mới</string>
+    <string name="task_reminder_at">Nhắc lúc: %s</string>
+    <string name="task_select_future_time">Vui lòng chọn thời gian trong tương lai</string>
+    <string name="task_content_required">Nội dung không được để trống</string>
+    <string name="task_added">Đã thêm</string>
+    <string name="task_updated">Đã cập nhật</string>
+    <string name="task_delete_folder_menu">Vui lòng xóa thư mục bằng menu 3 chấm</string>
+    <string name="project_rename">Đổi tên Thư mục</string>
+    <string name="project_new">Thư mục Mới</string>
+    <string name="project_name_required">Tên thư mục không được để trống</string>
+    <string name="project_created">Đã tạo thư mục</string>
+    <string name="project_updated">Đã cập nhật</string>
+    
+    <!-- Notes -->
+    <string name="note_reminder_at">Nhắc lúc: %s</string>
+    <string name="note_deleted_msg">Đã xóa Ghi chú</string>
+    <string name="note_title_content_required">Vui lòng nhập Tiêu đề và Nội dung</string>
+    <string name="note_saved_msg">Đã lưu Ghi chú</string>
+    <string name="note_updated">Đã cập nhật Ghi chú</string>
+    
+    <!-- Settings -->
+    <string name="settings_biometric_not_supported">Thiết bị không hỗ trợ hoặc chưa cài đặt vân tay</string>
+    <string name="settings_biometric_status">Đăng nhập bằng vân tay đã %s</string>
+    <string name="settings_auth_failed">Xác thực thất bại: %s</string>
+    <string name="settings_cannot_change">Không thể thay đổi cài đặt: %s</string>
+    <string name="settings_enabled">bật</string>
+    <string name="settings_disabled">tắt</string>
+    
+    <!-- Change Password -->
+    <string name="change_password_user_not_found">Không tìm thấy thông tin người dùng</string>
+    <string name="change_password_auth_failed">Xác thực thất bại. Vui lòng kiểm tra lại mật khẩu.</string>
+    <string name="change_password_email_not_found">Không tìm thấy email người dùng</string>
+    <string name="change_password_email_error">Lỗi gửi email: %s</string>
+    <string name="change_password_current_required">Vui lòng nhập mật khẩu hiện tại</string>
+    <string name="change_password_current_incorrect">Mật khẩu không chính xác</string>
+    <string name="change_password_new_required">Vui lòng nhập mật khẩu mới</string>
+    <string name="change_password_min_length">Mật khẩu phải có ít nhất 8 ký tự</string>
+    <string name="change_password_need_uppercase">Mật khẩu phải có ít nhất 1 chữ in hoa</string>
+    <string name="change_password_need_lowercase">Mật khẩu phải có ít nhất 1 chữ thường</string>
+    <string name="change_password_need_number">Mật khẩu phải có ít nhất 1 chữ số</string>
+    <string name="change_password_need_special">Mật khẩu phải có ít nhất 1 ký tự đặc biệt (@#$%^&amp;+=!)</string>
+    <string name="change_password_same_as_old">Mật khẩu mới không được trùng với mật khẩu cũ</string>
+    <string name="change_password_confirm_required">Vui lòng xác nhận mật khẩu</string>
+    <string name="change_password_confirm_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="change_password_update_error">Lỗi cập nhật mật khẩu: %s</string>
+    
+    <!-- Account Detail -->
+    <string name="account_password_masked">••••••••</string>
+    <string name="account_auth_failed">Xác thực thất bại: %s</string>
+    <string name="account_copied">Đã sao chép %s</string>
+    <string name="account_missing_info">Thiếu thông tin bắt buộc</string>
+    <string name="account_saved_secure">Đã lưu (Bảo mật)</string>
+    <string name="account_deleted_msg">Đã xóa tài khoản</string>
+    <string name="account_delete_failed">Không thể xóa tài khoản</string>
+    <string name="account_invalid_id">Lỗi: ID tài liệu không hợp lệ</string>
+    <string name="authenticator_deleted">Đã xóa Authenticator</string>
+    <string name="authenticator_delete_failed">Không thể xóa authenticator: %s</string>
+    <string name="authenticator_delete_failed_generic">Không thể xóa authenticator</string>
+    
+    <!-- Calendar Events -->
+    <string name="event_edit">Sửa Sự kiện</string>
+    <string name="event_new">Sự kiện Mới</string>
+    <string name="event_deleted_msg">Đã xóa sự kiện</string>
+    <string name="event_delete_confirm_msg">Bạn có chắc chắn muốn xóa sự kiện này?</string>
+    <string name="event_end_date_past">Ngày kết thúc không thể trong quá khứ</string>
+    <string name="event_start_date_future_limit">Ngày bắt đầu không được quá 5 năm trong tương lai</string>
+    <string name="event_end_before_start">Thời gian kết thúc phải sau thời gian bắt đầu</string>
+    <string name="event_title_required">Vui lòng nhập tiêu đề</string>
+    <string name="event_updated">Đã cập nhật sự kiện</string>
+    <string name="event_added">Đã thêm sự kiện</string>
+    <string name="event_count_more">+%d sự kiện</string>
+    <string name="no_events">Không có sự kiện</string>
+    
+    <!-- Password Generator Dialog -->
+    <string name="password_length_label">Độ dài: %d</string>
+    <string name="password_copied_msg">Đã sao chép mật khẩu!</string>
+    
+    <!-- QR & Camera -->
+    <string name="qr_camera_init_error">Lỗi khởi động camera: %s</string>
+    <string name="qr_camera_bind_error">Lỗi khi bind camera: %s</string>
+    <string name="qr_camera_permission_needed">Cần quyền camera để quét QR code</string>
+    <string name="authenticator_account_added">Đã thêm tài khoản</string>
+    <string name="authenticator_add_error">Lỗi: %s</string>
+    
+    <!-- Productivity -->
+    <string name="productivity_title">Năng suất</string>
+    <string name="productivity_notes">Ghi chú</string>
+    <string name="productivity_tasks">Công việc (To-do)</string>
+    <string name="productivity_shopping">Danh sách Mua sắm</string>
+    <string name="productivity_calculator">Máy tính</string>
+    <string name="productivity_weather">Thời tiết</string>
+    <string name="productivity_calendar">Lịch</string>
+    
+    <!-- Custom Fields -->
+    <string name="custom_field_label">Tên đề mục</string>
+    <string name="custom_field_content">Nội dung</string>
+    
+    <!-- Intro Slide -->
+    <string name="intro_slide_title">Tiêu đề giới thiệu</string>
+    <string name="intro_slide_description">Mô tả ngắn về tính năng của ứng dụng LifeHub.</string>
+    
+    <!-- Empty States -->
+    <string name="no_accounts_authenticator">Chưa có tài khoản Authenticator</string>
+    <string name="no_accounts_authenticator_hint">Nhấn vào nút + để thêm tài khoản đầu tiên</string>
+    
+    <!-- Permission Item -->
+    <string name="permission_required">Bắt buộc</string>
+    
+    <!-- Misc -->
+    <string name="please_wait">Vui lòng đợi...</string>
+    <string name="password_reset_sent">Đã gửi link khôi phục, vui lòng kiểm tra email.</string>
+    <string name="error_with_message">Lỗi: %s</string>
+    <string name="sent_to_email">Gửi tới: %s</string>
+    
+    <!-- Dialog Titles & Messages -->
+    <string name="title_manage_permissions">Quản lý quyền</string>
+    <string name="title_grant_permission">Cấp quyền %s</string>
+    <string name="title_revoke_permission">Thu hồi quyền</string>
+    <string name="msg_revoke_permission_instructions">Để thu hồi quyền này, vui lòng vào Cài đặt hệ thống > Ứng dụng > LifeHub > Quyền</string>
+    <string name="title_password_recovery">Khôi phục Mật khẩu</string>
+    <string name="msg_password_recovery">Nhập email của bạn để nhận link khôi phục.\n\nMật khẩu mới phải đáp ứng:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ in hoa\n• Ít nhất 1 chữ thường\n• Ít nhất 1 số\n• Ít nhất 1 ký tự đặc biệt</string>
+    <string name="title_delete_account">Xóa tài khoản</string>
+    <string name="msg_delete_account">Bạn có chắc chắn muốn xóa tài khoản này?</string>
+    <string name="title_delete_authenticator">Xóa Authenticator</string>
+    <string name="msg_delete_authenticator">Bạn có chắc muốn xóa tài khoản authenticator này?</string>
+    <string name="msg_delete_account_confirm">Bạn có chắc muốn xóa tài khoản \"%s\"?</string>
+    <string name="title_confirm_delete">Xác nhận xóa</string>
+    <string name="msg_delete_project_confirm">Xóa thư mục \"%s\"? Các công việc bên trong sẽ được chuyển ra ngoài màn hình chính.</string>
+    <string name="title_language_change">Language / Ngôn ngữ</string>
+    <string name="title_language_changed">Language Changed / Đã đổi ngôn ngữ</string>
+    <string name="title_forgot_password">Quên mật khẩu</string>
+    <string name="msg_forgot_password">Chúng tôi sẽ gửi email đặt lại mật khẩu đến:\n\n%s\n\nBạn có muốn tiếp tục?</string>
+    <string name="title_email_sent">Email đã được gửi</string>
+    <string name="msg_email_sent_check">Vui lòng kiểm tra email của bạn để đặt lại mật khẩu.\n\nSau khi đặt lại mật khẩu, bạn cần đăng nhập lại.</string>
+    <string name="title_success">Thành công!</string>
+    <string name="msg_password_updated">Mật khẩu đã được cập nhật thành công.\n\nVui lòng đăng nhập lại với mật khẩu mới.</string>
+    <string name="msg_confirm_delete_account">Xóa tài khoản này?</string>
+    <string name="title_biometric_auth">Xác thực LifeHub</string>
+    <string name="biometric_subtitle">Vui lòng xác thực để mở khóa</string>
+    <string name="biometric_description">Sử dụng vân tay hoặc khuôn mặt của bạn</string>
+    <string name="biometric_cancel">Hủy</string>
+    <string name="biometric_error_user_canceled">Người dùng đã hủy</string>
+    <string name="biometric_error_auth">Lỗi xác thực: %1$s</string>
+    
+    <!-- Activity Titles -->
+    <string name="title_authenticator">Authenticator</string>
+    <string name="title_qr_scanner">Quét mã QR</string>
+    <string name="title_notes">Ghi chú</string>
+    <string name="title_edit_note">Sửa Ghi chú</string>
+    <string name="title_new_note">Ghi chú Mới</string>
+    <string name="title_add_account">Thêm tài khoản mới</string>
+    <string name="title_edit_account">Sửa tài khoản</string>
+    
+    <!-- Calculator Buttons -->
+    <string name="calc_button_c">C</string>
+    <string name="calc_button_ac">AC</string>
 </resources>

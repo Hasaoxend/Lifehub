@@ -49,7 +49,7 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Quản lý quyền");
+            getSupportActionBar().setTitle(R.string.title_manage_permissions);
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
@@ -135,14 +135,14 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
 
     private void requestPermission(PermissionItem item) {
         if (item.isSpecialPermission) {
-            Toast.makeText(this, "Quyền này được quản lý tự động bởi hệ thống", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.permission_system_managed, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, item.permission)) {
             // Hiển thị giải thích tại sao cần quyền
             new MaterialAlertDialogBuilder(this)
-                .setTitle("Cấp quyền " + item.name)
+                .setTitle(getString(R.string.title_grant_permission, item.name))
                 .setMessage(item.description)
                 .setPositiveButton("Đồng ý", (dialog, which) -> {
                     ActivityCompat.requestPermissions(
@@ -170,8 +170,8 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
         // Android không cho phép ứng dụng tự thu hồi quyền
         // Cần hướng dẫn người dùng vào cài đặt hệ thống
         new MaterialAlertDialogBuilder(this)
-            .setTitle("Thu hồi quyền")
-            .setMessage("Để thu hồi quyền này, vui lòng vào Cài đặt hệ thống > Ứng dụng > LifeHub > Quyền")
+            .setTitle(R.string.title_revoke_permission)
+            .setMessage(R.string.msg_revoke_permission_instructions)
             .setPositiveButton("Mở cài đặt", (dialog, which) -> {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 Uri uri = Uri.fromParts("package", getPackageName(), null);
@@ -190,7 +190,7 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
             
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Đã cấp quyền", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.permission_granted_short, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -241,10 +241,10 @@ public class PermissionsSettingsActivity extends AppCompatActivity {
                 
                 // Cập nhật trạng thái
                 if (item.isGranted) {
-                    tvStatus.setText("Đã cấp");
+                    tvStatus.setText(R.string.permission_granted);
                     tvStatus.setTextColor(getColor(R.color.green_500));
                 } else {
-                    tvStatus.setText("Chưa cấp");
+                    tvStatus.setText(R.string.permission_not_granted);
                     tvStatus.setTextColor(getColor(R.color.orange_500));
                 }
 

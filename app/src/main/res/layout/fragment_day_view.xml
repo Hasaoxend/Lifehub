@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Header 7 ngày tuần -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_week_days"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="4dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorHeight="0dp"
+        app:tabTextColor="@color/text_secondary"
+        app:tabSelectedTextColor="@color/primary" />
+
+    <!-- ViewPager2 để swipe qua các ngày -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager_days"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

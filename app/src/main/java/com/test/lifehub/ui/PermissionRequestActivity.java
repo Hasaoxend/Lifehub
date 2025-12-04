@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -60,6 +61,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
         setupPermissionsList();
         setupRecyclerView();
         setupButtons();
+        setupBackPressedCallback();
         updateUI();
     }
 
@@ -176,7 +178,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
                 try {
                     Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                     startActivity(intent);
-                    Toast.makeText(this, "Vui lòng bật quyền 'Alarms & reminders'", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.permission_alarms_required, Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -225,10 +227,10 @@ public class PermissionRequestActivity extends AppCompatActivity {
 
         btnContinue.setEnabled(allRequiredGranted);
         if (allRequiredGranted) {
-            btnContinue.setText("Tiếp tục");
+            btnContinue.setText(R.string.continue_text);
             btnGrantAll.setVisibility(View.GONE);
         } else {
-            btnContinue.setText("Vui lòng cấp quyền bắt buộc");
+            btnContinue.setText(R.string.permission_request_required);
             btnGrantAll.setVisibility(View.VISIBLE);
         }
     }
@@ -241,12 +243,17 @@ public class PermissionRequestActivity extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        // Không cho phép back nếu từ intro
-        if (!isFromIntro) {
-            super.onBackPressed();
-        }
+    private void setupBackPressedCallback() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Không cho phép back nếu từ intro
+                if (!isFromIntro) {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     // ===== ADAPTER =====
@@ -297,11 +304,11 @@ public class PermissionRequestActivity extends AppCompatActivity {
                 tvDescription.setText(item.description);
                 
                 if (item.isGranted) {
-                    tvStatus.setText("✓ Đã cấp");
+                    tvStatus.setText(R.string.permission_granted);
                     tvStatus.setTextColor(getColor(R.color.status_success));
                     cardView.setStrokeColor(getColor(R.color.status_success));
                 } else {
-                    tvStatus.setText("✗ Chưa cấp");
+                    tvStatus.setText(R.string.permission_not_granted);
                     tvStatus.setTextColor(getColor(R.color.status_error));
                     cardView.setStrokeColor(getColor(R.color.status_error));
                 }

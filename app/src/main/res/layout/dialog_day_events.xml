@@ -13,6 +13,21 @@
         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
         tools:text="Thứ Hai, 17 Tháng 11 2025" />
 
+    <!-- Ngày lễ hiển thị ở đây -->
+    <TextView
+        android:id="@+id/tv_dialog_holiday"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="@color/md_theme_light_primary"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="🎉 Tết Nguyên Đán"
+        tools:visibility="visible" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="300dp"> <androidx.recyclerview.widget.RecyclerView

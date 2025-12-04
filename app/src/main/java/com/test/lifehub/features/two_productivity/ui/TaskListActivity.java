@@ -332,7 +332,7 @@ public class TaskListActivity extends AppCompatActivity
 
                 if (item.type == TaskListItem.TYPE_PROJECT) {
                     mAdapter.notifyItemChanged(position);
-                    Toast.makeText(TaskListActivity.this, "Vui lòng xóa thư mục bằng menu 3 chấm", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskListActivity.this, R.string.task_delete_folder_menu, Toast.LENGTH_SHORT).show();
                 } else {
                     deleteTask(item.task);
                 }
@@ -406,8 +406,8 @@ public class TaskListActivity extends AppCompatActivity
     public void onProjectDelete(ProjectEntry project) {
         dismissBottomSheet();
         new AlertDialog.Builder(this)
-                .setTitle("Xác nhận xóa")
-                .setMessage("Xóa thư mục \"" + project.getName() + "\"? Các công việc bên trong sẽ được chuyển ra ngoài màn hình chính.")
+                .setTitle(R.string.title_confirm_delete)
+                .setMessage(getString(R.string.msg_delete_project_confirm, project.getName()))
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     mViewModel.deleteProject(project);
                 })

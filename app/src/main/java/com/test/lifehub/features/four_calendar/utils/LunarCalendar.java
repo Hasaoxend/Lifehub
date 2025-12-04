@@ -4,12 +4,25 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Vietnamese Lunar Calendar Converter
- * Converts Gregorian (solar) dates to Vietnamese lunar dates
- * Based on Vietnamese lunar calendar algorithms with UTC+7 timezone
+ * Công cụ chuyển đổi Lịch Âm Việt Nam
+ * 
+ * Class này giúp chuyển đổi ngày từ lịch dương (Gregorian) sang lịch âm Việt Nam.
+ * Dữ liệu lịch được tính toán dựa trên múi giờ UTC+7 (giờ Việt Nam) và hỗ trợ
+ * từ năm 1900 đến 2050.
+ * 
+ * Cách hoạt động:
+ * - Lưu trữ bảng dữ liệu số ngày của mỗi tháng âm lịch theo năm
+ * - Tính số ngày từ đầu năm dương lịch đến ngày cần chuyển đổi
+ * - So sánh với ngày Tết Nguyên Đán để xác định năm âm lịch
+ * - Duyệt qua các tháng âm lịch để tìm tháng và ngày tương ứng
  */
 public class LunarCalendar {
     
+    // Bảng dữ liệu số ngày trong mỗi tháng âm lịch từ năm 1900-2050
+    // Mỗi số đại diện cho loại tháng:
+    // - 1: tháng thiếu (29 ngày)
+    // - 2: tháng đủ (30 ngày)  
+    // - 3-6: tháng nhuận (tháng thứ mấy trong năm có thêm 1 tháng nhuận)
     private static final int[][] LUNAR_MONTH_DAYS = {
         {1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2},  // 1900
         {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1},
@@ -165,9 +178,10 @@ public class LunarCalendar {
     };
 
     /**
-     * Converts a Gregorian date to Vietnamese lunar date
-     * @param date The Gregorian date to convert
-     * @return LunarDate object containing lunar day, month, year
+     * Chuyển đổi ngày dương lịch sang ngày âm lịch Việt Nam
+     * 
+     * @param date Ngày dương lịch cần chuyển đổi (kiểu Date)
+     * @return Đối tượng LunarDate chứa ngày, tháng, năm âm lịch
      */
     public static LunarDate convertSolarToLunar(Date date) {
         Calendar cal = Calendar.getInstance();
@@ -180,26 +194,27 @@ public class LunarCalendar {
     }
     
     /**
-     * Converts a Gregorian date to Vietnamese lunar date
-     * @param solarDay Day of month (1-31)
-     * @param solarMonth Month (1-12)
-     * @param solarYear Year
-     * @return LunarDate object containing lunar day, month, year
+     * Chuyển đổi ngày dương lịch sang ngày âm lịch Việt Nam
+     * 
+     * @param solarDay Ngày trong tháng (1-31)
+     * @param solarMonth Tháng (1-12)
+     * @param solarYear Năm
+     * @return Đối tượng LunarDate chứa ngày, tháng, năm âm lịch
      */
     public static LunarDate convertSolarToLunar(int solarDay, int solarMonth, int solarYear) {
         if (solarYear < 1900 || solarYear > 2050) {
             return new LunarDate(solarDay, solarMonth, solarYear, false);
         }
         
-        // Calculate the number of days from the solar new year to the given date
+        // Tính số ngày từ đầu năm dương lịch đến ngày hiện tại
         int daysFromNewYear = getDaysInYear(solarYear, solarMonth, solarDay);
         
-        // Get lunar year data
+        // Lấy dữ liệu năm âm lịch
         int lunarYear = solarYear;
         int yearIndex = solarYear - 1900;
         
-        // Adjust for Vietnamese timezone - Lunar new year typically falls in late Jan or Feb
-        // If before lunar new year, belongs to previous lunar year
+        // Điều chỉnh theo múi giờ Việt Nam - Tết Nguyên Đán thường rơi vào cuối tháng 1 hoặc tháng 2
+        // Nếu trước ngày Tết thì thuộc năm âm lịch trước
         int lunarNewYearDays = getLunarNewYearDays(solarYear);
         if (daysFromNewYear < lunarNewYearDays) {
             lunarYear = solarYear - 1;
@@ -207,15 +222,15 @@ public class LunarCalendar {
             if (yearIndex < 0) {
                 return new LunarDate(solarDay, solarMonth, solarYear, false);
             }
-            // Add days from previous year
+            // Thêm số ngày của năm trước
             daysFromNewYear += getTotalDaysInSolarYear(solarYear - 1);
             lunarNewYearDays += getTotalDaysInSolarYear(solarYear - 1);
         }
         
-        // Calculate days since lunar new year
+        // Tính số ngày từ Tết Nguyên Đán đến ngày hiện tại
         int daysSinceLunarNewYear = daysFromNewYear - lunarNewYearDays;
         
-        // Determine lunar month and day
+        // Xác định tháng và ngày âm lịch
         int[] monthData = LUNAR_MONTH_DAYS[yearIndex];
         int lunarMonth = 1;
         int lunarDay = 1;
@@ -223,9 +238,9 @@ public class LunarCalendar {
         for (int i = 0; i < 12; i++) {
             int daysInMonth = (monthData[i] < 3) ? 29 + monthData[i] : 29;
             
-            // Check for leap month
+            // Kiểm tra tháng nhuận (tháng 13 trong năm)
             if (monthData[i] >= 3) {
-                // This is a leap month indicator
+                // Đây là chỉ số tháng nhuận
                 int leapMonthNum = i + 1;
                 int regularDays = 29;
                 int leapDays = 30;
@@ -237,7 +252,7 @@ public class LunarCalendar {
                 } else if (daysSinceLunarNewYear < regularDays + leapDays) {
                     lunarMonth = i + 1;
                     lunarDay = daysSinceLunarNewYear - regularDays + 1;
-                    return new LunarDate(lunarDay, lunarMonth, lunarYear, true); // Leap month
+                    return new LunarDate(lunarDay, lunarMonth, lunarYear, true); // Tháng nhuận
                 } else {
                     daysSinceLunarNewYear -= (regularDays + leapDays);
                 }
@@ -255,11 +270,12 @@ public class LunarCalendar {
     }
     
     /**
-     * Gets the day number of lunar new year in a given solar year
+     * Lấy số thứ tự ngày của Tết Nguyên Đán trong năm dương lịch
+     * Ví dụ: Tết 2025 rơi vào ngày 29/1 -> trả về 29
      */
     private static int getLunarNewYearDays(int year) {
-        // Approximate lunar new year dates (typically late Jan to mid Feb)
-        // This is a simplified calculation - in reality it varies by year
+        // Ngày Tết thường rơi vào cuối tháng 1 hoặc giữa tháng 2
+        // Dữ liệu này đã được tính toán sẵn cho từng năm
         if (year >= 1900 && year <= 2050) {
             int[] lunarNewYear = {
                 31, 19, 8, 29, 16, 5, 25, 13, 2, 22,      // 1900-1909
@@ -281,16 +297,17 @@ public class LunarCalendar {
             };
             return lunarNewYear[year - 1900];
         }
-        return 31; // Default to Jan 31 if out of range
+        return 31; // Mặc định trả về ngày 31/1 nếu năm nằm ngoài phạm vi hỗ trợ
     }
     
     /**
-     * Calculates the number of days from Jan 1 to the given date
+     * Tính số ngày từ đầu năm (1/1) đến ngày chỉ định
+     * Ví dụ: 15/2/2025 -> trả về 46 (31 ngày tháng 1 + 15 ngày)
      */
     private static int getDaysInYear(int year, int month, int day) {
         int[] daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         if (isLeapYear(year)) {
-            daysInMonth[1] = 29;
+            daysInMonth[1] = 29; // Tháng 2 có 29 ngày nếu là năm nhuận
         }
         
         int days = day;
@@ -301,23 +318,26 @@ public class LunarCalendar {
     }
     
     /**
-     * Gets total days in a solar year
+     * Lấy tổng số ngày trong một năm dương lịch
+     * @return 366 nếu là năm nhuận, 365 nếu là năm thường
      */
     private static int getTotalDaysInSolarYear(int year) {
         return isLeapYear(year) ? 366 : 365;
     }
     
     /**
-     * Checks if a year is a leap year
+     * Kiểm tra xem một năm có phải là năm nhuận không
+     * Quy tắc: Chia hết cho 4 NHƯNG không chia hết cho 100, HOẶC chia hết cho 400
      */
     private static boolean isLeapYear(int year) {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
     
     /**
-     * Returns a formatted lunar date string for display
-     * @param date The solar date to convert
-     * @return Formatted string like "15/8" for lunar day 15, month 8
+     * Chuyển đổi ngày dương lịch thành chuỗi ngày âm lịch để hiển thị
+     * @param date Ngày dương lịch cần chuyển đổi
+     * @return Chuỗi định dạng như "15/8" cho ngày 15 tháng 8 âm lịch,
+     *         hoặc "15/8 (nhuận)" nếu là tháng nhuận
      */
     public static String getLunarDateString(Date date) {
         LunarDate lunar = convertSolarToLunar(date);
@@ -328,14 +348,15 @@ public class LunarCalendar {
     }
     
     /**
-     * Lunar date result class
+     * Class chứa kết quả chuyển đổi ngày âm lịch
+     * Bao gồm ngày, tháng, năm và các thông tin bổ sung
      */
     public static class LunarDate {
-        public int day;
-        public int month;
-        public int year;
-        public boolean isLeapMonth;
-        public boolean isValid;
+        public int day;           // Ngày trong tháng (1-30)
+        public int month;         // Tháng trong năm (1-12)
+        public int year;          // Năm âm lịch
+        public boolean isLeapMonth; // Có phải tháng nhuận không
+        public boolean isValid;     // Kết quả chuyển đổi có hợp lệ không
         
         public LunarDate(int day, int month, int year, boolean isLeapMonth) {
             this.day = day;

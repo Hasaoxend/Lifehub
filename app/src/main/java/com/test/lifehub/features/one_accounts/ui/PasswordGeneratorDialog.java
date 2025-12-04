@@ -116,7 +116,7 @@ public class PasswordGeneratorDialog extends DialogFragment {
             ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Password", etGeneratedPassword.getText().toString());
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(getContext(), "Đã sao chép mật khẩu!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.password_copied_msg, Toast.LENGTH_SHORT).show();
         });
 
         // Nút CHỌN

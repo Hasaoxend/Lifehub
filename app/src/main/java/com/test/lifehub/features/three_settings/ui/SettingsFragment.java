@@ -2,6 +2,7 @@ package com.test.lifehub.features.three_settings.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,9 @@ import com.test.lifehub.core.security.BiometricHelper;
 import com.test.lifehub.core.util.LocaleHelper;
 import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.one_accounts.repository.AccountRepository;
+import com.test.lifehub.features.four_calendar.repository.CalendarRepository;
+import com.test.lifehub.features.two_productivity.repository.ProductivityRepository;
 import com.test.lifehub.ui.LoginActivity;
 
 import javax.inject.Inject;
@@ -43,6 +47,15 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     
     @Inject
     TotpRepository totpRepository;
+    
+    @Inject
+    AccountRepository accountRepository;
+    
+    @Inject
+    CalendarRepository calendarRepository;
+    
+    @Inject
+    ProductivityRepository productivityRepository;
 
     private FirebaseAuth mAuth;
 
@@ -93,8 +106,12 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     private void setupListeners() {
         // 1. Đăng xuất
         btnLogout.setOnClickListener(v -> {
-            // Stop Firestore listener to prevent memory leak
+            // ✅ BẢO MẬT: Stop ALL Firestore listeners để tránh data leak
+            Log.d("SettingsFragment", "Stopping all Firestore listeners on logout");
             totpRepository.stopListening();
+            accountRepository.stopListening();
+            calendarRepository.stopListening();
+            productivityRepository.stopListening();
             
             sessionManager.logoutUser();
             mAuth.signOut();
@@ -119,7 +136,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
                     BiometricHelper.showBiometricPrompt((AppCompatActivity) getActivity(), this);
                 }
             } else {
-                Toast.makeText(getContext(), "Thiết bị không hỗ trợ hoặc chưa cài đặt vân tay", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.settings_biometric_not_supported, Toast.LENGTH_SHORT).show();
                 // Không hỗ trợ thì trả về trạng thái cũ
                 revertSwitchState(!isChecked);
             }
@@ -127,12 +144,16 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
 
         // 3. Xử lý Đổi Mật Khẩu
         btnChangePassword.setOnClickListener(v -> {
-            if (BiometricHelper.isBiometricAvailable(requireContext())) {
+            // Chỉ yêu cầu xác thực vân tay nếu:
+            // 1. Thiết bị hỗ trợ vân tay
+            // 2. Người dùng đã bật tính năng vân tay trong app
+            if (BiometricHelper.isBiometricAvailable(requireContext()) && sessionManager.isBiometricEnabled()) {
                 isChangePasswordRequest = true;
                 if (getActivity() instanceof AppCompatActivity) {
                     BiometricHelper.showBiometricPrompt((AppCompatActivity) getActivity(), this);
                 }
             } else {
+                // Không có vân tay hoặc chưa bật -> Đổi mật khẩu trực tiếp
                 openChangePasswordActivity();
             }
         });
@@ -158,7 +179,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
         String[] languageCodes = {LocaleHelper.LANGUAGE_ENGLISH, LocaleHelper.LANGUAGE_VIETNAMESE};
         
         new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Language / Ngôn ngữ")
+            .setTitle(R.string.title_language_change)
             .setSingleChoiceItems(languages, selectedIndex, (dialog, which) -> {
                 String selectedLanguage = languageCodes[which];
                 String previousLanguage = LocaleHelper.getLanguage(requireContext());
@@ -173,7 +194,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
                     
                     // Hiển thị thông báo restart
                     new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Language Changed / Đã đổi ngôn ngữ")
+                        .setTitle(R.string.title_language_changed)
                         .setMessage(getString(R.string.language_changed_restart))
                         .setPositiveButton("OK", (restartDialog, w) -> {
                             // Khởi động lại activity để áp dụng ngôn ngữ mới
@@ -213,7 +234,7 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
             sessionManager.setBiometricEnabled(pendingBiometricState);
 
             String status = pendingBiometricState ? "được bật" : "bị tắt";
-            Toast.makeText(getContext(), "Đăng nhập bằng vân tay đã " + status, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.settings_biometric_status, status), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -230,14 +251,14 @@ public class SettingsFragment extends Fragment implements BiometricHelper.Biomet
     private void handleAuthFailure(String msg) {
         if (isChangePasswordRequest) {
             isChangePasswordRequest = false;
-            Toast.makeText(getContext(), "Xác thực thất bại: " + msg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.settings_auth_failed, msg), Toast.LENGTH_SHORT).show();
 
         } else if (isBiometricToggleRequest) {
             isBiometricToggleRequest = false;
 
             // Thất bại -> Trả lại trạng thái Switch cũ
             revertSwitchState(!pendingBiometricState);
-            Toast.makeText(getContext(), "Không thể thay đổi cài đặt: " + msg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.settings_cannot_change, msg), Toast.LENGTH_SHORT).show();
         }
     }
 

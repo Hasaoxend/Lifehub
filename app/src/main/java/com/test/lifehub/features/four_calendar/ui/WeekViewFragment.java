@@ -252,33 +252,52 @@ public class WeekViewFragment extends Fragment {
             }
         }
 
-        // --- PASS 2: TÍNH TOÁN LAYOUT ---
+        // --- PASS 2: TÍNH TOÁN LAYOUT (CHIA ĐỀU TẤT CẢ SỰ KIỆN) ---
+        // Logic mới: Tất cả sự kiện trong cùng time range chia đều nhau
+        
         for (int i = 0; i < 7; i++) {
             List<EventSegment> daySegments = segmentsPerDay.get(i);
             if (daySegments == null || daySegments.isEmpty()) continue;
+            
             Collections.sort(daySegments, (s1, s2) -> s1.segmentStart.compareTo(s2.segmentStart));
-            List<List<EventSegment>> visualColumns = new ArrayList<>();
+            
+            // Tìm tất cả các nhóm sự kiện overlap với nhau
+            List<List<EventSegment>> overlapGroups = new ArrayList<>();
+            
             for (EventSegment segment : daySegments) {
-                boolean placed = false;
-                for (List<EventSegment> column : visualColumns) {
-                    EventSegment lastSegmentInColumn = column.get(column.size() - 1);
-                    if (!segment.overlaps(lastSegmentInColumn)) {
-                        column.add(segment);
-                        segment.layoutColumn = visualColumns.indexOf(column);
-                        placed = true;
+                boolean addedToGroup = false;
+                
+                // Tìm nhóm mà segment này overlap
+                for (List<EventSegment> group : overlapGroups) {
+                    boolean overlapsWithGroup = false;
+                    for (EventSegment existingSegment : group) {
+                        if (segment.overlaps(existingSegment)) {
+                            overlapsWithGroup = true;
+                            break;
+                        }
+                    }
+                    if (overlapsWithGroup) {
+                        group.add(segment);
+                        addedToGroup = true;
                         break;
                     }
                 }
-                if (!placed) {
-                    List<EventSegment> newColumn = new ArrayList<>();
-                    newColumn.add(segment);
-                    segment.layoutColumn = visualColumns.size();
-                    visualColumns.add(newColumn);
+                
+                if (!addedToGroup) {
+                    List<EventSegment> newGroup = new ArrayList<>();
+                    newGroup.add(segment);
+                    overlapGroups.add(newGroup);
                 }
             }
-            int numColumns = visualColumns.size();
-            for (EventSegment segment : daySegments) {
-                segment.totalLayoutColumns = numColumns;
+            
+            // Gán layout cho từng nhóm
+            for (List<EventSegment> group : overlapGroups) {
+                int totalInGroup = group.size();
+                for (int j = 0; j < group.size(); j++) {
+                    EventSegment segment = group.get(j);
+                    segment.layoutColumn = j;
+                    segment.totalLayoutColumns = totalInGroup;
+                }
             }
         }
 
@@ -304,14 +323,69 @@ public class WeekViewFragment extends Fragment {
         FrameLayout eventsContainer = dayColumn.findViewById(R.id.events_container);
         if (eventsContainer == null) return;
 
+        // Kiểm tra xem sự kiện có kéo dài nhiều ngày không
+        Calendar eventStart = Calendar.getInstance();
+        eventStart.setTime(segment.originalEvent.getStartTime());
+        Calendar eventEnd = Calendar.getInstance();
+        eventEnd.setTime(segment.originalEvent.getEndTime());
+        
+        boolean isMultiDayEvent = !isSameDay(eventStart, eventEnd);
+        // Kiểm tra segment có nằm trong ngày đầu/cuối của event không
+        boolean isFirstSegment = isSameDay(segment.segmentStart, eventStart);
+        boolean isLastSegment = isSameDay(segment.segmentEnd, eventEnd) || 
+                                segment.segmentEnd.after(eventEnd);
+        
         TextView eventView = new TextView(requireContext());
-        eventView.setText(segment.originalEvent.getTitle());
+        
+        // Tạo text với indicator cho sự kiện nhiều ngày
+        String displayText = segment.originalEvent.getTitle();
+        if (isMultiDayEvent) {
+            if (!isFirstSegment && !isLastSegment) {
+                // Segment ở giữa
+                displayText = "◄ " + displayText + " ►";
+            } else if (!isFirstSegment) {
+                // Segment cuối
+                displayText = "◄ " + displayText;
+            } else if (!isLastSegment) {
+                // Segment đầu
+                displayText = displayText + " ►";
+            }
+        }
+        
+        eventView.setText(displayText);
         eventView.setTextSize(10);
         eventView.setPadding(dpToPx(4), dpToPx(2), dpToPx(4), dpToPx(2));
 
         GradientDrawable eventBackground = new GradientDrawable();
         eventBackground.setShape(GradientDrawable.RECTANGLE);
-        eventBackground.setStroke(dpToPx(1), Color.BLACK);
+        
+        // Tùy chỉnh border cho sự kiện nhiều ngày
+        if (isMultiDayEvent) {
+            // Border dày hơn và màu đậm hơn cho sự kiện nhiều ngày
+            eventBackground.setStroke(dpToPx(2), Color.BLACK);
+            
+            // Bo góc tùy theo vị trí segment
+            float[] cornerRadii = new float[8]; // top-left, top-right, bottom-right, bottom-left (mỗi góc 2 giá trị)
+            float radius = dpToPx(4);
+            
+            if (isFirstSegment && !isLastSegment) {
+                // Segment đầu: bo góc bên trái
+                cornerRadii = new float[]{radius, radius, 0, 0, 0, 0, radius, radius};
+            } else if (!isFirstSegment && isLastSegment) {
+                // Segment cuối: bo góc bên phải
+                cornerRadii = new float[]{0, 0, radius, radius, radius, radius, 0, 0};
+            } else if (!isFirstSegment && !isLastSegment) {
+                // Segment giữa: không bo góc
+                cornerRadii = new float[]{0, 0, 0, 0, 0, 0, 0, 0};
+            } else {
+                // Sự kiện trong 1 ngày: bo tất cả góc
+                cornerRadii = new float[]{radius, radius, radius, radius, radius, radius, radius, radius};
+            }
+            eventBackground.setCornerRadii(cornerRadii);
+        } else {
+            eventBackground.setStroke(dpToPx(1), Color.BLACK);
+            eventBackground.setCornerRadius(dpToPx(4));
+        }
 
         int eventColor = generateColorFromEvent(segment.originalEvent);
         eventBackground.setColor(eventColor);
@@ -319,19 +393,26 @@ public class WeekViewFragment extends Fragment {
         eventView.setTextColor(isColorDark(eventColor) ? Color.WHITE : Color.BLACK);
         eventView.setBackground(eventBackground);
 
+        // ✅ SỬA LỖI: Tính vị trí và chiều cao theo tỉ lệ với HOUR_HEIGHT_DP
         int startHour = segment.segmentStart.get(Calendar.HOUR_OF_DAY);
         int startMinute = segment.segmentStart.get(Calendar.MINUTE);
-        int topMarginDp = (startHour * 60) + startMinute;
+        // Công thức: Nếu HOUR_HEIGHT_DP = 60dp, thì mỗi phút = 1dp
+        int topMarginDp = ((startHour * 60) + startMinute) * HOUR_HEIGHT_DP / 60;
 
         long durationMillis = segment.segmentEnd.getTimeInMillis() - segment.segmentStart.getTimeInMillis();
         int durationMinutes = (int) (durationMillis / 60000);
 
+        // Xử lý trường hợp event kéo dài qua ngày (segmentEnd = 00:00 ngày sau)
         if (durationMinutes <= 0 && segment.segmentEnd.get(Calendar.HOUR_OF_DAY) == 0 && segment.segmentEnd.get(Calendar.MINUTE) == 0
                 && (segment.segmentEnd.get(Calendar.DAY_OF_YEAR) > segment.segmentStart.get(Calendar.DAY_OF_YEAR) || segment.segmentEnd.get(Calendar.YEAR) > segment.segmentStart.get(Calendar.YEAR))) {
             durationMinutes = (24 * 60) - topMarginDp;
         }
         if (durationMinutes < 15) durationMinutes = 15;
-        int heightDp = durationMinutes;
+        
+        // ✅ SỬA LỖI: Chiều cao phải tính theo tỉ lệ với HOUR_HEIGHT_DP
+        // Nếu HOUR_HEIGHT_DP = 60dp thì 60 phút = 60dp
+        // Công thức: heightDp = (durationMinutes / 60) * HOUR_HEIGHT_DP
+        int heightDp = (durationMinutes * HOUR_HEIGHT_DP) / 60;
 
         int totalWidthPx = dpToPx(DAY_COLUMN_WIDTH_DP) - eventsContainer.getPaddingLeft() - eventsContainer.getPaddingRight();
         int segmentWidthPx = totalWidthPx / segment.totalLayoutColumns;
@@ -352,6 +433,14 @@ public class WeekViewFragment extends Fragment {
 
         eventView.setOnClickListener(v -> showEventDetail(segment.originalEvent));
         eventsContainer.addView(eventView);
+    }
+    
+    /**
+     * Kiểm tra 2 Calendar có cùng ngày không
+     */
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+               cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     private int generateColorFromEvent(CalendarEvent event) {

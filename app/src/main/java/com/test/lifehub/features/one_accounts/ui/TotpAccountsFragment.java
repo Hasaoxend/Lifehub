@@ -278,19 +278,19 @@ public class TotpAccountsFragment extends Fragment {
 
     private void showDeleteConfirmDialog(AuthenticatorActivity.TotpAccountItem account) {
         new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Xóa tài khoản")
-            .setMessage("Bạn có chắc muốn xóa tài khoản \"" + account.getAccountName() + "\"?")
+            .setTitle(R.string.title_delete_account)
+            .setMessage(getString(R.string.msg_delete_account_confirm, account.getAccountName()))
             .setPositiveButton("Xóa", (dialog, which) -> {
                 // Xóa từ Firestore
                 viewModel.delete(account.getDocumentId(), new TotpRepository.OnCompleteListener() {
                     @Override
                     public void onSuccess(String documentId) {
-                        Toast.makeText(requireContext(), "Đã xóa tài khoản", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), R.string.account_deleted_msg, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(String error) {
-                        Toast.makeText(requireContext(), "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getString(R.string.authenticator_add_error, error), Toast.LENGTH_SHORT).show();
                     }
                 });
             })
@@ -304,7 +304,7 @@ public class TotpAccountsFragment extends Fragment {
         android.content.ClipData clip = android.content.ClipData.newPlainText("TOTP Code", text);
         clipboard.setPrimaryClip(clip);
 
-        Toast.makeText(getContext(), "Đã sao chép mã: " + text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getString(R.string.code_copied, text), Toast.LENGTH_SHORT).show();
     }
 
     public void refreshAccounts() {

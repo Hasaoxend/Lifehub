@@ -23,7 +23,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.test.lifehub.R;
+import com.test.lifehub.core.security.BiometricHelper;
 import com.test.lifehub.core.security.EncryptionHelper;
+import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.one_accounts.data.AccountEntry;
 
 import java.util.Map;
@@ -32,12 +34,15 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class AccountDetailActivity extends AppCompatActivity {
+public class AccountDetailActivity extends AppCompatActivity implements BiometricHelper.BiometricAuthListener {
 
     public static final String EXTRA_ACCOUNT_ID = "ACCOUNT_ID";
 
     @Inject
     EncryptionHelper encryptionHelper;
+
+    @Inject
+    SessionManager sessionManager;
 
     private String mAccountId;
     private AccountEntry mAccount;
@@ -168,15 +173,61 @@ public class AccountDetailActivity extends AppCompatActivity {
 
     private void togglePassword() {
         if (mAccount == null) return;
-        isPasswordVisible = !isPasswordVisible;
+        
+        // Nếu đang hiển thị mật khẩu → Ẩn mật khẩu (không cần xác thực)
         if (isPasswordVisible) {
-            String plain = encryptionHelper.decrypt(mAccount.password);
-            tvPassword.setText(plain);
-            btnTogglePassword.setImageResource(R.drawable.ic_visibility_off);
-        } else {
+            isPasswordVisible = false;
             tvPassword.setText("••••••••");
             btnTogglePassword.setImageResource(R.drawable.ic_visibility);
+            return;
         }
+        
+        // Nếu đang ẩn → Muốn hiển thị mật khẩu
+        // Kiểm tra xem user có bật biometric trong Settings không
+        if (sessionManager.isBiometricEnabled()) {
+            // Đã bật biometric → Kiểm tra thiết bị có hỗ trợ không
+            if (BiometricHelper.isBiometricAvailable(this)) {
+                // Thiết bị hỗ trợ → Yêu cầu xác thực
+                BiometricHelper.showBiometricPrompt(this, this);
+            } else {
+                // Thiết bị KHÔNG hỗ trợ nhưng setting đã bật
+                // → Tự động tắt setting biometric và cho phép xem
+                sessionManager.setBiometricEnabled(false);
+                Toast.makeText(this, 
+                    "Thiết bị không hỗ trợ sinh trắc học. Đã tự động tắt xác thực vân tay.", 
+                    Toast.LENGTH_LONG).show();
+                showPassword();
+            }
+        } else {
+            // Chưa bật biometric → Hiển thị trực tiếp
+            showPassword();
+        }
+    }
+    
+    private void showPassword() {
+        if (mAccount == null) return;
+        isPasswordVisible = true;
+        String plain = encryptionHelper.decrypt(mAccount.password);
+        tvPassword.setText(plain);
+        btnTogglePassword.setImageResource(R.drawable.ic_visibility_off);
+    }
+
+    // --- BIOMETRIC CALLBACKS ---
+    @Override
+    public void onBiometricAuthSuccess() {
+        // Xác thực thành công → Hiển thị mật khẩu
+        showPassword();
+    }
+
+    @Override
+    public void onBiometricAuthError(String errorMessage) {
+        // Xác thực thất bại/hủy → Không làm gì
+        Toast.makeText(this, getString(R.string.account_auth_failed, errorMessage), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBiometricAuthFailed() {
+        // Vân tay không khớp → Hệ thống cho phép thử lại
     }
 
     private void copyToClipboard(String label, String text, boolean isSensitive) {
@@ -196,7 +247,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         ClipData clip = ClipData.newPlainText(label, contentToCopy);
         clipboard.setPrimaryClip(clip);
 
-        Toast.makeText(this, "Đã sao chép " + label, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.account_copied, label), Toast.LENGTH_SHORT).show();
 
         if (isSensitive) {
             // Tự động xóa clipboard sau 30 giây nếu là dữ liệu nhạy cảm

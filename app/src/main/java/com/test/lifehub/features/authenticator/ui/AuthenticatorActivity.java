@@ -154,7 +154,7 @@ public class AuthenticatorActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Authenticator");
+            getSupportActionBar().setTitle(R.string.title_authenticator);
         }
     }
 
@@ -208,8 +208,8 @@ public class AuthenticatorActivity extends AppCompatActivity {
 
     private void showDeleteConfirmDialog(TotpAccountItem account) {
         new AlertDialog.Builder(this)
-            .setTitle("Xóa tài khoản")
-            .setMessage("Bạn có chắc muốn xóa tài khoản \"" + account.getDisplayName() + "\"?")
+            .setTitle(R.string.title_delete_account)
+            .setMessage(getString(R.string.msg_delete_account_confirm, account.getDisplayName()))
             .setPositiveButton("Xóa", (dialog, which) -> {
                 // Xóa từ Firestore
                 viewModel.delete(account.getDocumentId(), new TotpRepository.OnCompleteListener() {
@@ -236,8 +236,8 @@ public class AuthenticatorActivity extends AppCompatActivity {
         android.content.ClipData clip = android.content.ClipData.newPlainText("TOTP Code", text);
         clipboard.setPrimaryClip(clip);
         
-        android.widget.Toast.makeText(this, "Đã sao chép mã: " + text, 
-            android.widget.Toast.LENGTH_SHORT).show();
+        android.widget.Toast.makeText(this, getString(R.string.code_copied, text), 
+                android.widget.Toast.LENGTH_SHORT).show();
     }
 
     @Override

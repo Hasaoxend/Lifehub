@@ -232,14 +232,14 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
         ClipData clip = ClipData.newPlainText("TOTP Code", code);
         clipboard.setPrimaryClip(clip);
         
-        Toast.makeText(getContext(), "Code copied: " + code, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getString(R.string.code_copied, code), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onPasswordAccountMenuClick(UnifiedAccountItem item, View anchor) {
         new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Account")
-            .setMessage("Are you sure you want to delete this account?")
+            .setTitle(R.string.title_delete_account)
+            .setMessage(R.string.msg_delete_account)
             .setPositiveButton("Delete", (dialog, which) -> {
                 try {
                     // Convert UnifiedAccountItem back to AccountEntry for deletion
@@ -254,11 +254,11 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
                     
                     // Show toast only if fragment is still attached
                     if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), "Account deleted", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.account_deleted, Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to delete account", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.account_delete_failed, Toast.LENGTH_SHORT).show();
                     }
                     e.printStackTrace();
                 }
@@ -277,14 +277,14 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
         Log.d(TAG, "========================================");
         
         new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Authenticator")
-            .setMessage("Are you sure you want to delete this authenticator account?")
+            .setTitle(R.string.title_delete_authenticator)
+            .setMessage(R.string.msg_delete_authenticator)
             .setPositiveButton("Delete", (dialog, which) -> {
                 try {
                     String documentId = item.getId();
                     if (documentId == null || documentId.isEmpty()) {
                         Log.e(TAG, "✗ Cannot delete: Document ID is null or empty");
-                        Toast.makeText(getContext(), "Error: Invalid document ID", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.account_invalid_id, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     
@@ -294,7 +294,7 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
                         public void onSuccess(String documentId) {
                             Log.d(TAG, "✓ Delete successful: " + documentId);
                             if (isAdded() && getContext() != null) {
-                                Toast.makeText(getContext(), "Authenticator deleted", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), R.string.authenticator_deleted, Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -302,14 +302,14 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
                         public void onFailure(String error) {
                             Log.e(TAG, "✗ Delete failed: " + error);
                             if (isAdded() && getContext() != null) {
-                                Toast.makeText(getContext(), "Failed to delete authenticator: " + error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), getString(R.string.authenticator_delete_failed, error), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
                 } catch (Exception e) {
                     Log.e(TAG, "✗ Exception during delete", e);
                     if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to delete authenticator", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.authenticator_delete_failed_generic, Toast.LENGTH_SHORT).show();
                     }
                     e.printStackTrace();
                 }

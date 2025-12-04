@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
             if(state==null) return;
             if(state == LoginViewModel.LoginState.LOADING) setLoading(true);
             else if(state == LoginViewModel.LoginState.SUCCESS) { setLoading(false); navigateToMain(); }
-            else { setLoading(false); Toast.makeText(this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show(); }
+            else { setLoading(false); Toast.makeText(this, R.string.error_login_failed, Toast.LENGTH_SHORT).show(); }
         });
     }
 
@@ -107,22 +107,22 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         final TextInputEditText etEmailInput = dialogView.findViewById(R.id.et_dialog_email);
 
         new AlertDialog.Builder(this)
-                .setTitle("Khôi phục Mật khẩu")
-                .setMessage("Nhập email của bạn để nhận link khôi phục.\n\nMật khẩu mới phải đáp ứng:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ in hoa\n• Ít nhất 1 chữ thường\n• Ít nhất 1 số\n• Ít nhất 1 ký tự đặc biệt")
+                .setTitle(R.string.title_password_recovery)
+                .setMessage(R.string.msg_password_recovery)
                 .setView(dialogView)
                 .setPositiveButton("Gửi", (dialog, which) -> {
                     String email = etEmailInput.getText().toString().trim();
                     if (TextUtils.isEmpty(email)) {
-                        Toast.makeText(this, "Email không được để trống", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.error_email_empty, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.error_email_invalid, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     mAuth.sendPasswordResetEmail(email)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Đã gửi link khôi phục, vui lòng kiểm tra email.", Toast.LENGTH_LONG).show())
-                            .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                            .addOnSuccessListener(aVoid -> Toast.makeText(this, R.string.password_reset_sent, Toast.LENGTH_LONG).show())
+                            .addOnFailureListener(e -> Toast.makeText(this, getString(R.string.error_with_message, e.getMessage()), Toast.LENGTH_LONG).show());
                 })
                 .setNegativeButton("Hủy", null)
                 .show();

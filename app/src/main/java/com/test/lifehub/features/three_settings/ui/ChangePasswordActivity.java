@@ -28,6 +28,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.test.lifehub.R;
 import com.test.lifehub.core.util.SessionManager;
+import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.one_accounts.repository.AccountRepository;
+import com.test.lifehub.features.four_calendar.repository.CalendarRepository;
+import com.test.lifehub.features.two_productivity.repository.ProductivityRepository;
 import com.test.lifehub.ui.LoginActivity;
 
 import javax.inject.Inject;
@@ -57,6 +61,18 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
     @Inject
     SessionManager sessionManager;
+    
+    @Inject
+    TotpRepository totpRepository;
+    
+    @Inject
+    AccountRepository accountRepository;
+    
+    @Inject
+    CalendarRepository calendarRepository;
+    
+    @Inject
+    ProductivityRepository productivityRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,13 +116,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
         layoutCurrentPassword.setError(null);
 
         if (TextUtils.isEmpty(currentPass)) {
-            layoutCurrentPassword.setError("Vui lòng nhập mật khẩu hiện tại");
+            layoutCurrentPassword.setError(getString(R.string.change_password_current_required));
             return;
         }
 
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) {
-            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.change_password_user_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -122,8 +138,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 verifiedOldPassword = currentPass;
                 moveToStep2();
             } else {
-                layoutCurrentPassword.setError("Mật khẩu không chính xác");
-                Toast.makeText(ChangePasswordActivity.this, "Xác thực thất bại. Vui lòng kiểm tra lại mật khẩu.", Toast.LENGTH_SHORT).show();
+                layoutCurrentPassword.setError(getString(R.string.change_password_current_incorrect));
+                Toast.makeText(ChangePasswordActivity.this, R.string.change_password_auth_failed, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -131,15 +147,15 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private void showForgotPasswordDialog() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) {
-            Toast.makeText(this, "Không tìm thấy email người dùng", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.change_password_email_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
 
         String userEmail = user.getEmail();
 
         new MaterialAlertDialogBuilder(this)
-            .setTitle("Quên mật khẩu")
-            .setMessage("Chúng tôi sẽ gửi email đặt lại mật khẩu đến:\n\n" + userEmail + "\n\nBạn có muốn tiếp tục?")
+            .setTitle(R.string.title_forgot_password)
+            .setMessage(getString(R.string.msg_forgot_password, userEmail))
             .setPositiveButton("Gửi email", (dialog, which) -> sendPasswordResetEmail(userEmail))
             .setNegativeButton("Hủy", null)
             .show();
@@ -153,14 +169,14 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 setLoadingStep1(false);
                 if (task.isSuccessful()) {
                     new MaterialAlertDialogBuilder(this)
-                        .setTitle("Email đã được gửi")
-                        .setMessage("Vui lòng kiểm tra email của bạn để đặt lại mật khẩu.\n\nSau khi đặt lại mật khẩu, bạn cần đăng nhập lại.")
+                        .setTitle(R.string.title_email_sent)
+                        .setMessage(R.string.msg_email_sent_check)
                         .setPositiveButton("Đăng xuất ngay", (d, w) -> logoutAndRedirect())
                         .setNegativeButton("Để sau", (d, w) -> finish())
                         .setCancelable(false)
                         .show();
                 } else {
-                    Toast.makeText(this, "Lỗi gửi email: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.change_password_email_error, task.getException().getMessage()), Toast.LENGTH_LONG).show();
                 }
             });
     }
@@ -275,33 +291,33 @@ public class ChangePasswordActivity extends AppCompatActivity {
         boolean isValid = true;
 
         if (TextUtils.isEmpty(newPass)) {
-            layoutNewPassword.setError("Vui lòng nhập mật khẩu mới");
+            layoutNewPassword.setError(getString(R.string.change_password_new_required));
             isValid = false;
         } else if (newPass.length() < 8) {
-            layoutNewPassword.setError("Mật khẩu phải có ít nhất 8 ký tự");
+            layoutNewPassword.setError(getString(R.string.change_password_min_length));
             isValid = false;
         } else if (!newPass.matches(".*[A-Z].*")) {
-            layoutNewPassword.setError("Mật khẩu phải có ít nhất 1 chữ in hoa");
+            layoutNewPassword.setError(getString(R.string.change_password_need_uppercase));
             isValid = false;
         } else if (!newPass.matches(".*[a-z].*")) {
-            layoutNewPassword.setError("Mật khẩu phải có ít nhất 1 chữ thường");
+            layoutNewPassword.setError(getString(R.string.change_password_need_lowercase));
             isValid = false;
         } else if (!newPass.matches(".*\\d.*")) {
-            layoutNewPassword.setError("Mật khẩu phải có ít nhất 1 chữ số");
+            layoutNewPassword.setError(getString(R.string.change_password_need_number));
             isValid = false;
         } else if (!newPass.matches(".*[@#$%^&+=!].*")) {
-            layoutNewPassword.setError("Mật khẩu phải có ít nhất 1 ký tự đặc biệt (@#$%^&+=!)");
+            layoutNewPassword.setError(getString(R.string.change_password_need_special));
             isValid = false;
         } else if (newPass.equals(verifiedOldPassword)) {
-            layoutNewPassword.setError("Mật khẩu mới không được trùng với mật khẩu cũ");
+            layoutNewPassword.setError(getString(R.string.change_password_same_as_old));
             isValid = false;
         }
 
         if (TextUtils.isEmpty(confirmPass)) {
-            layoutConfirmPassword.setError("Vui lòng xác nhận mật khẩu");
+            layoutConfirmPassword.setError(getString(R.string.change_password_confirm_required));
             isValid = false;
         } else if (!newPass.equals(confirmPass)) {
-            layoutConfirmPassword.setError("Mật khẩu xác nhận không khớp");
+            layoutConfirmPassword.setError(getString(R.string.change_password_confirm_mismatch));
             isValid = false;
         }
 
@@ -320,18 +336,24 @@ public class ChangePasswordActivity extends AppCompatActivity {
             setLoadingStep2(false);
             if (task.isSuccessful()) {
                 new MaterialAlertDialogBuilder(this)
-                    .setTitle("Thành công!")
-                    .setMessage("Mật khẩu đã được cập nhật thành công.\n\nVui lòng đăng nhập lại với mật khẩu mới.")
+                    .setTitle(R.string.title_success)
+                    .setMessage(R.string.msg_password_updated)
                     .setPositiveButton("Đăng nhập lại", (d, w) -> logoutAndRedirect())
                     .setCancelable(false)
                     .show();
             } else {
-                Toast.makeText(ChangePasswordActivity.this, "Lỗi cập nhật mật khẩu: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ChangePasswordActivity.this, getString(R.string.change_password_update_error, task.getException().getMessage()), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void logoutAndRedirect() {
+        // ✅ BẢO MẬT: Stop ALL Firestore listeners để tránh data leak
+        totpRepository.stopListening();
+        accountRepository.stopListening();
+        calendarRepository.stopListening();
+        productivityRepository.stopListening();
+        
         sessionManager.logoutUser();
         mAuth.signOut();
         Intent intent = new Intent(this, LoginActivity.class);

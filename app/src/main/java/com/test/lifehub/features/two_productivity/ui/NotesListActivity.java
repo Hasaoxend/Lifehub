@@ -57,7 +57,7 @@ public class NotesListActivity extends AppCompatActivity {
         mEmptyView = findViewById(R.id.empty_view_notes);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("Ghi chú");
+        getSupportActionBar().setTitle(R.string.title_notes);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mToolbar.setNavigationOnClickListener(v -> finish());
 

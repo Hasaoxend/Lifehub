@@ -77,7 +77,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_NOTE_ID)) {
-            getSupportActionBar().setTitle("Sửa Ghi chú");
+            getSupportActionBar().setTitle(R.string.title_edit_note);
             mCurrentNoteId = intent.getStringExtra(EXTRA_NOTE_ID);
 
             if (mCurrentNoteId != null && !mCurrentNoteId.isEmpty()){
@@ -90,7 +90,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
             }
 
         } else {
-            getSupportActionBar().setTitle("Ghi chú Mới");
+            getSupportActionBar().setTitle(R.string.title_new_note);
             mCurrentNoteId = null;
             mCurrentNote = null;
             updateReminderUi();
@@ -141,7 +141,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
                                 mCalendar.set(Calendar.SECOND, 0);
 
                                 if (mCalendar.getTimeInMillis() <= System.currentTimeMillis()) {
-                                    Toast.makeText(this, "Vui lòng chọn thời gian trong tương lai", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, R.string.task_select_future_time, Toast.LENGTH_SHORT).show();
                                     mReminderDate = null;
                                 } else {
                                     mReminderDate = mCalendar.getTime();
@@ -194,7 +194,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
             }
 
             mViewModel.deleteNote(mCurrentNote);
-            Toast.makeText(this, "Đã xóa Ghi chú", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.note_deleted_msg, Toast.LENGTH_SHORT).show();
             setResult(Activity.RESULT_OK);
             finish();
         }
@@ -205,7 +205,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
         String content = mEtContent.getText().toString().trim();
 
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(content)) {
-            Toast.makeText(this, "Vui lòng nhập Tiêu đề và Nội dung", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.note_title_content_required, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -225,7 +225,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
             }
 
             mViewModel.insertNote(newNote);
-            Toast.makeText(this, "Đã lưu Ghi chú", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.note_saved_msg, Toast.LENGTH_SHORT).show();
 
         } else {
             // ----- CẬP NHẬT (SỬA) -----
@@ -252,7 +252,7 @@ public class AddEditNoteActivity extends AppCompatActivity {
                 }
 
                 mViewModel.updateNote(mCurrentNote);
-                Toast.makeText(this, "Đã cập nhật Ghi chú", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.note_updated, Toast.LENGTH_SHORT).show();
             }
         }
 

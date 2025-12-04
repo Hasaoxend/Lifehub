@@ -80,7 +80,7 @@ public class QRScannerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Quét mã QR");
+            getSupportActionBar().setTitle(R.string.title_qr_scanner);
         }
     }
 
@@ -104,7 +104,7 @@ public class QRScannerActivity extends AppCompatActivity {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindCameraUseCases(cameraProvider);
             } catch (ExecutionException | InterruptedException e) {
-                Toast.makeText(this, "Lỗi khởi động camera: " + e.getMessage(), 
+                Toast.makeText(this, getString(R.string.qr_camera_init_error, e.getMessage()), 
                     Toast.LENGTH_SHORT).show();
             }
         }, ContextCompat.getMainExecutor(this));
@@ -167,7 +167,7 @@ public class QRScannerActivity extends AppCompatActivity {
                 imageAnalysis
             );
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi khi bind camera: " + e.getMessage(), 
+            Toast.makeText(this, getString(R.string.qr_camera_bind_error, e.getMessage()), 
                 Toast.LENGTH_SHORT).show();
         }
     }
@@ -193,7 +193,7 @@ public class QRScannerActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startCamera();
             } else {
-                Toast.makeText(this, "Cần quyền camera để quét QR code", 
+                Toast.makeText(this, R.string.qr_camera_permission_needed, 
                     Toast.LENGTH_SHORT).show();
                 finish();
             }

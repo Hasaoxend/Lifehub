@@ -23,30 +23,40 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.test.lifehub.R;
 import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.one_accounts.repository.AccountRepository;
+import com.test.lifehub.features.four_calendar.repository.CalendarRepository;
+import com.test.lifehub.features.two_productivity.repository.ProductivityRepository;
 import com.test.lifehub.features.one_accounts.ui.AccountFragment;
 import com.test.lifehub.features.two_productivity.ui.ProductivityFragment;
 import com.test.lifehub.features.three_settings.ui.SettingsFragment;
-import com.test.lifehub.core.util.SessionManager; // <-- XÓA IMPORT NÀY
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.hilt.android.AndroidEntryPoint; // <-- THÊM IMPORT NÀY
+import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Activity chính, "bộ điều khiển" trung tâm của ứng dụng.
  * (Phiên bản đã refactor Hilt và xóa logic không cần thiết)
  */
-@AndroidEntryPoint // <-- THÊM CHÚ THÍCH NÀY
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    // private SessionManager sessionManager; // <-- XÓA FIELD NÀY
     private BottomNavigationView bottomNav;
     
     @Inject
     TotpRepository totpRepository;
+    
+    @Inject
+    AccountRepository accountRepository;
+    
+    @Inject
+    CalendarRepository calendarRepository;
+    
+    @Inject
+    ProductivityRepository productivityRepository;
 
     // ----- BỘ XIN QUYỀN MỚI (DÙNG CHO THÔNG BÁO) -----
     // (Giữ nguyên)
@@ -55,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
                 // Xử lý kết quả sau khi người dùng chọn "Cho phép" hoặc "Từ chối"
                 if (Boolean.TRUE.equals(permissions.get(Manifest.permission.POST_NOTIFICATIONS))) {
                     // Quyền thông báo được cấp
-                    Toast.makeText(this, "Đã cấp quyền thông báo!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.permission_notification_granted, Toast.LENGTH_SHORT).show();
                 } else {
                     // Quyền thông báo bị từ chối
-                    Toast.makeText(this, "Bạn đã từ chối quyền thông báo. Tính năng nhắc nhở có thể không hoạt động.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.permission_notification_denied, Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -67,18 +77,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Restart Firestore listener for current user
+        // ✅ QUAN TRỌNG: Restart Firestore listeners cho user hiện tại
+        // Đảm bảo các repository lắng nghe đúng dữ liệu của user vừa đăng nhập
         totpRepository.startListening();
-
-        // --- XÓA LOGIC KIỂM TRA ĐĂNG NHẬP ---
-        // LoginActivity đã xử lý việc này. Nếu user đến được đây
-        // nghĩa là họ ĐÃ ĐƯỢC PHÉP vào.
-        // sessionManager = new SessionManager(this);
-        // if (!sessionManager.isLoggedIn()) {
-        //     finish();
-        //     return;
-        // }
-        // ------------------------------------
+        accountRepository.startListening();
+        calendarRepository.startListening();
+        productivityRepository.startListening();
 
         bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(navListener);
@@ -140,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             if (!alarmManager.canScheduleExactAlarms()) {
                 new AlertDialog.Builder(this)
-                        .setTitle("Cần cấp quyền Báo thức")
-                        .setMessage("Để tính năng Nhắc nhở hoạt động chính xác, LifeHub cần quyền \"Đặt báo thức và lời nhắc\".")
+                        .setTitle(R.string.permission_alarm_title)
+                        .setMessage(R.string.permission_alarm_message)
                         .setPositiveButton("Đi đến Cài đặt", (dialog, which) -> {
                             Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
                                     Uri.parse("package:" + getPackageName()));

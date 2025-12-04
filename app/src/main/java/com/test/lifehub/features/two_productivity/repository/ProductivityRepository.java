@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.WriteBatch;
 import com.test.lifehub.core.util.Constants;
@@ -39,30 +40,97 @@ public class ProductivityRepository {
     private final MutableLiveData<List<TaskEntry>> mAllTasks = new MutableLiveData<>();
     private final MutableLiveData<List<TaskEntry>> mAllShoppingItems = new MutableLiveData<>();
     private final MutableLiveData<List<ProjectEntry>> mAllProjects = new MutableLiveData<>();
+    
+    // ✅ BẢO MẬT: Track user để detect user change
+    private String currentUserId = null;
+    private ListenerRegistration notesListener = null;
+    private ListenerRegistration tasksListener = null;
+    private ListenerRegistration projectsListener = null;
 
     @Inject
     public ProductivityRepository(FirebaseAuth auth, FirebaseFirestore db) {
         this.mAuth = auth;
         this.mDb = db;
+        
+        // ✅ BẢO MẬT: Khởi tạo listener với user tracking
+        startListening();
+    }
+    
+    /**
+     * ✅ BẢO MẬT: Bắt đầu listening với user change detection
+     */
+    public void startListening() {
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            String uid = user.getUid();
-            mNotesCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_NOTES);
-            mTasksCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_TASKS);
-            mProjectsCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(COLLECTION_PROJECTS);
-
-            Log.d(TAG, "Repository initialized. User: " + uid);
-            listenForNoteChanges();
-            listenForTaskChanges();
-            listenForProjectChanges();
-        } else {
-            Log.e(TAG, "Repository init failed: User is NULL");
+        if (user == null) {
+            Log.e(TAG, "User not logged in, cannot start listening");
+            stopListening();
+            clearAllData();
+            return;
         }
+        
+        String newUserId = user.getUid();
+        
+        // Detect user change
+        if (currentUserId != null && !currentUserId.equals(newUserId)) {
+            Log.d(TAG, "User changed from " + currentUserId + " to " + newUserId + ", clearing old data");
+            stopListening();
+            clearAllData();
+        }
+        
+        // Nếu đã listening cho cùng user, skip
+        if (currentUserId != null && currentUserId.equals(newUserId) && notesListener != null) {
+            Log.d(TAG, "Already listening for user: " + newUserId);
+            return;
+        }
+        
+        currentUserId = newUserId;
+        String uid = user.getUid();
+        mNotesCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_NOTES);
+        mTasksCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(Constants.COLLECTION_TASKS);
+        mProjectsCollection = mDb.collection(Constants.COLLECTION_USERS).document(uid).collection(COLLECTION_PROJECTS);
+
+        Log.d(TAG, "Repository initialized. User: " + uid);
+        listenForNoteChanges();
+        listenForTaskChanges();
+        listenForProjectChanges();
+    }
+    
+    /**
+     * ✅ BẢO MẬT: Dừng tất cả listeners
+     * Gọi khi user logout để tránh data leak
+     */
+    public void stopListening() {
+        if (notesListener != null) {
+            notesListener.remove();
+            notesListener = null;
+        }
+        if (tasksListener != null) {
+            tasksListener.remove();
+            tasksListener = null;
+        }
+        if (projectsListener != null) {
+            projectsListener.remove();
+            projectsListener = null;
+        }
+        currentUserId = null;
+        Log.d(TAG, "Stopped all Firestore listeners");
+    }
+    
+    /**
+     * ✅ BẢO MẬT: Clear toàn bộ data trong LiveData
+     * Gọi khi user logout hoặc switch user
+     */
+    private void clearAllData() {
+        mAllNotes.setValue(new ArrayList<>());
+        mAllTasks.setValue(new ArrayList<>());
+        mAllShoppingItems.setValue(new ArrayList<>());
+        mAllProjects.setValue(new ArrayList<>());
+        Log.d(TAG, "Cleared all LiveData");
     }
 
     private void listenForNoteChanges() {
         if (mNotesCollection == null) return;
-        mNotesCollection.orderBy("lastModified", Query.Direction.DESCENDING)
+        notesListener = mNotesCollection.orderBy("lastModified", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { Log.w(TAG, "❌ Lỗi lắng nghe Notes", e); return; }
                     if (snapshot != null) {
@@ -85,7 +153,7 @@ public class ProductivityRepository {
         Log.d(TAG, "Lắng nghe TẤT CẢ Tasks...");
 
         // Query đơn giản nhất: Lấy tất cả, sắp xếp theo thời gian
-        mTasksCollection.orderBy("lastModified", Query.Direction.DESCENDING)
+        tasksListener = mTasksCollection.orderBy("lastModified", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "❌ Lỗi lắng nghe Tasks", e);
@@ -119,7 +187,7 @@ public class ProductivityRepository {
     // Lắng nghe Projects (sắp xếp A-Z)
     private void listenForProjectChanges() {
         if (mProjectsCollection == null) return;
-        mProjectsCollection.orderBy("name", Query.Direction.ASCENDING)
+        projectsListener = mProjectsCollection.orderBy("name", Query.Direction.ASCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { Log.w(TAG, "❌ Lỗi lắng nghe Projects", e); return; }
                     if (snapshot != null) {

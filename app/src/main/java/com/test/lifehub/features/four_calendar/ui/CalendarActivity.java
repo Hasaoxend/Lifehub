@@ -18,17 +18,19 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class CalendarActivity extends AppCompatActivity {
 
-    private static final int VIEW_WEEK = 0;
+    // View modes: Year → Month → Day (iOS style)
+    private static final int VIEW_YEAR = 0;
     private static final int VIEW_MONTH = 1;
+    private static final int VIEW_DAY = 2;
 
     private Toolbar mToolbar;
     private TabLayout mTabLayout;
-    private FloatingActionButton mFab; // Nút FAB
+    private FloatingActionButton mFab;
     private MaterialButton mBtnPrevious, mBtnNext, mBtnToday;
     private TextView mTvCurrentDate;
 
     private CalendarViewModel mViewModel;
-    private int mCurrentView = VIEW_WEEK;
+    private int mCurrentView = VIEW_MONTH; // Mặc định Month View (như iOS)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +46,19 @@ public class CalendarActivity extends AppCompatActivity {
         mTvCurrentDate = findViewById(R.id.tv_current_date);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("Lịch");
+        getSupportActionBar().setTitle(R.string.calendar_title);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mToolbar.setNavigationOnClickListener(v -> finish());
 
         mViewModel = new ViewModelProvider(this).get(CalendarViewModel.class);
 
         setupTabLayout();
-        setupFab(); // *** ĐẢM BẢO GỌI HÀM NÀY ***
+        setupFab();
         setupNavigationButtons();
 
         if (savedInstanceState == null) {
-            loadFragment(new WeekViewFragment());
+            // Bắt đầu với Month View (như iOS)
+            loadFragment(new MonthViewFragment());
         }
     }
 
@@ -66,8 +69,12 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void setupTabLayout() {
-        mTabLayout.addTab(mTabLayout.newTab().setText("Tuần"));
-        mTabLayout.addTab(mTabLayout.newTab().setText("Tháng"));
+        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.calendar_year_view));
+        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.calendar_month_view));
+        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.calendar_day_view));
+
+        // Chọn tab Month mặc định
+        mTabLayout.selectTab(mTabLayout.getTabAt(VIEW_MONTH));
 
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -85,7 +92,6 @@ public class CalendarActivity extends AppCompatActivity {
     // *** HÀM SỬA LỖI CHO FAB ***
     private void setupFab() {
         mFab.setOnClickListener(v -> {
-            // (Giả sử bạn có AddEditEventDialog.java)
             AddEditEventDialog dialog = AddEditEventDialog.newInstance(null);
             dialog.show(getSupportFragmentManager(), "AddEventDialog");
         });
@@ -96,19 +102,23 @@ public class CalendarActivity extends AppCompatActivity {
 
         mBtnPrevious.setOnClickListener(v -> {
             Fragment current = getCurrentFragment();
-            if (current instanceof WeekViewFragment) {
-                ((WeekViewFragment) current).previousWeek();
+            if (current instanceof YearViewFragment) {
+                ((YearViewFragment) current).previousYear();
             } else if (current instanceof MonthViewFragment) {
                 ((MonthViewFragment) current).previousMonth();
+            } else if (current instanceof DayViewFragment) {
+                ((DayViewFragment) current).previousWeek();
             }
         });
 
         mBtnNext.setOnClickListener(v -> {
             Fragment current = getCurrentFragment();
-            if (current instanceof WeekViewFragment) {
-                ((WeekViewFragment) current).nextWeek();
+            if (current instanceof YearViewFragment) {
+                ((YearViewFragment) current).nextYear();
             } else if (current instanceof MonthViewFragment) {
                 ((MonthViewFragment) current).nextMonth();
+            } else if (current instanceof DayViewFragment) {
+                ((DayViewFragment) current).nextWeek();
             }
         });
     }
@@ -120,17 +130,53 @@ public class CalendarActivity extends AppCompatActivity {
 
     private void scrollToToday() {
         Fragment current = getCurrentFragment();
-        if (current instanceof WeekViewFragment) {
-            ((WeekViewFragment) current).scrollToToday();
+        if (current instanceof YearViewFragment) {
+            ((YearViewFragment) current).scrollToCurrentYear();
         } else if (current instanceof MonthViewFragment) {
             ((MonthViewFragment) current).scrollToToday();
+        } else if (current instanceof DayViewFragment) {
+            ((DayViewFragment) current).scrollToToday();
         }
     }
 
     private void switchView() {
-        Fragment fragment = (mCurrentView == VIEW_WEEK)
-                ? new WeekViewFragment()
-                : new MonthViewFragment();
+        Fragment fragment;
+        switch (mCurrentView) {
+            case VIEW_YEAR:
+                fragment = new YearViewFragment();
+                break;
+            case VIEW_DAY:
+                fragment = new DayViewFragment();
+                break;
+            case VIEW_MONTH:
+            default:
+                fragment = new MonthViewFragment();
+                break;
+        }
+        loadFragment(fragment);
+    }
+
+    /**
+     * Navigation từ Year View → Month View
+     */
+    public void navigateToMonth(java.util.Calendar month) {
+        mCurrentView = VIEW_MONTH;
+        mTabLayout.selectTab(mTabLayout.getTabAt(VIEW_MONTH));
+        
+        MonthViewFragment fragment = new MonthViewFragment();
+        // TODO: Truyền tháng được chọn qua Bundle
+        loadFragment(fragment);
+    }
+
+    /**
+     * Navigation từ Month View → Day View
+     */
+    public void navigateToDay(java.util.Date day) {
+        mCurrentView = VIEW_DAY;
+        mTabLayout.selectTab(mTabLayout.getTabAt(VIEW_DAY));
+        
+        DayViewFragment fragment = new DayViewFragment();
+        // TODO: Truyền ngày được chọn qua Bundle
         loadFragment(fragment);
     }
 

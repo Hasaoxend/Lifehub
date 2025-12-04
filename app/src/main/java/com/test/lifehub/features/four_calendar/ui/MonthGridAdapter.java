@@ -69,6 +69,14 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
     @Override
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         MonthDayData day = getItem(position);
+        
+        // Kiểm tra nếu là ô trống
+        if (!day.isCurrentMonth && day.date.getTime() == 0) {
+            holder.itemView.setVisibility(View.INVISIBLE);
+            return;
+        }
+        
+        holder.itemView.setVisibility(View.VISIBLE);
         holder.tvDate.setText(String.format(Locale.getDefault(), "%d", day.date.getDate()));
 
         float alpha = day.isCurrentMonth ? 1.0f : 0.3f;
@@ -101,7 +109,7 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
         }
 
         // Hiển thị ngày lễ
-        if (day.holidayName != null && day.isCurrentMonth) {
+        if (day.holidayName != null && !day.holidayName.isEmpty() && day.isCurrentMonth) {
             holder.tvHoliday.setText(day.holidayName);
             holder.tvHoliday.setVisibility(View.VISIBLE);
             if (!isToday) { // Chỉ đổi màu chữ nếu không phải hôm nay
@@ -111,10 +119,10 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
             holder.tvHoliday.setVisibility(View.GONE);
         }
 
-        // Hiển thị tên sự kiện (Giữ nguyên logic này)
+        // Hiển thị tên sự kiện (KHÔNG bao gồm ngày lễ)
         holder.layoutEvents.removeAllViews();
         int maxEventsToShow = 2;
-        int eventCount = day.events.size();
+        int eventCount = day.events != null ? day.events.size() : 0;
 
         for (int i = 0; i < Math.min(eventCount, maxEventsToShow); i++) {
             CalendarEvent event = day.events.get(i);

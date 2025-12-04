@@ -116,11 +116,11 @@ public class WeatherActivity extends AppCompatActivity {
 
         if (savedCity != null && !savedCity.isEmpty()) {
             // Nếu đã có thành phố, gọi fetchWeather
-            Toast.makeText(this, "Đang làm mới thời tiết...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.weather_refreshing, Toast.LENGTH_SHORT).show();
             fetchWeather(savedCity);
         } else {
             // Nếu chưa có thành phố (lần đầu vào app)
-            Toast.makeText(this, "Vui lòng chọn một thành phố trước", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.weather_select_city_first, Toast.LENGTH_SHORT).show();
             // Bạn cũng có thể gọi showChangeCityDialog() nếu muốn
         }
     }
@@ -219,7 +219,7 @@ public class WeatherActivity extends AppCompatActivity {
                 Log.e(TAG_SEARCH, "LỖI TÌM KIẾM THÀNH PHỐ: " + t.getMessage(), t);
 
                 if (!call.isCanceled()) {
-                    Toast.makeText(WeatherActivity.this, "Lỗi tìm kiếm: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WeatherActivity.this, getString(R.string.weather_search_error, t.getMessage()), Toast.LENGTH_SHORT).show();
                     tvNoResults.setVisibility(View.VISIBLE);
                 }
             }
@@ -248,7 +248,7 @@ public class WeatherActivity extends AppCompatActivity {
                         } else {
                             // Lỗi server (ví dụ: không tìm thấy thành phố này)
                             Log.e(TAG_FETCH, "Lỗi khi lấy thời tiết: Code " + response.code() + " - " + response.message());
-                            Toast.makeText(WeatherActivity.this, "Không tìm thấy thời tiết cho: " + city, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(WeatherActivity.this, getString(R.string.weather_not_found, city), Toast.LENGTH_SHORT).show();
                             tvPromptCity.setVisibility(View.VISIBLE);
                         }
                     }
@@ -260,7 +260,7 @@ public class WeatherActivity extends AppCompatActivity {
 
                         progressBar.setVisibility(View.GONE);
                         tvPromptCity.setVisibility(View.VISIBLE);
-                        Toast.makeText(WeatherActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WeatherActivity.this, getString(R.string.weather_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

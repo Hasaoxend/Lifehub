@@ -90,10 +90,10 @@ public class AddEditEventDialog extends DialogFragment {
         if (getArguments() != null && getArguments().containsKey(ARG_EVENT)) {
             mCurrentEvent = (CalendarEvent) getArguments().getSerializable(ARG_EVENT);
             populateUI(mCurrentEvent);
-            tvTitle.setText("Sửa Sự kiện");
+            tvTitle.setText(R.string.event_edit);
             btnDelete.setVisibility(View.VISIBLE);
         } else {
-            tvTitle.setText("Sự kiện Mới");
+            tvTitle.setText(R.string.event_new);
             btnDelete.setVisibility(View.GONE);
             // Default: 1 hour from now
             mStartCalendar.add(Calendar.HOUR_OF_DAY, 1);
@@ -159,15 +159,15 @@ public class AddEditEventDialog extends DialogFragment {
 
         btnDelete.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Xác nhận xóa")
-                    .setMessage("Bạn có chắc chắn muốn xóa sự kiện này?")
+                    .setTitle(R.string.title_confirm_delete)
+                    .setMessage(R.string.event_delete_confirm_msg)
                     .setPositiveButton("Xóa", (dialog, which) -> {
                         if (mCurrentEvent != null) {
                             if (mCurrentEvent.getAlarmRequestCode() != 0) {
                                 AlarmHelper.cancelAlarm(requireContext(), mCurrentEvent.getAlarmRequestCode());
                             }
                             mViewModel.deleteEvent(mCurrentEvent);
-                            Toast.makeText(getContext(), "Đã xóa sự kiện", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), R.string.event_deleted_msg, Toast.LENGTH_SHORT).show();
                             dismiss();
                         }
                     })
@@ -198,7 +198,7 @@ public class AddEditEventDialog extends DialogFragment {
                                 
                                 // Validate: Ngày kết thúc không được ở quá khứ
                                 if (!isStartTime && mEndCalendar.getTimeInMillis() < currentTime) {
-                                    Toast.makeText(getContext(), "Ngày kết thúc không được ở quá khứ", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getContext(), R.string.event_end_date_past, Toast.LENGTH_LONG).show();
                                     mEndCalendar.setTime(mStartCalendar.getTime());
                                     mEndCalendar.add(Calendar.HOUR_OF_DAY, 1);
                                     updateTimeDisplays();
@@ -209,7 +209,7 @@ public class AddEditEventDialog extends DialogFragment {
                                 Calendar maxFuture = Calendar.getInstance();
                                 maxFuture.add(Calendar.YEAR, 5);
                                 if (isStartTime && mStartCalendar.getTimeInMillis() > maxFuture.getTimeInMillis()) {
-                                    Toast.makeText(getContext(), "Ngày bắt đầu không được quá 5 năm trong tương lai", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getContext(), R.string.event_start_date_future_limit, Toast.LENGTH_LONG).show();
                                     mStartCalendar.setTimeInMillis(currentTime);
                                     mStartCalendar.add(Calendar.HOUR_OF_DAY, 1);
                                     updateTimeDisplays();
@@ -218,7 +218,7 @@ public class AddEditEventDialog extends DialogFragment {
                                 
                                 // Validate: End time must be after start time
                                 if (!isStartTime && mEndCalendar.getTimeInMillis() <= mStartCalendar.getTimeInMillis()) {
-                                    Toast.makeText(getContext(), "Thời gian kết thúc phải sau thời gian bắt đầu", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), R.string.event_end_before_start, Toast.LENGTH_SHORT).show();
                                     mEndCalendar.setTime(mStartCalendar.getTime());
                                     mEndCalendar.add(Calendar.HOUR_OF_DAY, 1);
                                 }
@@ -250,7 +250,7 @@ public class AddEditEventDialog extends DialogFragment {
         String location = etLocation.getText().toString().trim();
 
         if (TextUtils.isEmpty(title)) {
-            Toast.makeText(getContext(), "Vui lòng nhập tiêu đề", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.event_title_required, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -301,10 +301,10 @@ public class AddEditEventDialog extends DialogFragment {
 
         if (mCurrentEvent != null) {
             mViewModel.updateEvent(event);
-            Toast.makeText(getContext(), "Đã cập nhật sự kiện", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.event_updated, Toast.LENGTH_SHORT).show();
         } else {
             mViewModel.insertEvent(event);
-            Toast.makeText(getContext(), "Đã thêm sự kiện", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.event_added, Toast.LENGTH_SHORT).show();
         }
 
         dismiss();

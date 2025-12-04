@@ -96,10 +96,10 @@ public class AddEditProjectDialog extends DialogFragment {
         }
 
         if (mCurrentProjectId != null) {
-            mTvTitle.setText("Đổi tên Thư mục");
+            mTvTitle.setText(R.string.project_rename);
             mEtProjectName.setText(mCurrentProjectName);
         } else {
-            mTvTitle.setText("Thư mục Mới");
+            mTvTitle.setText(R.string.project_new);
         }
 
         Log.d(TAG, "Dialog created. ParentID: " + mParentProjectId);
@@ -118,19 +118,19 @@ public class AddEditProjectDialog extends DialogFragment {
         String projectName = mEtProjectName.getText().toString().trim();
 
         if (TextUtils.isEmpty(projectName)) {
-            Toast.makeText(getContext(), "Tên thư mục không được để trống", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.project_name_required, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (mCurrentProjectId == null) {
             // ----- THÊM MỚI -----
             mViewModel.insertProject(projectName, mParentProjectId); // Truyền cả parentId
-            Toast.makeText(getContext(), "Đã tạo thư mục", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.project_created, Toast.LENGTH_SHORT).show();
 
         } else {
             // ----- CẬP NHẬT (SỬA) -----
             mViewModel.updateProjectName(mCurrentProjectId, projectName);
-            Toast.makeText(getContext(), "Đã cập nhật", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.project_updated, Toast.LENGTH_SHORT).show();
         }
 
         dismiss();

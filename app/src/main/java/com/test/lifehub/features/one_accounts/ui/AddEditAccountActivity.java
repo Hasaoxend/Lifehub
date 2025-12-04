@@ -107,11 +107,11 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
         }
 
         if (mAccountDocumentId == null) {
-            getSupportActionBar().setTitle("Thêm tài khoản mới");
+            getSupportActionBar().setTitle(R.string.title_add_account);
             mIsDataLoaded = true;
             updateFieldButtons();
         } else {
-            getSupportActionBar().setTitle("Sửa tài khoản");
+            getSupportActionBar().setTitle(R.string.title_edit_account);
             loadAccountData(mAccountDocumentId);
         }
         setupListeners();
@@ -253,7 +253,7 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
         String password = etPassword.getText().toString().trim(); // Đây là Plain Text
 
         if (serviceName.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Thiếu thông tin bắt buộc", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.account_missing_info, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -287,12 +287,12 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
             mViewModel.update(account);
         }
 
-        Toast.makeText(this, "Đã lưu (Bảo mật)", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.account_saved_secure, Toast.LENGTH_SHORT).show();
         finish();
     }
 
     private void confirmDelete() {
-        new AlertDialog.Builder(this).setTitle("Xóa").setMessage("Xóa tài khoản này?")
+        new AlertDialog.Builder(this).setTitle(R.string.delete).setMessage(R.string.msg_confirm_delete_account)
                 .setPositiveButton("Xóa", (d,w) -> { mViewModel.delete(mCurrentAccount); finish(); })
                 .setNegativeButton("Hủy", null).show();
     }

@@ -83,8 +83,8 @@ public class AccountAdapter extends ListAdapter<AccountEntry, AccountAdapter.Acc
             } else if (id == R.id.action_delete_account) {
                 // Confirm delete
                 new AlertDialog.Builder(view.getContext())
-                        .setTitle("Xác nhận Xóa")
-                        .setMessage("Bạn có chắc chắn muốn xóa tài khoản \"" + account.serviceName + "\" không?")
+                        .setTitle(R.string.title_confirm_delete)
+                        .setMessage(view.getContext().getString(R.string.msg_delete_account_confirm, account.serviceName))
                         .setPositiveButton("Xóa", (dialog, which) -> {
                             if (mListener != null) {
                                 mListener.onDelete(account);

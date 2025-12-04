@@ -8,6 +8,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,7 +52,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false); // Ẩn tiêu đề
         }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed()); // Nút quay về
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed()); // Nút quay về
         // ------------------------
 
         tvDisplay = findViewById(R.id.tv_display);
@@ -151,7 +152,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                 }
             }
         }
-        btnClear.setText("C"); // Đổi thành nút "C"
+        btnClear.setText(R.string.calc_button_c); // Đổi thành nút "C"
     }
 
     private void handleDecimalInput() {
@@ -161,7 +162,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
         } else if (!tvDisplay.getText().toString().contains(".")) {
             tvDisplay.setText(tvDisplay.getText().toString() + ".");
         }
-        btnClear.setText("C"); // Đổi thành nút "C"
+        btnClear.setText(R.string.calc_button_c); // Đổi thành nút "C"
     }
 
     private void handleOperationInput(String operation) {
@@ -180,7 +181,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             formulaBuilder.append(formatResult(operand1)).append(" ").append(operation);
             tvFormula.setText(formulaBuilder.toString());
         }
-        btnClear.setText("AC"); // Đổi về nút "AC"
+        btnClear.setText(R.string.calc_button_ac); // Đổi về nút "AC"
     }
 
     private void handleEqualsInput() {
@@ -224,11 +225,11 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                 break;
             case "÷":
                 if (operand2 == 0) {
-                    tvDisplay.setText("Lỗi");
+                    tvDisplay.setText(R.string.calc_error);
                     tvFormula.setText(""); // Xóa formula khi lỗi
                     isErrorState = true;
                     isUserTyping = false;
-                    btnClear.setText("AC");
+                    btnClear.setText(R.string.calc_button_ac);
                     resetCalculatorState(); // Chỉ reset state, không reset hiển thị
                     return;
                 }
@@ -246,7 +247,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
 
         operand1 = result; // Kết quả trở thành operand1 cho phép tính tiếp theo
         isUserTyping = false;
-        btnClear.setText("AC");
+        btnClear.setText(R.string.calc_button_ac);
 
         // Yêu cầu 2: Tắt tính năng lặp lại dấu =
         // Reset pendingOperation và operand2 để buộc người dùng nhập lại
@@ -269,7 +270,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             tvDisplay.setText("0");
             resetCalculatorState();
         }
-        btnClear.setText("AC");
+        btnClear.setText(R.string.calc_button_ac);
     }
 
     // Reset logic tính toán
@@ -346,7 +347,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             calculationHistory.clear();
             historyAdapter.notifyDataSetChanged();
             dialog.dismiss();
-            Toast.makeText(this, "Đã xóa lịch sử", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.calc_history_cleared, Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();

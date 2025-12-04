@@ -8,6 +8,7 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.test.lifehub.R;
 import com.test.lifehub.core.receivers.AlarmReceiver;
 import java.util.Date;
 
@@ -54,7 +55,7 @@ public class AlarmHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (!alarmManager.canScheduleExactAlarms()) {
                     Log.w(TAG, "Không có quyền SCHEDULE_EXACT_ALARM");
-                    Toast.makeText(context, "Vui lòng cấp quyền Báo thức trong Cài đặt > Ứng dụng > LifeHub > Quyền", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, R.string.permission_alarm_settings, Toast.LENGTH_LONG).show();
                     
                     // Mở cài đặt để cấp quyền
                     try {
@@ -86,7 +87,7 @@ public class AlarmHelper {
 
         } catch (SecurityException e) {
             Log.e(TAG, "Lỗi bảo mật khi lên lịch Alarm", e);
-            Toast.makeText(context, "Không thể đặt báo thức do thiếu quyền", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.permission_alarm_failed, Toast.LENGTH_LONG).show();
         }
     }
 

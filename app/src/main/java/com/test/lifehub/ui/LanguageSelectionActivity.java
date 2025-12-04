@@ -7,6 +7,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.google.android.material.button.MaterialButton;
 import com.test.lifehub.R;
 import com.test.lifehub.core.base.BaseActivity;
@@ -44,6 +46,7 @@ public class LanguageSelectionActivity extends BaseActivity {
 
         findViews();
         setupListeners();
+        setupBackPressedCallback();
         preselectLanguage();
     }
 
@@ -59,7 +62,7 @@ public class LanguageSelectionActivity extends BaseActivity {
             int selectedId = radioGroupLanguage.getCheckedRadioButtonId();
             
             if (selectedId == -1) {
-                Toast.makeText(this, "Please select a language / Vui lòng chọn ngôn ngữ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.please_select_language, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -100,8 +103,12 @@ public class LanguageSelectionActivity extends BaseActivity {
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        // Không cho phép quay lại từ màn hình chọn ngôn ngữ
+    private void setupBackPressedCallback() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Không cho phép quay lại từ màn hình chọn ngôn ngữ
+            }
+        });
     }
 }

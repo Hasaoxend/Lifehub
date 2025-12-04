@@ -50,7 +50,7 @@ public class AccountsListFragment extends Fragment {
         mAdapter = new AccountAdapter();
         mAdapter.setOnAccountActionListener(account -> {
             mAccountViewModel.delete(account);
-            Toast.makeText(getContext(), "Đã xóa tài khoản", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.account_deleted_msg, Toast.LENGTH_SHORT).show();
         });
 
         mRecyclerView.setAdapter(mAdapter);

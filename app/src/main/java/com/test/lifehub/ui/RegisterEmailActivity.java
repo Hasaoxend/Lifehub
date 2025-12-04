@@ -71,14 +71,14 @@ public class RegisterEmailActivity extends AppCompatActivity {
 
         // 1. Kiểm tra email trống
         if (TextUtils.isEmpty(email)) {
-            layoutEmail.setError("Vui lòng nhập email");
+            layoutEmail.setError(getString(R.string.error_email_empty));
             etEmail.requestFocus();
             return;
         }
 
         // 2. Kiểm tra định dạng email
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            layoutEmail.setError("Email không hợp lệ");
+            layoutEmail.setError(getString(R.string.error_email_invalid));
             etEmail.requestFocus();
             return;
         }
@@ -97,7 +97,7 @@ public class RegisterEmailActivity extends AppCompatActivity {
 
                     if (result.getSignInMethods() != null && !result.getSignInMethods().isEmpty()) {
                         // Email đã tồn tại
-                        layoutEmail.setError("Email này đã được sử dụng");
+                        layoutEmail.setError(getString(R.string.error_email_already_used));
                         etEmail.requestFocus();
                     } else {
                         // Email chưa tồn tại, chuyển sang bước 2
@@ -108,7 +108,7 @@ public class RegisterEmailActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
-                    layoutEmail.setError("Lỗi kiểm tra email: " + e.getMessage());
+                    layoutEmail.setError(getString(R.string.error_email_check_failed, e.getMessage()));
                 });
     }
 

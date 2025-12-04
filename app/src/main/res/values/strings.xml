@@ -63,10 +63,14 @@
     </string-array>
 
     <!-- Calendar -->
-    <string name="calendar_week_view">Week</string>
+    <string name="calendar_year_view">Year</string>
     <string name="calendar_month_view">Month</string>
+    <string name="calendar_day_view">Day</string>
+    <string name="calendar_week_view">Week</string>
     <string name="calendar_today">Today</string>
-
+    <string name="calendar_title">Calendar</string>
+    
+    <!-- Day names (short) -->
     <string name="day_sun">Sun</string>
     <string name="day_mon">Mon</string>
     <string name="day_tue">Tue</string>
@@ -198,4 +202,217 @@
     <string name="scan_qr_instruction">Point camera at QR code</string>
     <string name="invalid_qr_code">Invalid QR code</string>
     <string name="qr_scan_success">QR code scanned successfully</string>
+    
+    <!-- Password Strength Levels -->
+    <string name="password_strength_not_entered">Not entered</string>
+    <string name="password_strength_weak">Weak</string>
+    <string name="password_strength_fair">Fair</string>
+    <string name="password_strength_good">Good</string>
+    <string name="password_strength_strong">Strong</string>
+    
+    <!-- Registration Errors -->
+    <string name="error_email_not_found">Error: Email not found</string>
+    <string name="error_password_no_spaces">Password cannot contain spaces</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_password_not_strong">Password is not strong enough</string>
+    <string name="error_create_account_failed">Failed to create account</string>
+    <string name="error_email_already_used">Email address is already in use</string>
+    <string name="error_network_connection">Network connection error</string>
+    <string name="error_password_too_weak">Password is too weak</string>
+    <string name="error_email_empty">Please enter email</string>
+    <string name="error_email_invalid">Email is invalid</string>
+    <string name="error_email_check_failed">Email check failed: %s</string>
+    <string name="error_login_failed">Login failed</string>
+    
+    <!-- Registration Success -->
+    <string name="registration_success_title">Registration Successful!</string>
+    <string name="registration_success_message">A verification email has been sent to %s\n\nPlease check your inbox and click the verification link to activate your account.</string>
+    <string name="registration_success_ok">OK, I got it</string>
+    
+    <!-- Permissions -->
+    <string name="permission_alarms_required">Please enable \'Alarms &amp; reminders\' permission</string>
+    <string name="permission_request_required">Please grant required permissions</string>
+    <string name="permission_granted">✓ Granted</string>
+    <string name="permission_not_granted">✗ Not granted</string>
+    <string name="permission_notification_granted">Notification permission granted!</string>
+    <string name="permission_notification_denied">You denied notification permission. Reminder features may not work.</string>
+    <string name="permission_alarm_title">Alarm Permission Required</string>
+    <string name="permission_alarm_message">For Reminder features to work correctly, LifeHub needs \"Set alarms and reminders\" permission.</string>
+    <string name="permission_alarm_settings">Please grant Alarm permission in Settings > Apps > LifeHub > Permissions</string>
+    <string name="permission_alarm_failed">Cannot set alarm due to missing permission</string>
+    <string name="permission_system_managed">This permission is managed automatically by the system</string>
+    <string name="permission_granted_short">Permission granted</string>
+    
+    <!-- Calculator -->
+    <string name="calc_clear">C</string>
+    <string name="calc_all_clear">AC</string>
+    <string name="calc_error">Error</string>
+    <string name="calc_history_cleared">History cleared</string>
+    
+    <!-- Weather -->
+    <string name="weather_refreshing">Refreshing weather...</string>
+    <string name="weather_select_city_first">Please select a city first</string>
+    <string name="weather_search_error">Search error: %s</string>
+    <string name="weather_not_found">Weather not found for: %s</string>
+    <string name="weather_network_error">Network error: %s</string>
+    
+    <!-- Tasks & Projects -->
+    <string name="task_edit">Edit Task</string>
+    <string name="task_add_shopping">Add Shopping Item</string>
+    <string name="task_add_new">Add New Task</string>
+    <string name="task_reminder_at">Remind at: %s</string>
+    <string name="task_select_future_time">Please select a time in the future</string>
+    <string name="task_content_required">Content cannot be empty</string>
+    <string name="task_added">Added</string>
+    <string name="task_updated">Updated</string>
+    <string name="task_delete_folder_menu">Please delete folder using the 3-dot menu</string>
+    <string name="project_rename">Rename Folder</string>
+    <string name="project_new">New Folder</string>
+    <string name="project_name_required">Folder name cannot be empty</string>
+    <string name="project_created">Folder created</string>
+    <string name="project_updated">Updated</string>
+    
+    <!-- Notes -->
+    <string name="note_reminder_at">Remind at: %s</string>
+    <string name="note_deleted_msg">Note deleted</string>
+    <string name="note_title_content_required">Please enter Title and Content</string>
+    <string name="note_saved_msg">Note saved</string>
+    <string name="note_updated">Note updated</string>
+    
+    <!-- Settings -->
+    <string name="settings_biometric_not_supported">Device does not support or has not set up fingerprint</string>
+    <string name="settings_biometric_status">Fingerprint login %s</string>
+    <string name="settings_auth_failed">Authentication failed: %s</string>
+    <string name="settings_cannot_change">Cannot change setting: %s</string>
+    <string name="settings_enabled">enabled</string>
+    <string name="settings_disabled">disabled</string>
+    
+    <!-- Change Password -->
+    <string name="change_password_user_not_found">User information not found</string>
+    <string name="change_password_auth_failed">Authentication failed. Please check your password.</string>
+    <string name="change_password_email_not_found">User email not found</string>
+    <string name="change_password_email_error">Error sending email: %s</string>
+    <string name="change_password_current_required">Please enter current password</string>
+    <string name="change_password_current_incorrect">Password is incorrect</string>
+    <string name="change_password_new_required">Please enter new password</string>
+    <string name="change_password_min_length">Password must be at least 8 characters</string>
+    <string name="change_password_need_uppercase">Password must have at least 1 uppercase letter</string>
+    <string name="change_password_need_lowercase">Password must have at least 1 lowercase letter</string>
+    <string name="change_password_need_number">Password must have at least 1 number</string>
+    <string name="change_password_need_special">Password must have at least 1 special character (@#$%^&amp;+=!)</string>
+    <string name="change_password_same_as_old">New password cannot be the same as old password</string>
+    <string name="change_password_confirm_required">Please confirm password</string>
+    <string name="change_password_confirm_mismatch">Confirmation password does not match</string>
+    <string name="change_password_update_error">Error updating password: %s</string>
+    
+    <!-- Account Detail -->
+    <string name="account_password_masked">••••••••</string>
+    <string name="account_auth_failed">Authentication failed: %s</string>
+    <string name="account_copied">Copied %s</string>
+    <string name="account_missing_info">Missing required information</string>
+    <string name="account_saved_secure">Saved (Secure)</string>
+    <string name="account_deleted_msg">Account deleted</string>
+    <string name="account_delete_failed">Failed to delete account</string>
+    <string name="account_invalid_id">Error: Invalid document ID</string>
+    <string name="authenticator_deleted">Authenticator deleted</string>
+    <string name="authenticator_delete_failed">Failed to delete authenticator: %s</string>
+    <string name="authenticator_delete_failed_generic">Failed to delete authenticator</string>
+    
+    <!-- Calendar Events -->
+    <string name="event_edit">Edit Event</string>
+    <string name="event_new">New Event</string>
+    <string name="event_deleted_msg">Event deleted</string>
+    <string name="event_delete_confirm_msg">Are you sure you want to delete this event?</string>
+    <string name="event_end_date_past">End date cannot be in the past</string>
+    <string name="event_start_date_future_limit">Start date cannot be more than 5 years in the future</string>
+    <string name="event_end_before_start">End time must be after start time</string>
+    <string name="event_title_required">Please enter title</string>
+    <string name="event_updated">Event updated</string>
+    <string name="event_added">Event added</string>
+    <string name="event_count_more">+%d events</string>
+    <string name="no_events">No events</string>
+    
+    <!-- Password Generator Dialog -->
+    <string name="password_length_label">Length: %d</string>
+    <string name="password_copied_msg">Password copied!</string>
+    
+    <!-- QR & Camera -->
+    <string name="qr_camera_init_error">Camera initialization error: %s</string>
+    <string name="qr_camera_bind_error">Error binding camera: %s</string>
+    <string name="qr_camera_permission_needed">Camera permission needed to scan QR code</string>
+    <string name="authenticator_account_added">Account added</string>
+    <string name="authenticator_add_error">Error: %s</string>
+    
+    <!-- Productivity -->
+    <string name="productivity_title">Productivity</string>
+    <string name="productivity_notes">Notes</string>
+    <string name="productivity_tasks">Tasks (To-do)</string>
+    <string name="productivity_shopping">Shopping List</string>
+    <string name="productivity_calculator">Calculator</string>
+    <string name="productivity_weather">Weather</string>
+    <string name="productivity_calendar">Calendar</string>
+    
+    <!-- Custom Fields -->
+    <string name="custom_field_label">Field Label</string>
+    <string name="custom_field_content">Content</string>
+    
+    <!-- Intro Slide -->
+    <string name="intro_slide_title">Introduction Title</string>
+    <string name="intro_slide_description">Brief description of LifeHub app features.</string>
+    
+    <!-- Empty States -->
+    <string name="no_accounts_authenticator">No Authenticator accounts yet</string>
+    <string name="no_accounts_authenticator_hint">Tap + button to add your first account</string>
+    
+    <!-- Permission Item -->
+    <string name="permission_required">Required</string>
+    
+    <!-- Misc -->
+    <string name="please_wait">Please wait...</string>
+    <string name="password_reset_sent">Password reset link sent, please check your email.</string>
+    <string name="error_with_message">Error: %s</string>
+    <string name="sent_to_email">Sent to: %s</string>
+    
+    <!-- Dialog Titles & Messages -->
+    <string name="title_manage_permissions">Manage Permissions</string>
+    <string name="title_grant_permission">Grant Permission %s</string>
+    <string name="title_revoke_permission">Revoke Permission</string>
+    <string name="msg_revoke_permission_instructions">To revoke this permission, please go to System Settings > Apps > LifeHub > Permissions</string>
+    <string name="title_password_recovery">Password Recovery</string>
+    <string name="msg_password_recovery">Enter your email to receive recovery link.\n\nNew password must meet:\n• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number\n• At least 1 special character</string>
+    <string name="title_delete_account">Delete Account</string>
+    <string name="msg_delete_account">Are you sure you want to delete this account?</string>
+    <string name="title_delete_authenticator">Delete Authenticator</string>
+    <string name="msg_delete_authenticator">Are you sure you want to delete this authenticator account?</string>
+    <string name="msg_delete_account_confirm">Are you sure you want to delete account \"%s\"?</string>
+    <string name="title_confirm_delete">Confirm Delete</string>
+    <string name="msg_delete_project_confirm">Delete folder \"%s\"? Tasks inside will be moved to main screen.</string>
+    <string name="title_language_change">Language / Ngôn ngữ</string>
+    <string name="title_language_changed">Language Changed / Đã đổi ngôn ngữ</string>
+    <string name="title_forgot_password">Forgot Password</string>
+    <string name="msg_forgot_password">We will send a password reset email to:\n\n%s\n\nDo you want to continue?</string>
+    <string name="title_email_sent">Email Sent</string>
+    <string name="msg_email_sent_check">Please check your email to reset your password.\n\nAfter resetting, you will need to log in again.</string>
+    <string name="title_success">Success!</string>
+    <string name="msg_password_updated">Password has been updated successfully.\n\nPlease log in again with your new password.</string>
+    <string name="msg_confirm_delete_account">Delete this account?</string>
+    <string name="title_biometric_auth">Authenticate LifeHub</string>
+    <string name="biometric_subtitle">Please authenticate to unlock</string>
+    <string name="biometric_description">Use your fingerprint or face</string>
+    <string name="biometric_cancel">Cancel</string>
+    <string name="biometric_error_user_canceled">User canceled</string>
+    <string name="biometric_error_auth">Authentication error: %1$s</string>
+    
+    <!-- Activity Titles -->
+    <string name="title_authenticator">Authenticator</string>
+    <string name="title_qr_scanner">Scan QR Code</string>
+    <string name="title_notes">Notes</string>
+    <string name="title_edit_note">Edit Note</string>
+    <string name="title_new_note">New Note</string>
+    <string name="title_add_account">Add New Account</string>
+    <string name="title_edit_account">Edit Account</string>
+    
+    <!-- Calculator Buttons -->
+    <string name="calc_button_c">C</string>
+    <string name="calc_button_ac">AC</string>
 </resources>

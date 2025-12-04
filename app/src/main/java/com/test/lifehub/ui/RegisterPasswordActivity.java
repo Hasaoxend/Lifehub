@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -37,12 +38,13 @@ import java.util.regex.Pattern;
 public class RegisterPasswordActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterPasswordActivity";
-    private static final int MIN_PASSWORD_LENGTH = 7;
+    private static final int MIN_PASSWORD_LENGTH = 8;
 
     // Regex patterns
     private static final Pattern UPPERCASE_PATTERN = Pattern.compile("[A-Z]");
     private static final Pattern LOWERCASE_PATTERN = Pattern.compile("[a-z]");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9]");
+    private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':,.<>?/~`]");
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
 
     // --- Views ---
@@ -55,7 +57,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
     private Button btnCreateAccount;
 
     // Password requirement indicators
-    private ImageView iconLength, iconUppercase, iconLowercase, iconNumber;
+    private ImageView iconLength, iconUppercase, iconLowercase, iconNumber, iconSpecial;
 
     // --- Data ---
     private String mEmail;
@@ -67,6 +69,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
     private boolean hasUppercase = false;
     private boolean hasLowercase = false;
     private boolean hasNumber = false;
+    private boolean hasSpecialChar = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +80,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         mEmail = getIntent().getStringExtra("EMAIL");
         if (TextUtils.isEmpty(mEmail)) {
             Log.e(TAG, "Email is null or empty!");
-            Toast.makeText(this, "Lỗi: Không tìm thấy email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_email_not_found, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -88,8 +91,9 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         findViews();
         setupToolbar();
         setupListeners();
+        setupBackPressedCallback();
 
-        tvEmailDisplay.setText("Email: " + mEmail);
+        tvEmailDisplay.setText(getString(R.string.email_display_format, mEmail));
     }
 
     private void findViews() {
@@ -108,6 +112,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         iconUppercase = findViewById(R.id.icon_uppercase);
         iconLowercase = findViewById(R.id.icon_lowercase);
         iconNumber = findViewById(R.id.icon_number);
+        iconSpecial = findViewById(R.id.icon_special);
     }
 
     private void setupToolbar() {
@@ -116,7 +121,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupListeners() {
@@ -164,7 +169,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
 
         // Kiểm tra khoảng trắng
         if (WHITESPACE_PATTERN.matcher(password).find()) {
-            layoutPassword.setError("Mật khẩu không được chứa khoảng trắng");
+            layoutPassword.setError(getString(R.string.error_password_no_spaces));
             resetPasswordStrengthUI();
             return;
         }
@@ -185,6 +190,10 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         hasNumber = NUMBER_PATTERN.matcher(password).find();
         updateRequirementIcon(iconNumber, hasNumber);
 
+        // 5. Kiểm tra ký tự đặc biệt
+        hasSpecialChar = SPECIAL_CHAR_PATTERN.matcher(password).find();
+        updateRequirementIcon(iconSpecial, hasSpecialChar);
+
         // Tính điểm độ mạnh
         int score = calculatePasswordScore();
         updatePasswordStrengthUI(score);
@@ -199,6 +208,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         if (hasUppercase) score++;
         if (hasLowercase) score++;
         if (hasNumber) score++;
+        if (hasSpecialChar) score++;
         return score;
     }
 
@@ -208,25 +218,26 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         switch (score) {
             case 0:
             case 1:
-                tvPasswordStrength.setText("Yếu");
+            case 2:
+                tvPasswordStrength.setText(R.string.password_strength_weak);
                 tvPasswordStrength.setTextColor(ContextCompat.getColor(this, R.color.password_strength_weak));
                 progressPasswordStrength.setProgressTintList(
                         ContextCompat.getColorStateList(this, R.color.password_strength_weak_tint));
                 break;
-            case 2:
-                tvPasswordStrength.setText("Trung bình");
+            case 3:
+                tvPasswordStrength.setText(R.string.medium);
                 tvPasswordStrength.setTextColor(ContextCompat.getColor(this, R.color.password_strength_medium));
                 progressPasswordStrength.setProgressTintList(
                         ContextCompat.getColorStateList(this, R.color.password_strength_medium_tint));
                 break;
-            case 3:
-                tvPasswordStrength.setText("Khá");
+            case 4:
+                tvPasswordStrength.setText(R.string.password_strength_fair);
                 tvPasswordStrength.setTextColor(ContextCompat.getColor(this, R.color.password_strength_good));
                 progressPasswordStrength.setProgressTintList(
                         ContextCompat.getColorStateList(this, R.color.password_strength_good_tint));
                 break;
-            case 4:
-                tvPasswordStrength.setText("Mạnh");
+            case 5:
+                tvPasswordStrength.setText(R.string.password_strength_strong);
                 tvPasswordStrength.setTextColor(ContextCompat.getColor(this, R.color.password_strength_strong));
                 progressPasswordStrength.setProgressTintList(
                         ContextCompat.getColorStateList(this, R.color.password_strength_strong_tint));
@@ -235,7 +246,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
     }
 
     private void resetPasswordStrengthUI() {
-        tvPasswordStrength.setText("Chưa nhập");
+        tvPasswordStrength.setText(R.string.password_strength_not_entered);
         tvPasswordStrength.setTextColor(ContextCompat.getColor(this, R.color.password_strength_default));
         progressPasswordStrength.setProgress(0);
         resetRequirementIcons();
@@ -260,11 +271,13 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         hasUppercase = false;
         hasLowercase = false;
         hasNumber = false;
+        hasSpecialChar = false;
 
         updateRequirementIcon(iconLength, false);
         updateRequirementIcon(iconUppercase, false);
         updateRequirementIcon(iconLowercase, false);
         updateRequirementIcon(iconNumber, false);
+        updateRequirementIcon(iconSpecial, false);
     }
 
     private void checkPasswordsMatch() {
@@ -278,12 +291,12 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         }
 
         if (!password.equals(confirmPassword)) {
-            layoutConfirmPassword.setError("Mật khẩu không khớp");
+            layoutConfirmPassword.setError(getString(R.string.error_password_mismatch));
             updateButtonState(false);
         } else {
             layoutConfirmPassword.setError(null);
-            // Chỉ bật nút nếu mật khẩu đủ mạnh (score = 4)
-            boolean isPasswordStrong = hasMinLength && hasUppercase && hasLowercase && hasNumber;
+            // Chỉ bật nút nếu mật khẩu đủ mạnh (score = 5, tất cả yêu cầu)
+            boolean isPasswordStrong = hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar;
             updateButtonState(isPasswordStrong);
         }
     }
@@ -299,17 +312,17 @@ public class RegisterPasswordActivity extends AppCompatActivity {
 
         // Kiểm tra lần cuối
         if (!isPasswordValid(password)) {
-            Toast.makeText(this, "Mật khẩu chưa đủ mạnh", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_password_not_strong, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!password.equals(confirmPassword)) {
-            layoutConfirmPassword.setError("Mật khẩu không khớp");
+            layoutConfirmPassword.setError(getString(R.string.error_password_mismatch));
             return;
         }
 
         if (WHITESPACE_PATTERN.matcher(password).find()) {
-            layoutPassword.setError("Mật khẩu không được chứa khoảng trắng");
+            layoutPassword.setError(getString(R.string.error_password_no_spaces));
             return;
         }
 
@@ -324,7 +337,7 @@ public class RegisterPasswordActivity extends AppCompatActivity {
                         createUserDocumentInFirestore(user);
                     } else {
                         setLoading(false);
-                        showError("Tạo tài khoản thất bại");
+                        showError(getString(R.string.error_create_account_failed));
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -341,18 +354,19 @@ public class RegisterPasswordActivity extends AppCompatActivity {
                 && hasUppercase
                 && hasLowercase
                 && hasNumber
+                && hasSpecialChar
                 && !WHITESPACE_PATTERN.matcher(password).find();
     }
 
     private String parseFirebaseError(String error) {
-        if (error == null) return "Lỗi không xác định";
+        if (error == null) return getString(R.string.error_unknown);
 
         if (error.contains("email address is already in use")) {
-            return "Email đã được sử dụng";
+            return getString(R.string.error_email_already_used);
         } else if (error.contains("network error")) {
-            return "Lỗi kết nối mạng";
+            return getString(R.string.error_network_connection);
         } else if (error.contains("weak password")) {
-            return "Mật khẩu quá yếu";
+            return getString(R.string.error_password_too_weak);
         }
         return error;
     }
@@ -394,9 +408,8 @@ public class RegisterPasswordActivity extends AppCompatActivity {
 
     private void showSuccessDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Đăng ký Thành công!")
-                .setMessage("Một email xác thực đã được gửi đến " + mEmail +
-                        ".\n\nVui lòng kiểm tra hộp thư (kể cả spam) và xác thực tài khoản trước khi đăng nhập.")
+                .setTitle(R.string.registration_success_title)
+                .setMessage(getString(R.string.registration_success_message, mEmail))
                 .setPositiveButton("OK", (dialog, which) -> navigateToLogin())
                 .setCancelable(false)
                 .show();
@@ -431,13 +444,18 @@ public class RegisterPasswordActivity extends AppCompatActivity {
         return editText.getText().toString().trim();
     }
 
-    @Override
-    public void onBackPressed() {
-        if (pbLoading.getVisibility() == View.VISIBLE) {
-            // Prevent back press during loading
-            Toast.makeText(this, "Vui lòng đợi...", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        super.onBackPressed();
+    private void setupBackPressedCallback() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (pbLoading.getVisibility() == View.VISIBLE) {
+                    // Prevent back press during loading
+                    Toast.makeText(RegisterPasswordActivity.this, R.string.please_wait, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 }

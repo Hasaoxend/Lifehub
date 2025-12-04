@@ -102,6 +102,8 @@ public class TotpRepository {
         Log.d(TAG, "Collection path: " + ref.getPath());
         isListening = true;
         
+        // Query tất cả TOTP accounts (đã được cách ly bởi path users/{userId}/totp_accounts)
+        // KHÔNG dùng whereEqualTo() để tránh vấn đề với dữ liệu cũ không có field userOwnerId
         // Store listener registration so we can remove it later
         listenerRegistration = ref.addSnapshotListener((snapshot, e) -> {
                 if (e != null) {
@@ -126,8 +128,18 @@ public class TotpRepository {
                         Log.d(TAG, "Account " + i + ": " + accounts.get(i).getIssuer() + " / " + accounts.get(i).getAccountName());
                     }
                     
-                    Log.d(TAG, "Loaded " + accounts.size() + " TOTP accounts from Firestore");
-                    mAllAccounts.setValue(accounts);
+                    // ✅ Kiểm tra lại lần nữa để chắc chắn (defense in depth)
+                    List<TotpAccount> filteredAccounts = new ArrayList<>();
+                    for (TotpAccount account : accounts) {
+                        if (currentUserId.equals(account.getUserOwnerId())) {
+                            filteredAccounts.add(account);
+                        } else {
+                            Log.w(TAG, "⚠️ Filtered out TOTP account with wrong userOwnerId: " + account.getUserOwnerId());
+                        }
+                    }
+                    
+                    Log.d(TAG, "Loaded " + filteredAccounts.size() + " TOTP accounts from Firestore (filtered from " + accounts.size() + ")");
+                    mAllAccounts.setValue(filteredAccounts);
                 } else {
                     Log.w(TAG, "Snapshot is null");
                 }
@@ -230,6 +242,8 @@ public class TotpRepository {
         updates.put("accountName", account.getAccountName());
         updates.put("issuer", account.getIssuer());
         updates.put("updatedAt", System.currentTimeMillis());
+        // ✅ Đảm bảo userOwnerId không bị mất khi update
+        updates.put("userOwnerId", mAuth.getCurrentUser().getUid());
 
         ref.document(account.getDocumentId())
             .update(updates)

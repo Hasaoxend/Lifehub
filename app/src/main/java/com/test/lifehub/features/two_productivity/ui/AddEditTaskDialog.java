@@ -103,7 +103,7 @@ public class AddEditTaskDialog extends DialogFragment {
             Log.d(TAG, "Dialog created - TaskType: " + mTaskType + ", TaskId: " + taskId + ", ProjectId: " + mProjectId);
 
             if (taskId != null) {
-                mTvTitle.setText("Sửa Công việc");
+                mTvTitle.setText(R.string.task_edit);
 
                 LiveData<List<TaskEntry>> tasksLiveData;
                 if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
@@ -127,9 +127,9 @@ public class AddEditTaskDialog extends DialogFragment {
                 });
             } else {
                 if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
-                    mTvTitle.setText("Thêm Đồ Mua sắm");
+                    mTvTitle.setText(R.string.task_add_shopping);
                 } else {
-                    mTvTitle.setText("Thêm Công việc Mới");
+                    mTvTitle.setText(R.string.task_add_new);
                 }
                 updateReminderUi();
             }
@@ -189,7 +189,7 @@ public class AddEditTaskDialog extends DialogFragment {
                                 mCalendar.set(Calendar.MINUTE, minute);
                                 mCalendar.set(Calendar.SECOND, 0);
                                 if (mCalendar.getTimeInMillis() <= System.currentTimeMillis()) {
-                                    Toast.makeText(getContext(), "Vui lòng chọn thời gian trong tương lai", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), R.string.task_select_future_time, Toast.LENGTH_SHORT).show();
                                     mReminderDate = null;
                                 } else {
                                     mReminderDate = mCalendar.getTime();
@@ -214,7 +214,7 @@ public class AddEditTaskDialog extends DialogFragment {
         String taskName = mEtTaskName.getText().toString().trim();
 
         if (TextUtils.isEmpty(taskName)) {
-            Toast.makeText(getContext(), "Nội dung không được để trống", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.task_content_required, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -234,7 +234,7 @@ public class AddEditTaskDialog extends DialogFragment {
             }
 
             mViewModel.insertTask(newTask);
-            Toast.makeText(getContext(), "Đã thêm", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.task_added, Toast.LENGTH_SHORT).show();
 
         } else {
             // ----- CẬP NHẬT -----
@@ -258,7 +258,7 @@ public class AddEditTaskDialog extends DialogFragment {
             }
 
             mViewModel.updateTask(mCurrentTask);
-            Toast.makeText(getContext(), "Đã cập nhật", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.task_updated, Toast.LENGTH_SHORT).show();
         }
 
         dismiss();
