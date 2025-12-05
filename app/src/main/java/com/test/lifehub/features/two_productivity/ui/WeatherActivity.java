@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.test.lifehub.BuildConfig;
 import com.test.lifehub.R;
 import com.test.lifehub.core.util.PreferenceManager;
 import com.test.lifehub.features.two_productivity.data.GeoResult;
@@ -54,10 +55,11 @@ import android.view.MenuItem;
 @AndroidEntryPoint
 public class WeatherActivity extends AppCompatActivity {
 
-    // --- QUAN TRỌNG: API KEY ---
-    // Đây là key miễn phí từ OpenWeatherMap
-    // Nếu vượt quá giới hạn 60 calls/phút, cần đăng ký key mới tại: https://openweathermap.org/api
-    private static final String API_KEY = "REMOVED_API_KEY";
+    // --- BẢO MẬT: API KEY ---
+    // ✅ API key được đọc từ BuildConfig (local.properties)
+    // ⚠️ KHÔNG HARDCODE API KEY trong source code!
+    // Đăng ký key mới tại: https://openweathermap.org/api
+    private static final String API_KEY = BuildConfig.OPENWEATHER_API_KEY;
     // ------------------------------------------
 
     // Tags để lọc log lỗi trong Logcat (dùng khi debug)

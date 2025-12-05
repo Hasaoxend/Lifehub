@@ -17,6 +17,15 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Đọc API key từ local.properties (an toàn, không commit lên Git)
+        val properties = org.jetbrains.kotlin.konan.properties.Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "OPENWEATHER_API_KEY", "\"${properties.getProperty("OPENWEATHER_API_KEY", "")}\"")
+    }
+    
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
