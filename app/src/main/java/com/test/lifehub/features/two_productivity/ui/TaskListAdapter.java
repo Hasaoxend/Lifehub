@@ -197,8 +197,7 @@ public class TaskListAdapter extends ListAdapter<TaskListItem, RecyclerView.View
             } else {
                 return oldItem.task.getName().equals(newItem.task.getName())
                         && oldItem.task.isCompleted() == newItem.task.isCompleted()
-                        && (oldItem.task.getReminderTime() == newItem.task.getReminderTime() ||
-                        (oldItem.task.getReminderTime() != null && oldItem.task.getReminderTime().equals(newItem.task.getReminderTime())));
+                        && java.util.Objects.equals(oldItem.task.getReminderTime(), newItem.task.getReminderTime());
             }
         }
     };

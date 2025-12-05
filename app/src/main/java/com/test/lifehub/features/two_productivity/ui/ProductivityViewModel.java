@@ -10,13 +10,154 @@ import com.test.lifehub.features.two_productivity.data.TaskEntry;
 import com.test.lifehub.features.two_productivity.repository.ProductivityRepository;
 
 import java.util.List;
-import java.util.Objects; // Thêm import
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
+/**
+ * ProductivityViewModel - ViewModel cho ProductivityFragment
+ * 
+ * === MỤC ĐÍCH ===
+ * Quản lý UI state và business logic cho màn hình Productivity.
+ * Expose LiveData cho Fragment để hiển thị 3 loại dữ liệu:
+ * 1. Notes (Ghi chú)
+ * 2. Tasks (Công việc) - Có thể nhóm theo Projects
+ * 3. Shopping Items (Danh sách mua sắm)
+ * 
+ * === KIẾN TRÚC MVVM ===
+ * ```
+ * ProductivityFragment (View Layer)
+ *        |
+ *        | observe()
+ *        v
+ * ProductivityViewModel (ViewModel Layer) <- ĐÂY
+ *        |
+ *        | delegate to
+ *        v
+ * ProductivityRepository (Data Layer)
+ *        |
+ *        | Firestore Snapshot Listener
+ *        v
+ * Firestore Database
+ * ```
+ * 
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 
+ * 1. HIERARCHICAL FILTERING (Lọc theo cấp bậc):
+ *    - Root Level: Tasks/Projects không thuộc project nào (projectId=null)
+ *    - Project Detail: Tasks/Projects thuộc project đang xem (projectId=mCurrentProjectId)
+ * 
+ *    Cấu trúc:
+ *    ```
+ *    Root
+ *    ├─ Task 1 (projectId=null)
+ *    ├─ Task 2 (projectId=null)
+ *    ├─ Project A (projectId=null)
+ *    │  ├─ Task 3 (projectId="projectA_id")
+ *    │  └─ SubProject B (projectId="projectA_id")
+ *    └─ Project C (projectId=null)
+ *    ```
+ * 
+ * 2. MEDIATOR LIVEDATA PATTERN:
+ *    - tasksInRoot: Tự động lọc tasks ở root khi allTasks thay đổi
+ *    - projectsInRoot: Tự động lọc projects ở root khi allProjects thay đổi
+ *    - tasksInProject: Lọc tasks thuộc mCurrentProjectId
+ *    - projectsInProject: Lọc subprojects thuộc mCurrentProjectId
+ * 
+ *    Lý do dùng MediatorLiveData:
+ *    - Kết hợp nhiều LiveData sources (allTasks + allProjects)
+ *    - Tự động cập nhật khi bất kỳ source nào thay đổi
+ *    - Tránh phải refresh thủ công
+ * 
+ * 3. STREAM API FILTERING:
+ *    ```java
+ *    tasks.stream()
+ *         .filter(t -> t.getProjectId() == null)  // Chỉ lấy root tasks
+ *         .collect(Collectors.toList())
+ *    ```
+ * 
+ * === LIVEDATA HIERARCHY ===
+ * 
+ * Repository Layer (Source):
+ * - allNotes: Tất cả notes
+ * - allTasks: Tất cả tasks (task + shopping items)
+ * - allShoppingItems: Chỉ shopping items (taskType=1)
+ * - allProjects: Tất cả projects
+ * 
+ * ViewModel Layer (Transformed):
+ * - tasksInRoot: Tasks ở root level (projectId=null)
+ * - projectsInRoot: Projects ở root level (projectId=null)
+ * - tasksInProject: Tasks thuộc mCurrentProjectId
+ * - projectsInProject: Subprojects thuộc mCurrentProjectId
+ * 
+ * Fragment Layer (Observe):
+ * ```java
+ * viewModel.getTasksInRoot().observe(this, tasks -> {
+ *     adapter.submitList(tasks);
+ * });
+ * ```
+ * 
+ * === NAVIGATION FLOW ===
+ * 1. User mở ProductivityFragment -> Hiển thị root level
+ * 2. User click vào Project A -> setCurrentProject("projectA_id")
+ * 3. ViewModel lọc tasksInProject và projectsInProject
+ * 4. Fragment hiển thị nội dung Project A
+ * 
+ * === SCOPE ===
+ * @HiltViewModel:
+ * - Tự động inject ProductivityRepository
+ * - Lifecycle gắn với Fragment (destroy khi Fragment destroy)
+ * - Mỗi Fragment có 1 ViewModel instance riêng
+ * 
+ * === VÍ DỤ SỚ DỤNG ===
+ * ```java
+ * // Fragment
+ * @AndroidEntryPoint
+ * public class ProductivityFragment extends Fragment {
+ *     private ProductivityViewModel viewModel;
+ * 
+ *     @Override
+ *     public void onViewCreated(View view, Bundle savedInstanceState) {
+ *         // 1. Inject ViewModel
+ *         viewModel = new ViewModelProvider(this).get(ProductivityViewModel.class);
+ * 
+ *         // 2. Observe root level data
+ *         viewModel.getTasksInRoot().observe(getViewLifecycleOwner(), tasks -> {
+ *             taskAdapter.submitList(tasks);
+ *         });
+ * 
+ *         // 3. Navigate vào project
+ *         projectAdapter.setOnItemClickListener(project -> {
+ *             viewModel.setCurrentProject(project.documentId);
+ *             // Fragment tự động cập nhật nhờ observe tasksInProject
+ *         });
+ * 
+ *         // 4. Insert task mới
+ *         viewModel.insertTask(newTask);
+ *     }
+ * }
+ * ```
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * 1. ViewModel KHÔNG GIỮNG REFERENCE ĐẾN VIEW (Fragment/Activity)
+ * 2. Chỉ expose LiveData, không expose MutableLiveData ra ngoài
+ * 3. Business logic nặng nề để ở Repository, ViewModel chỉ transform data
+ * 4. Dùng Objects.equals() thay vì == để so sánh String (tránh NullPointerException)
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Thêm search/filter tasks theo keyword
+ * TODO: Hỗ trợ sort tasks (theo ngày, tên, priority)
+ * TODO: Thêm batch operations (delete nhiều tasks)
+ * TODO: Hỗ trợ drag-and-drop để sắp xếp tasks
+ * FIXME: Hiệu suất khi danh sách tasks quá dài (1000+ items)
+ * 
+ * @see ProductivityRepository Data source
+ * @see ProductivityFragment UI layer
+ * @see NoteEntry, TaskEntry, ProjectEntry Data models
+ */
 @HiltViewModel
 public class ProductivityViewModel extends ViewModel {
 

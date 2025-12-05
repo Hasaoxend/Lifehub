@@ -21,21 +21,82 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Quản lý Dữ liệu Sự kiện Lịch từ Firestore
+ * CalendarRepository - Quản lý Sự kiện Lịch từ Firestore
  * 
- * Repository này thực hiện:
- * - Lắng nghe realtime các thay đổi sự kiện trên Firestore
- * - Thêm, sửa, xóa sự kiện lịch
- * - Đảm bảo cách ly dữ liệu giữa các user (mỗi user chỉ xem sự kiện của mình)
- * - Quản lý lifecycle của Firestore listener để tránh memory leak
+ * === MỤC ĐÍCH ===
+ * Repository này quản lý toàn bộ dữ liệu sự kiện lịch (calendar events)
+ * Cho phép user tạo/sửa/xóa sự kiện và theo dõi realtime changes.
  * 
- * Cấu trúc Firestore:
+ * === FIRESTORE STRUCTURE ===
  * users/{userId}/calendar_events/{eventId}
+ *   ├─ title: String             -> Tên sự kiện
+ *   ├─ startTime: Timestamp      -> Thời gian bắt đầu
+ *   ├─ endTime: Timestamp        -> Thời gian kết thúc
+ *   ├─ location: String         -> Địa điểm (optional)
+ *   ├─ color: String            -> Màu hiển thị (hex: #FF5722)
+ *   ├─ userOwnerId: String       -> Firebase Auth UID
+ *   └─ notes: String            -> Ghi chú (optional)
  * 
- * Lưu ý quan trọng:
- * - @Singleton: Đảm bảo chỉ có 1 instance trong toàn app
- * - Khi user đổi: phải dừng listener cũ và xóa dữ liệu cũ
- * - Không dùng orderBy() trong Firestore query để tránh phải tạo composite index
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 1. Realtime Listener:
+ *    - Firestore snapshot listener tự động cập nhật khi có thay đổi
+ *    - Không cần refresh thủ công
+ * 
+ * 2. User Isolation:
+ *    - Mỗi user chỉ thấy sự kiện của chính mình
+ *    - Filter theo userOwnerId trong Firestore query
+ * 
+ * 3. User Change Detection:
+ *    - Kiểm tra currentUserId trước khi sử dụng listener
+ *    - Nếu user thay đổi -> dừng listener cũ và xóa dữ liệu cũ
+ * 
+ * 4. Listener Lifecycle Management:
+ *    - startListening(): Bắt đầu lắng nghe Firestore
+ *    - stopListening(): Dừng listener (quan trọng để tránh memory leak)
+ *    - ListenerRegistration: Đối tượng để hủy listener
+ * 
+ * === SCOPE ===
+ * @Singleton: 
+ * - Chỉ có 1 instance trong toàn app
+ * - Đảm bảo không tạo nhiều listener cho cùng user
+ * - Lý tưởng cho repository vì data chia sẻ giữa nhiều screens
+ * 
+ * === LIÊN KẾT VỚI MVVM ===
+ * Repository -> ViewModel -> Fragment:
+ * ```java
+ * // 1. Repository expose LiveData
+ * LiveData<List<CalendarEvent>> events = repository.getAllEvents();
+ * 
+ * // 2. ViewModel observe repository
+ * calendarViewModel.getEvents().observe(this, events -> {
+ *     adapter.submitList(events);
+ * });
+ * 
+ * // 3. Fragment hiển thị dữ liệu
+ * ```
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * 1. Không dùng .orderBy() trong Firestore query:
+ *    - Tránh phải tạo composite index
+ *    - Sắp xếp sẽ thực hiện ở client (Fragment)
+ * 
+ * 2. Lifecycle:
+ *    - startListening() gọi trong constructor
+ *    - stopListening() gọi khi user logout hoặc app destroy
+ * 
+ * 3. Thread Safety:
+ *    - Firestore listener chạy trên background thread
+ *    - MutableLiveData.setValue() tự động switch về main thread
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Thêm filter theo khoảng thời gian (startTime >= date1 AND endTime <= date2)
+ * TODO: Hỗ trợ offline mode với Firestore cache
+ * TODO: Thêm pagination cho danh sách sự kiện dài
+ * TODO: Export/Import sự kiện sang iCal format
+ * FIXME: Xử lý trường hợp network error khi insert/update/delete
+ * 
+ * @see CalendarEvent POJO cho sự kiện lịch
+ * @see CalendarViewModel ViewModel expose data cho UI
  */
 @Singleton
 public class CalendarRepository {

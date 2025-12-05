@@ -109,9 +109,8 @@ public class TaskAdapter extends ListAdapter<TaskEntry, TaskAdapter.TaskViewHold
         public boolean areContentsTheSame(@NonNull TaskEntry oldItem, @NonNull TaskEntry newItem) {
             return oldItem.getName().equals(newItem.getName())
                     && oldItem.isCompleted() == newItem.isCompleted()
-                    // Thêm kiểm tra reminderTime
-                    && (oldItem.getReminderTime() == newItem.getReminderTime() ||
-                    oldItem.getReminderTime() != null && oldItem.getReminderTime().equals(newItem.getReminderTime()));
+                    // Thêm kiểm tra reminderTime với Objects.equals()
+                    && java.util.Objects.equals(oldItem.getReminderTime(), newItem.getReminderTime());
         }
     };
 }

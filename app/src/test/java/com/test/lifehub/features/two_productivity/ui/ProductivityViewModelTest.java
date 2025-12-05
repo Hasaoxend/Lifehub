@@ -125,13 +125,13 @@ public class ProductivityViewModelTest {
     public void testTaskCompletion_ToggleStatus() {
         // Given
         TaskEntry task = createTestTask("Test Task", false);
-        assertFalse("Task ban đầu chưa hoàn thành", task.isCompleted);
+        assertFalse("Task ban đầu chưa hoàn thành", task.isCompleted());
         
         // When
-        task.isCompleted = true;
+        task.setCompleted(true);
         
         // Verify
-        assertTrue("Task phải được đánh dấu hoàn thành", task.isCompleted);
+        assertTrue("Task phải được đánh dấu hoàn thành", task.isCompleted());
     }
 
     @Test
@@ -191,65 +191,48 @@ public class ProductivityViewModelTest {
     @Test
     public void testInsertProject_CallsRepository() {
         // Given
-        ProjectEntry newProject = createTestProject("New Project");
+        String projectName = "New Project";
         
         // When
-        mockRepository.insertProject(newProject);
+        mockRepository.insertProject(projectName, null);
         
         // Verify
-        verify(mockRepository, times(1)).insertProject(any(ProjectEntry.class));
+        verify(mockRepository, times(1)).insertProject(eq(projectName), isNull());
     }
 
     @Test
-    public void testTaskPriority_ValidValues() {
+    public void testTaskWithReminder_ValidDate() {
         // Given
-        TaskEntry highPriority = createTestTask("High Priority", false);
-        highPriority.priority = 3;
-        
-        TaskEntry lowPriority = createTestTask("Low Priority", false);
-        lowPriority.priority = 1;
+        TaskEntry task = createTestTask("Task with Reminder", false);
+        Date reminderDate = new Date();
+        task.setReminderTime(reminderDate);
         
         // Verify
-        assertEquals("High priority phải là 3", 3, highPriority.priority);
-        assertEquals("Low priority phải là 1", 1, lowPriority.priority);
-        assertTrue("High priority > Low priority", highPriority.priority > lowPriority.priority);
-    }
-
-    @Test
-    public void testTaskDueDate_ValidDate() {
-        // Given
-        TaskEntry task = createTestTask("Task with Due Date", false);
-        Date dueDate = new Date();
-        task.dueDate = dueDate;
-        
-        // Verify
-        assertNotNull("Due date không được null", task.dueDate);
-        assertEquals("Due date phải khớp", dueDate, task.dueDate);
+        assertNotNull("Reminder time không được null", task.getReminderTime());
+        assertEquals("Reminder time phải khớp", reminderDate, task.getReminderTime());
     }
 
     // Helper methods
     private NoteEntry createTestNote(String title, String content) {
         NoteEntry note = new NoteEntry();
-        note.title = title;
-        note.content = content;
-        note.createdAt = new Date();
-        note.updatedAt = new Date();
+        note.setTitle(title);
+        note.setContent(content);
+        note.setLastModified(new Date());
         return note;
     }
 
-    private TaskEntry createTestTask(String title, boolean isCompleted) {
+    private TaskEntry createTestTask(String name, boolean isCompleted) {
         TaskEntry task = new TaskEntry();
-        task.title = title;
-        task.isCompleted = isCompleted;
-        task.priority = 2;
-        task.createdAt = new Date();
+        task.setName(name);
+        task.setCompleted(isCompleted);
+        task.setLastModified(new Date());
         return task;
     }
 
     private ProjectEntry createTestProject(String name) {
         ProjectEntry project = new ProjectEntry();
-        project.name = name;
-        project.createdAt = new Date();
+        project.setName(name);
+        project.setCreatedDate(new Date());
         return project;
     }
 }

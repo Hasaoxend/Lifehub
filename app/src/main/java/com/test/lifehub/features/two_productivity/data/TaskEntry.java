@@ -5,13 +5,74 @@ import com.google.firebase.firestore.PropertyName;
 import java.util.Date;
 
 /**
- * POJO cho Task
- * (Phiên bản đã thêm projectId)
+ * TaskEntry - POJO cho Công việc/Task
+ * 
+ * === MỤC ĐÍCH ===
+ * Quản lý 2 loại task:
+ * 1. Task thông thường (taskType = 0): Công việc cần làm
+ * 2. Shopping item (taskType = 1): Danh sách mua sắm
+ * 
+ * === FIRESTORE STRUCTURE ===
+ * users/{userId}/tasks/{taskId}
+ *   ├─ name: String             -> Tên task
+ *   ├─ completed: boolean       -> Đã hoàn thành chưa
+ *   ├─ taskType: int           -> 0=Task, 1=Shopping
+ *   ├─ lastModified: Timestamp -> Thời gian sửa cuối
+ *   ├─ reminderTime: Timestamp -> Nhắc nhở (optional)
+ *   ├─ alarmRequestCode: int   -> ID của AlarmManager
+ *   ├─ projectId: String       -> Thuộc project nào (null = root)
+ *   └─ userOwnerId: String     -> ID user sở hữu
+ * 
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 1. Project Hierarchy:
+ *    - projectId = null: Task ở root level
+ *    - projectId = "xyz": Task thuộc project "xyz"
+ * 
+ * 2. Task Types:
+ *    - taskType = 0: Task thông thường (ví dụ: "Hoàn thành báo cáo")
+ *    - taskType = 1: Shopping item (ví dụ: "Mua sữa")
+ * 
+ * 3. Reminders:
+ *    - reminderTime: Thời gian nhắc
+ *    - alarmRequestCode: ID để hủy alarm qua AlarmManager
+ * 
+ * === ANNOTATIONS ===
+ * @Exclude: documentId không lưu vào Firestore
+ * @PropertyName("completed"): Map với field "completed" trong Firestore
+ *   - isCompleted() -> read
+ *   - setCompleted() -> write
+ * 
+ * === VÍ DỤ SỚ DỤNG ===
+ * ```java
+ * // Tạo task thông thường
+ * TaskEntry task = new TaskEntry();
+ * task.setName("Học Android");
+ * task.setCompleted(false);
+ * task.setTaskType(0);  // Task type
+ * task.setProjectId("project123");  // Thuộc project
+ * 
+ * // Tạo shopping item
+ * TaskEntry shopping = new TaskEntry();
+ * shopping.setName("Mua sữa");
+ * shopping.setTaskType(1);  // Shopping type
+ * shopping.setProjectId(null);  // Root level
+ * 
+ * // Set reminder
+ * task.setReminderTime(new Date(System.currentTimeMillis() + 86400000)); // +1 day
+ * task.setAlarmRequestCode(456);
+ * ```
+ * 
+ * @see ProductivityRepository Repository quản lý tasks
+ * @see TaskReminderHelper Helper đặt reminder cho tasks
+ * @see ProjectEntry Project chứa task
  */
 public class TaskEntry {
 
+    // ===== FIRESTORE DOCUMENT ID =====
     @Exclude
-    public String documentId;
+    public String documentId;  // ID document từ Firestore (không sync)
+
+    // ===== PRIVATE FIELDS =====
 
     private String name;
     private Date lastModified;

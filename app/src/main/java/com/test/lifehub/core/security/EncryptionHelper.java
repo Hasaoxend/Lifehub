@@ -20,23 +20,117 @@ import javax.inject.Singleton;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 /**
- * Công cụ Mã hóa/Giải mã Dữ liệu Nhạy cảm
+ * EncryptionHelper - Mã hóa/Giải mã Dữ liệu Nhạy cảm
  * 
+ * === MỤC ĐÍCH ===
  * Class này cung cấp các phương thức để mã hóa và giải mã dữ liệu nhạy cảm 
  * (như mật khẩu tài khoản) trước khi lưu lên Firestore.
  * 
- * Thuật toán mã hóa:
- * - AES-GCM (Advanced Encryption Standard - Galois/Counter Mode)
- * - Độ dài khóa: 256-bit (rất an toàn)
- * - IV (Initialization Vector): 12 bytes, ngẫu nhiên cho mỗi lần mã hóa
- * - Tag: 128-bit để xác thực tính toàn vẹn dữ liệu
+ * === THUẬT TOÁN MÃ HÓA ===
+ * Algorithm: AES-GCM (Advanced Encryption Standard - Galois/Counter Mode)
+ * - AES: Thuật toán mã hóa đối xứng chuẩn quốc tế
+ * - GCM: Chế độ mã hóa kết hợp xác thực (authenticated encryption)
  * 
- * Cách hoạt động:
- * 1. Khóa mã hóa được tạo ngẫu nhiên và lưu trong EncryptedSharedPreferences
- * 2. Mỗi lần mã hóa: tạo IV mới -> mã hóa -> ghép IV và CipherText -> Base64
- * 3. Giải mã: tách IV và CipherText -> giải mã bằng khóa -> trả về plaintext
+ * Thông số bảo mật:
+ * - Key Length: 256-bit (32 bytes) - RẤT AN TOÀN
+ * - IV Length: 12 bytes (96-bit) - Tiêu chuẩn cho GCM
+ * - Tag Length: 128-bit - Xác thực tính toàn vẹn dữ liệu
  * 
- * Lưu ý: Singleton để sử dụng chung trong toàn app và tránh tạo khóa mới nhiều lần.
+ * === CÁCH HOẠT ĐỘNG ===
+ * 
+ * 1. KHỚI TẠO (LẦN ĐẦU SỚ DỤNG):
+ *    a. Tạo MasterKey bằng Android Keystore (AES-256-GCM)
+ *    b. Tạo EncryptedSharedPreferences với MasterKey
+ *    c. Tạo khóa AES ngẫu nhiên 256-bit
+ *    d. Lưu khóa AES vào EncryptedSharedPreferences
+ * 
+ * 2. MÃ HÓA (ENCRYPT):
+ *    ```
+ *    Plaintext: "MyPassword123"
+ *         |
+ *         v
+ *    Tạo IV ngẫu nhiên 12 bytes -> [a3, f2, 9c, ...]
+ *         |
+ *         v
+ *    AES-GCM Encrypt (key + IV) -> CipherText + Tag
+ *         |
+ *         v
+ *    Ghép: [IV | CipherText+Tag] -> [a3,f2,9c,...,encrypted_data,...,tag]
+ *         |
+ *         v
+ *    Base64 encode -> "o/Kc...xYz=="
+ *    ```
+ * 
+ * 3. GIẢI MÃ (DECRYPT):
+ *    ```
+ *    Base64 Encoded: "o/Kc...xYz=="
+ *         |
+ *         v
+ *    Base64 decode -> [IV | CipherText+Tag]
+ *         |
+ *         v
+ *    Tách IV (12 bytes đầu) -> IV = [a3,f2,9c,...]
+ *    Tách CipherText+Tag (phần còn lại)
+ *         |
+ *         v
+ *    AES-GCM Decrypt (key + IV) -> Plaintext
+ *         |
+ *         v
+ *    Kết quả: "MyPassword123"
+ *    ```
+ * 
+ * === VÍ DỤ SỚ DỤNG ===
+ * ```java
+ * // Inject qua Hilt
+ * @Inject EncryptionHelper encryptionHelper;
+ * 
+ * // Mã hóa mật khẩu trước khi lưu Firestore
+ * String password = "MySecretPassword";
+ * String encrypted = encryptionHelper.encrypt(password);
+ * account.setPassword(encrypted);  // Lưu encrypted vào Firestore
+ * 
+ * // Giải mã khi hiển thị cho user
+ * String encryptedFromDb = account.getPassword();
+ * String decrypted = encryptionHelper.decrypt(encryptedFromDb);
+ * textView.setText(decrypted);  // Hiển thị password gốc
+ * ```
+ * 
+ * === BẢO MẬT ===
+ * 1. Khóa AES (256-bit):
+ *    - Tạo bằng SecureRandom (không thể đoán trước)
+ *    - Lưu trong EncryptedSharedPreferences (mã hóa bởi MasterKey)
+ *    - MasterKey quản lý bởi Android Keystore (không thể truy xuất từ bên ngoài)
+ * 
+ * 2. IV (Initialization Vector):
+ *    - Mỗi lần mã hóa tạo IV mới (never reuse!)
+ *    - IV không cần giữ bí mật, chỉ cần duy nhất
+ *    - Lưu kèm CipherText để giải mã sau này
+ * 
+ * 3. GCM Tag:
+ *    - Tự động xác thực khi giải mã
+ *    - Nếu dữ liệu bị thay đổi -> giải mã sẽ fail
+ *    - Bảo vệ chống tamper (sửa đổi dữ liệu)
+ * 
+ * === SCOPE ===
+ * @Singleton:
+ * - Chỉ 1 instance trong toàn app
+ * - Tránh tạo khóa mới nhiều lần
+ * - Chia sẻ khóa AES giữa các component
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * ⚠️ KHÔNG BAO GIờ LƯU PLAINTEXT PASSWORD LÊN FIRESTORE!
+ * ⚠️ Luôn mã hóa TRƯỚC KHI lưu, giải mã SAU KHI đọc
+ * ⚠️ IV phải DUY NHẤT cho mỗi lần mã hóa (never reuse!)
+ * ⚠️ Nếu mất khóa AES -> KHÔNG THỂ giải mã dữ liệu cũ
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Hỗ trợ backup/restore khóa AES
+ * TODO: Thêm key rotation (thay khóa định kỳ)
+ * TODO: Hỗ trợ mã hóa file (không chỉ String)
+ * FIXME: Xử lý trường hợp Android Keystore không khả dụng
+ * 
+ * @see AccountRepository Sử dụng để mã hóa password
+ * @see BiometricHelper Kết hợp với biometric authentication
  */
 @Singleton
 public class EncryptionHelper {

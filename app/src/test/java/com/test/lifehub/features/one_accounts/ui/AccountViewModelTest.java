@@ -161,7 +161,6 @@ public class AccountViewModelTest {
         account.serviceName = serviceName;
         account.username = username;
         account.password = "encrypted_password";
-        account.category = "Social Media";
         account.notes = "Test notes";
         return account;
     }

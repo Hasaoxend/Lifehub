@@ -41,6 +41,10 @@
     <string name="change_password_verify_note">Để bảo mật tài khoản, vui lòng nhập mật khẩu hiện tại của bạn.</string>
     <string name="humidity_format">Độ ẩm: %d%%</string>
     <string name="remind_at">Nhắc lúc: </string>
+    <string name="search_other_city">Tìm thành phố khác</string>
+    <string name="hide_search">Ẩn tìm kiếm</string>
+    <string name="search_city_hint">Nhập tên thành phố (VD: hanoi, ...)</string>
+    <string name="no_results_found">Không tìm thấy kết quả</string>
     
     <!-- Language Selection -->
     <string name="language_selection_title">Chào mừng đến Lifehub</string>
@@ -161,6 +165,7 @@
     
     <!-- Toolbar Titles -->
     <string name="title_weather">Thời tiết</string>
+    <string name="select_city">Chọn thành phố</string>
     <string name="title_qr_scanner">Quét mã QR</string>
     <string name="title_app_permissions">Quyền ứng dụng</string>
     <string name="title_notes">Ghi chú</string>

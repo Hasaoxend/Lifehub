@@ -38,6 +38,125 @@ import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * AccountFragment - Màn hình quản lý Tài khoản và TOTP
+ * 
+ * === MỤC ĐÍCH ===
+ * Fragment này hiển thị danh sách thống nhất:
+ * 1. Password Accounts: Tài khoản với email/password (mã hóa)
+ * 2. TOTP Accounts: Tài khoản 2FA với mã OTP 6 số
+ * 
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 
+ * 1. UNIFIED LIST (Danh sách thống nhất):
+ *    - Hiển thị cả 2 loại accounts trong 1 RecyclerView
+ *    - Auto-detect loại item để hiển thị layout tương ứng
+ * 
+ * 2. TOTP AUTO-UPDATE:
+ *    - Mã TOTP tự động refresh mỗi 30 giây
+ *    - Handler + Runnable chạy background
+ *    - Dừng khi Fragment destroy (tránh memory leak)
+ * 
+ * 3. SEARCH FUNCTIONALITY:
+ *    - Tìm kiếm theo serviceName, username, issuer
+ *    - Filter realtime khi user gõ phím
+ *    - Case-insensitive search
+ * 
+ * 4. SWIPE REFRESH:
+ *    - Kéo xuống để refresh data từ Firestore
+ *    - Hiệu ứng loading animation
+ * 
+ * 5. COPY TO CLIPBOARD:
+ *    - Click vào TOTP code -> copy tự động
+ *    - Click vào password account -> hiển dialog copy
+ *    - Toast thông báo khi copy thành công
+ * 
+ * === KIẾN TRÚC ===
+ * ```
+ * AccountFragment (View Layer)
+ *        |
+ *        | observe allAccounts
+ *        v
+ * UnifiedAccountViewModel
+ *        |
+ *        | combineLatest(passwordAccounts, totpAccounts)
+ *        v
+ * AccountRepository + TotpRepository
+ *        |
+ *        v
+ * Firestore: users/{userId}/accounts + totp_accounts
+ * ```
+ * 
+ * === TOTP UPDATE MECHANISM ===
+ * ```java
+ * // Handler chạy mỗi 1 giây để update TOTP
+ * totpUpdateHandler = new Handler();
+ * totpUpdateRunnable = new Runnable() {
+ *     public void run() {
+ *         adapter.updateTotpCodes();  // Refresh tất cả TOTP codes
+ *         totpUpdateHandler.postDelayed(this, 1000);  // Lặp lại sau 1s
+ *     }
+ * };
+ * 
+ * // Dừng khi Fragment destroy
+ * onDestroyView() {
+ *     totpUpdateHandler.removeCallbacks(totpUpdateRunnable);
+ * }
+ * ```
+ * 
+ * === BOTTOM SHEET DIALOG ===
+ * Khi FAB click, hiển BottomSheet với 2 options:
+ * 1. "Thêm tài khoản" -> AddEditAccountActivity
+ * 2. "Thêm TOTP" -> AddTotpAccountActivity (scan QR hoặc nhập thủ công)
+ * 
+ * === SEARCH IMPLEMENTATION ===
+ * ```java
+ * searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+ *     public boolean onQueryTextChange(String query) {
+ *         if (query.isEmpty()) {
+ *             filteredAccounts = new ArrayList<>(allAccounts);
+ *         } else {
+ *             String lowerQuery = query.toLowerCase(Locale.ROOT).trim();
+ *             filteredAccounts = allAccounts.stream()
+ *                 .filter(item -> matchesQuery(item, lowerQuery))
+ *                 .collect(Collectors.toList());
+ *         }
+ *         adapter.submitList(filteredAccounts);
+ *         return true;
+ *     }
+ * });
+ * ```
+ * 
+ * === LIFECYCLE ===
+ * 1. onCreate(): Inject ViewModel
+ * 2. onCreateView(): Setup UI, RecyclerView, listeners
+ * 3. onViewCreated(): Observe LiveData
+ * 4. onResume(): Bắt đầu TOTP auto-update
+ * 5. onPause(): Dừng TOTP auto-update
+ * 6. onDestroyView(): Clear handler callbacks
+ * 
+ * === BẢO MẬT ===
+ * - Password accounts: Mật khẩu đã mã hóa AES-256-GCM
+ * - TOTP secrets: Lưu trong Firestore (nên mã hóa thêm)
+ * - Clipboard auto-clear sau 30s (nên implement)
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * 1. Luôn dừng Handler khi Fragment destroy (memory leak!)
+ * 2. toLowerCase() nên dùng Locale.ROOT cho internal search
+ * 3. UnifiedAccountItem có 2 loại -> kiểm tra type trước khi dùng
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Thêm categories/folders cho accounts
+ * TODO: Export/Import accounts (encrypted JSON)
+ * TODO: Biến thể strength indicator cho passwords
+ * TODO: Auto-clear clipboard sau 30s
+ * TODO: Thêm batch operations (delete nhiều items)
+ * FIXME: TOTP update hiệu suất khi có 100+ accounts
+ * 
+ * @see UnifiedAccountViewModel Kết hợp 2 data sources
+ * @see UnifiedAccountAdapter Hiển thị 2 loại items
+ * @see TotpManager Tạo mã TOTP 6 số
+ */
 @AndroidEntryPoint
 public class AccountFragment extends Fragment implements UnifiedAccountAdapter.OnItemClickListener {
 

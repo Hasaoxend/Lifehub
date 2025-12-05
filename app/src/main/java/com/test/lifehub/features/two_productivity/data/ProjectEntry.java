@@ -5,12 +5,80 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * POJO cho Project (Thư mục Todo)
+ * ProjectEntry - POJO cho Thư mục/Project (Folder/Category)
+ * 
+ * === MỤC ĐÍCH ===
+ * Quản lý các thư mục để nhóm Tasks theo chuề đề.
+ * Ví dụ: "Công việc", "Cá nhân", "Học tập", ...
+ * 
+ * === FIRESTORE STRUCTURE ===
+ * users/{userId}/projects/{projectId}
+ *   ├─ name: String            -> Tên thư mục
+ *   ├─ color: String           -> Màu hiển thị (hex: #FF5722)
+ *   ├─ userOwnerId: String    -> Firebase Auth UID
+ *   ├─ createdDate: Timestamp -> Ngày tạo
+ *   ├─ lastModified: Timestamp-> Lần sửa cuối
+ *   └─ projectId: String      -> ID thư mục cha (null = root)
+ * 
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 1. Nested Folders (Thư mục lồng nhau):
+ *    - projectId = null: Thư mục gốc (root folder)
+ *    - projectId = "abc": Thư mục con của "abc"
+ * 
+ *    Ví dụ:
+ *    ```
+ *    Root
+ *    ├─ Công việc (projectId=null)
+ *    │  ├─ Dự án A (projectId="congviec_id")
+ *    │  └─ Dự án B (projectId="congviec_id")
+ *    └─ Cá nhân (projectId=null)
+ *       └─ Sức khỏe (projectId="canhan_id")
+ *    ```
+ * 
+ * 2. Color Coding:
+ *    - Mỗi thư mục có màu riêng
+ *    - Hiển thị trên UI để dễ phân biệt
+ *    - Mặc định: #808080 (gray)
+ * 
+ * 3. Serializable:
+ *    - Implements Serializable để truyền qua Intent
+ *    - Dùng cho Edit/View Project Activity
+ * 
+ * === LIÊN KẾT VỚI TASKS ===
+ * ```java
+ * // Tạo thư mục
+ * ProjectEntry project = new ProjectEntry("Công việc", userId);
+ * project.setColor("#FF5722");
+ * repository.insertProject(project);
+ * 
+ * // Tạo task thuộc thư mục
+ * TaskEntry task = new TaskEntry();
+ * task.setName("Hoàn thành báo cáo");
+ * task.setProjectId(project.documentId);  // Liên kết với project
+ * repository.insertTask(task);
+ * ```
+ * 
+ * === VÍ DỤ SỚ DỤNG ===
+ * ```java
+ * // Tạo thư mục gốc
+ * ProjectEntry root = new ProjectEntry("Công việc", userId);
+ * root.setProjectId(null);  // Root folder
+ * root.setColor("#2196F3");
+ * 
+ * // Tạo thư mục con
+ * ProjectEntry sub = new ProjectEntry("Dự án A", userId);
+ * sub.setProjectId(root.documentId);  // Thuộc thư mục "Công việc"
+ * sub.setColor("#4CAF50");
+ * ```
+ * 
+ * @see ProductivityRepository Repository quản lý projects
+ * @see TaskEntry Tasks thuộc projects
  */
 public class ProjectEntry implements Serializable {
 
+    // ===== FIRESTORE DOCUMENT ID =====
     @Exclude
-    public String documentId;
+    public String documentId;  // ID document từ Firestore (không sync)
 
     private String name;
     private String color;

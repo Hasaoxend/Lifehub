@@ -24,18 +24,83 @@ import java.util.List;
 import javax.inject.Inject;
 import dagger.hilt.android.scopes.ActivityRetainedScoped; // <-- THÊM IMPORT NÀY
 
+/**
+ * ProductivityRepository - Quản lý dữ liệu Năng suất từ Firestore
+ * 
+ * === NHIỆM VỤ ===
+ * Repository tổng hợp quản lý 3 loại dữ liệu:
+ * 1. Notes (Ghi chú): Tạo/sửa/xóa ghi chú cá nhân
+ * 2. Tasks (Công việc): Quản lý task với reminder, completion status
+ * 3. Projects (Dự án): Hỗ trợ hiệu quả theo dự án, nested projects
+ * 
+ * === FIRESTORE STRUCTURE ===
+ * users/{userId}/
+ *   ├─ notes/{noteId}
+ *   │   ├─ title: String
+ *   │   ├─ content: String
+ *   │   ├─ lastModified: Timestamp
+ *   │   └─ reminderTime: Timestamp (optional)
+ *   ├─ tasks/{taskId}
+ *   │   ├─ name: String
+ *   │   ├─ completed: boolean
+ *   │   ├─ taskType: int (0=Task, 1=Shopping)
+ *   │   ├─ projectId: String (null = root level)
+ *   │   └─ reminderTime: Timestamp (optional)
+ *   └─ projects/{projectId}
+ *       ├─ name: String
+ *       ├─ color: String (hex code)
+ *       ├─ projectId: String (parent project, null = root)
+ *       └─ createdDate: Timestamp
+ * 
+ * === FEATURES NỔI BẬT ===
+ * 1. Realtime Sync: Tự động cập nhật UI khi data thay đổi
+ * 2. Project Hierarchy: Hỗ trợ sub-project (project lồng project)
+ * 3. Task Organization: Tasks có thể thuộc project hoặc ở root level
+ * 4. Shopping List: Task loại 1 (taskType=1) là shopping items
+ * 5. User Isolation: Mỗi user chỉ thấy data của mình
+ * 
+ * === DEPENDENCIES ===
+ * @Inject FirebaseAuth: Lấy userId hiện tại
+ * @Inject FirebaseFirestore: Truy xuất Firestore database
+ * 
+ * === LIFECYCLE ===
+ * 1. Constructor: Tự động gọi startListening()
+ * 2. startListening(): Bắt đầu 3 listeners (notes, tasks, projects)
+ * 3. stopListening(): Dừng tất cả listeners (gọi khi logout)
+ * 
+ * === LƯU Ý BẢO MẬT ===
+ * - Phát hiện user thay đổi: Nếu userId khác -> dừng listener cũ + xóa data cũ
+ * - Tránh data leak giữa các user khác nhau
+ * - Gọi stopListening() khi logout để tránh memory leak
+ * 
+ * === PHÁT TRIỂN TIẾP ===
+ * TODO: Thêm offline support với Firestore persistence
+ * TODO: Implement pagination cho danh sách lớn (>100 items)
+ * TODO: Thêm query filter theo date range
+ * TODO: Thêm batch operations cho performance
+ * 
+ * @see NoteEntry POJO cho ghi chú
+ * @see TaskEntry POJO cho task
+ * @see ProjectEntry POJO cho project
+ * @see ProductivityViewModel ViewModel sử dụng repository này
+ */
 @ActivityRetainedScoped // <-- THAY THẾ @Singleton BẰNG CÁI NÀY
 public class ProductivityRepository {
 
     private static final String TAG = "ProductivityRepo";
     private static final String COLLECTION_PROJECTS = "projects";
 
-    private final FirebaseAuth mAuth;
-    private final FirebaseFirestore mDb;
-    private CollectionReference mNotesCollection;
-    private CollectionReference mTasksCollection;
-    private CollectionReference mProjectsCollection;
+    // ===== DEPENDENCIES =====
+    private final FirebaseAuth mAuth;         // Firebase Authentication
+    private final FirebaseFirestore mDb;      // Firestore Database
+    
+    // ===== COLLECTION REFERENCES =====
+    private CollectionReference mNotesCollection;     // Reference đến notes collection
+    private CollectionReference mTasksCollection;     // Reference đến tasks collection
+    private CollectionReference mProjectsCollection;  // Reference đến projects collection
 
+    // ===== LIVEDATA =====
+    // LiveData cho UI observe - tự động update UI khi data thay đổi
     private final MutableLiveData<List<NoteEntry>> mAllNotes = new MutableLiveData<>();
     private final MutableLiveData<List<TaskEntry>> mAllTasks = new MutableLiveData<>();
     private final MutableLiveData<List<TaskEntry>> mAllShoppingItems = new MutableLiveData<>();

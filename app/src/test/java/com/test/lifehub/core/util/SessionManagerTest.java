@@ -40,7 +40,7 @@ public class SessionManagerTest {
         when(mockEditor.putString(anyString(), anyString())).thenReturn(mockEditor);
         when(mockEditor.putInt(anyString(), anyInt())).thenReturn(mockEditor);
         when(mockEditor.remove(anyString())).thenReturn(mockEditor);
-        when(mockEditor.apply()).thenReturn(null);
+        doNothing().when(mockEditor).apply();
     }
 
     @Test

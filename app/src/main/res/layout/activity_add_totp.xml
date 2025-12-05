@@ -39,7 +39,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@android:drawable/ic_menu_camera"
-            android:tint="?attr/colorPrimary"
+            app:tint="?attr/colorPrimary"
             android:contentDescription="QR Icon" />
 
         <TextView

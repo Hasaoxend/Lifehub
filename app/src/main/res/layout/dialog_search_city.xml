@@ -1,31 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/search_view_city"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"
-        android:queryHint="Nhập tên thành phố VD:hanoi,..."
-        android:hint="Nhập tên thành phố VD:hanoi,..."/>
+        android:text="@string/select_city"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="8dp"
+        android:gravity="center" />
 
+    <!-- Nút mở thanh tìm kiếm -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_search_city"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/search_other_city"
+        app:icon="@android:drawable/ic_menu_search"
+        android:layout_marginBottom="16dp" />
 
+    <!-- Thanh tìm kiếm (ẩn mặc định) -->
+    <LinearLayout
+        android:id="@+id/layout_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view_city"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="@string/search_city_hint" />
+
+        <TextView
+            android:id="@+id/tv_no_results"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/no_results_found"
+            android:gravity="center"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Danh sách thành phố -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_city_results"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="300dp" />
-
-    <TextView
-        android:id="@+id/tv_no_results"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="Không tìm thấy kết quả"
-        android:gravity="center"
-        android:visibility="gone" />
+        android:maxHeight="400dp" />
 
 </LinearLayout>

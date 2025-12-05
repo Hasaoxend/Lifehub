@@ -109,45 +109,45 @@ public class CalendarViewModelTest {
     public void testEventWithReminder_ValidReminderTime() {
         // Given
         CalendarEvent event = createTestEvent("Event with Reminder", getTodayDate());
-        event.reminderMinutes = 15; // 15 phút trước
+        Date reminderTime = new Date(System.currentTimeMillis() - 15 * 60 * 1000); // 15 phút trước
+        event.setReminderTime(reminderTime);
         
         // Verify
-        assertTrue("Reminder time phải > 0", event.reminderMinutes > 0);
-        assertEquals("Reminder phải là 15 phút", 15, event.reminderMinutes);
+        assertNotNull("Reminder time không được null", event.getReminderTime());
+        assertTrue("Reminder time phải trước start time", event.getReminderTime().before(event.getStartTime()));
     }
 
     @Test
     public void testRecurringEvent_ValidPattern() {
         // Given
         CalendarEvent recurringEvent = createTestEvent("Weekly Meeting", getTodayDate());
-        recurringEvent.isRecurring = true;
-        recurringEvent.recurrencePattern = "WEEKLY";
+        recurringEvent.setRepeatType("WEEKLY");
         
         // Verify
-        assertTrue("Event phải là recurring", recurringEvent.isRecurring);
-        assertEquals("Pattern phải là WEEKLY", "WEEKLY", recurringEvent.recurrencePattern);
+        assertNotNull("Repeat type không được null", recurringEvent.getRepeatType());
+        assertEquals("Pattern phải là WEEKLY", "WEEKLY", recurringEvent.getRepeatType());
     }
 
     @Test
     public void testEventColor_ValidColor() {
         // Given
         CalendarEvent event = createTestEvent("Colored Event", getTodayDate());
-        event.color = "#FF5733"; // Mã màu hex
+        event.setColor("#FF5733"); // Mã màu hex
         
         // Verify
-        assertNotNull("Color không được null", event.color);
-        assertTrue("Color phải bắt đầu bằng #", event.color.startsWith("#"));
+        assertNotNull("Color không được null", event.getColor());
+        assertTrue("Color phải bắt đầu bằng #", event.getColor().startsWith("#"));
     }
 
     @Test
     public void testEventLocation_NotEmpty() {
         // Given
         CalendarEvent event = createTestEvent("Meeting", getTodayDate());
-        event.location = "Conference Room A";
+        event.setLocation("Conference Room A");
         
         // Verify
-        assertNotNull("Location không được null", event.location);
-        assertFalse("Location không được rỗng", event.location.isEmpty());
+        assertNotNull("Location không được null", event.getLocation());
+        assertFalse("Location không được rỗng", event.getLocation().isEmpty());
     }
 
     @Test
@@ -157,12 +157,12 @@ public class CalendarViewModelTest {
         Date endDate = getDateAfterDays(3); // 3 ngày sau
         
         CalendarEvent multiDayEvent = createTestEvent("Conference", startDate);
-        multiDayEvent.endDate = endDate;
+        multiDayEvent.setEndTime(endDate);
         
         // Verify
-        assertTrue("End date phải sau start date", multiDayEvent.endDate.after(startDate));
+        assertTrue("End date phải sau start date", multiDayEvent.getEndTime().after(startDate));
         
-        long diffInMillis = multiDayEvent.endDate.getTime() - startDate.getTime();
+        long diffInMillis = multiDayEvent.getEndTime().getTime() - startDate.getTime();
         long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
         
         assertTrue("Event phải kéo dài nhiều ngày", diffInDays >= 1);
@@ -171,13 +171,11 @@ public class CalendarViewModelTest {
     // Helper methods
     private CalendarEvent createTestEvent(String title, Date startDate) {
         CalendarEvent event = new CalendarEvent();
-        event.title = title;
-        event.startDate = startDate;
-        event.endDate = startDate;
-        event.description = "Test description";
-        event.color = "#2196F3";
-        event.reminderMinutes = 0;
-        event.isRecurring = false;
+        event.setTitle(title);
+        event.setStartTime(startDate);
+        event.setEndTime(startDate);
+        event.setDescription("Test description");
+        event.setColor("#2196F3");
         return event;
     }
 

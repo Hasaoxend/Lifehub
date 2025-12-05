@@ -38,7 +38,7 @@ public class EncryptionHelperTest {
         // Setup mock behavior
         when(mockSharedPreferences.edit()).thenReturn(mockEditor);
         when(mockEditor.putString(anyString(), anyString())).thenReturn(mockEditor);
-        when(mockEditor.apply()).thenReturn(null);
+        doNothing().when(mockEditor).apply();
     }
 
     @Test

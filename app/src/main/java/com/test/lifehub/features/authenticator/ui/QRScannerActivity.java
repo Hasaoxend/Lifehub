@@ -131,6 +131,7 @@ public class QRScannerActivity extends AppCompatActivity {
             android.media.Image mediaImage = imageProxy.getImage();
             
             if (mediaImage != null) {
+                @androidx.camera.core.ExperimentalGetImage
                 InputImage image = InputImage.fromMediaImage(
                     mediaImage, 
                     imageProxy.getImageInfo().getRotationDegrees()

@@ -15,40 +15,121 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * AccountRepository - Quản lý dữ liệu tài khoản từ Firestore
+ * 
+ * === NHIỆM VỤ ===
+ * 1. Realtime listener cho collection "accounts"
+ * 2. CRUD operations (Create, Read, Update, Delete) cho accounts
+ * 3. Query và filter accounts theo serviceName, username
+ * 4. Transform Firestore documents → AccountEntry POJO
+ * 
+ * === FIRESTORE STRUCTURE ===
+ * users/{userId}/accounts/{accountId}
+ *   ├─ serviceName: String (Gmail, Facebook, ...)
+ *   ├─ username: String (email/username)
+ *   ├─ password: String (đã mã hóa AES-256)
+ *   ├─ notes: String (ghi chú optional)
+ *   └─ customFields: Map<String, String> (fields tùy chỉnh)
+ * 
+ * === DEPENDENCIES ===
+ * @Inject FirebaseFirestore: Firestore database instance
+ * @Inject FirebaseAuth: Lấy userId hiện tại
+ * 
+ * === LIFECYCLE ===
+ * 1. Constructor: Tự động gọi startListening()
+ * 2. startListening(): Bắt đầu realtime listener
+ * 3. stopListening(): Dừng listener (gọi khi logout)
+ * 
+ * === LƯU Ý BẢO MẬT ===
+ * - Mật khẩu PHẢI được mã hóa bằng EncryptionHelper trước khi lưu
+ * - Firestore rules chỉ cho phép user đọc/ghi data của chính mình
+ * 
+ * @see AccountEntry POJO model cho account
+ * @see AccountViewModel ViewModel sử dụng repository này
+ * @see EncryptionHelper Mã hóa/giải mã mật khẩu
+ */
 @Singleton
 public class AccountRepository {
 
     private static final String TAG = "AccountRepository";
-    private final FirebaseAuth mAuth;
-    private final FirebaseFirestore mDb;
+    
+    // ===== DEPENDENCIES =====
+    private final FirebaseAuth mAuth;          // Firebase Authentication
+    private final FirebaseFirestore mDb;       // Firestore Database
+    
+    // ===== LIVEDATA =====
     private final MutableLiveData<List<AccountEntry>> mAllAccounts = new MutableLiveData<>();
     
-    // ✅ THÊM: Track listener để quản lý lifecycle
+    // ===== LISTENER MANAGEMENT =====
+    /**
+     * Tracking variables cho listener lifecycle
+     * 
+     * isListening: Đang lắng nghe hay không
+     * currentUserId: User hiện tại đang được listen
+     * listenerRegistration: Reference để remove listener sau
+     */
     private boolean isListening = false;
     private String currentUserId = null;
     private ListenerRegistration listenerRegistration = null;
 
+    /**
+     * Constructor - Hilt tự động inject dependencies
+     * 
+     * @param auth FirebaseAuth instance
+     * @param db FirebaseFirestore instance
+     */
     @Inject
     public AccountRepository(FirebaseAuth auth, FirebaseFirestore db) {
         this.mAuth = auth;
         this.mDb = db;
         
-        // ✅ SỬA LỖI: Khởi tạo listener ngay trong constructor
+        // Tự động bắt đầu listener khi repository được tạo
         startListening();
     }
 
+    /**
+     * Lấy reference đến collection "accounts" của user hiện tại
+     * 
+     * @return CollectionReference hoặc null nếu chưa login
+     */
     private CollectionReference getAccountCollection() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            return mDb.collection("users").document(user.getUid()).collection("accounts");
+            return mDb.collection("users")
+                     .document(user.getUid())
+                     .collection("accounts");
         }
         return null;
     }
 
     /**
-     * ✅ SỬA LỖI: Bắt đầu lắng nghe thay đổi từ Firestore
-     * Tương tự TotpRepository - kiểm tra user thay đổi và reset listener
+     * Bắt đầu lắng nghe thay đổi từ Firestore
+     * 
+     * === KHI NÀO GỌI ===
+     * - Tự động gọi trong constructor
+     * - Gọi lại trong MainActivity.onCreate() để ensure đúng user
+     * 
+     * === LUỒNG HOẠT ĐỘNG ===
+     * 1. Kiểm tra user có đăng nhập không
+     * 2. Kiểm tra user có đổi không (compare với currentUserId)
+     * 3. Nếu đổi user -> stopListening() rồi bắt đầu listener mới
+     * 4. Attach SnapshotListener đến Firestore collection
+     * 5. Khi có thay đổi:
+     *    - Parse documents → List<AccountEntry>
+     *    - Set documentId cho mỗi entry
+     *    - Update LiveData
+     *    - UI tự động update (Observer pattern)
+     * 
+     * === LƯU Ý ===
+     * - Listener tự động update khi:
+     *   * Document mới được thêm
+     *   * Document cũ được sửa
+     *   * Document bị xóa
+     * - Phải gọi stopListening() khi logout để tránh memory leak
+     * - Firestore giới hạn 1 triệu reads/tháng (free tier)
      */
+
     public void startListening() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {

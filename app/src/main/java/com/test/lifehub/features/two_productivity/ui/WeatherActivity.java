@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,37 +37,71 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+/**
+ * Activity hiển thị thông tin thời tiết
+ * 
+ * Chức năng:
+ * - Lấy dữ liệu thời tiết từ OpenWeatherMap API
+ * - Hiển thị nhiệt độ, độ ẩm, tình trạng thời tiết
+ * - Cho phép chọn thành phố từ danh sách 14 thành phố phổ biến VN
+ * - Tự động lưu thành phố đã chọn vào SharedPreferences
+ * - Làm mới dữ liệu mỗi 10-30 phút hoặc khi người dùng bấm nút refresh
+ * 
+ * Dependencies injection:
+ * - WeatherApiService: Gọi API thời tiết qua Retrofit
+ * - PreferenceManager: Lưu/đọc thành phố đã chọn
+ */
 @AndroidEntryPoint
 public class WeatherActivity extends AppCompatActivity {
 
-    // --- QUAN TRỌNG: THAY THẾ BẰNG KEY CỦA BẠN ---
+    // --- QUAN TRỌNG: API KEY ---
+    // Đây là key miễn phí từ OpenWeatherMap
+    // Nếu vượt quá giới hạn 60 calls/phút, cần đăng ký key mới tại: https://openweathermap.org/api
     private static final String API_KEY = "REMOVED_API_KEY";
     // ------------------------------------------
 
-    // Tags để lọc lỗi trong Logcat
+    // Tags để lọc log lỗi trong Logcat (dùng khi debug)
     private static final String TAG_SEARCH = "WeatherSearchError";
     private static final String TAG_FETCH = "WeatherFetchError";
 
+    // --- DEPENDENCY INJECTION (Hilt tự động inject) ---
     @Inject
-    WeatherApiService apiService;
+    WeatherApiService apiService;  // Service để gọi OpenWeatherMap API
     @Inject
-    PreferenceManager preferenceManager;
+    PreferenceManager preferenceManager;  // Quản lý SharedPreferences
 
-    private TextView tvCityName, tvTemperature, tvCondition, tvHumidity, tvPromptCity;
-    private ProgressBar progressBar;
-    private LinearLayout weatherContent;
-    private Button btnChangeCity;
-    private MaterialToolbar toolbar;
+    // --- UI COMPONENTS ---
+    private TextView tvCityName;       // Hiển thị tên thành phố
+    private TextView tvTemperature;    // Hiển thị nhiệt độ (°C)
+    private TextView tvCondition;      // Hiển thị tình trạng (Sunny, Rainy, ...)
+    private TextView tvHumidity;       // Hiển thị độ ẩm (%)
+    private TextView tvPromptCity;     // Hiển thị lời nhắc "Vui lòng chọn thành phố"
+    private ProgressBar progressBar;   // Hiển thị loading khi đang tải dữ liệu
+    private LinearLayout weatherContent;  // Layout chứa thông tin thời tiết
+    private Button btnChangeCity;      // Nút "Thay đổi thành phố"
+    private MaterialToolbar toolbar;   // Thanh công cụ phía trên
 
-    private AlertDialog searchDialog; // Giữ tham chiếu đến dialog
-    private Call<List<GeoResult>> searchCall; // Giữ tham chiếu đến lệnh search
+    // --- STATE VARIABLES ---
+    private AlertDialog searchDialog;  // Dialog chọn thành phố (giữ reference để dismiss khi cần)
+    private Call<List<GeoResult>> searchCall;  // API call tìm kiếm thành phố (giữ để cancel nếu cần)
 
+    /**
+     * Khởi tạo Activity
+     * 
+     * Flow:
+     * 1. Ánh xạ các View từ layout
+     * 2. Setup toolbar với nút back
+     * 3. Đọc thành phố đã lưu từ SharedPreferences
+     * 4. Nếu có thành phố đã lưu -> tự động load thời tiết
+     * 5. Nếu chưa có -> hiển thị prompt "Vui lòng chọn thành phố"
+     * 6. Setup các listener cho buttons
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-        // Ánh xạ View
+        // === BƯỚC 1: ÁNH XẠ CÁC VIEW TỪ LAYOUT ===
         toolbar = findViewById(R.id.toolbar_weather);
         tvCityName = findViewById(R.id.tv_city_name);
         tvTemperature = findViewById(R.id.tv_temperature);
@@ -109,7 +142,13 @@ public class WeatherActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // === BƯỚC 3: THÊM HÀM TIỆN ÍCH NÀY ===
+    /**
+     * Làm mới dữ liệu thời tiết
+     * 
+     * Được gọi khi:
+     * - Người dùng bấm nút Refresh trên menu
+     * - Cần cập nhật dữ liệu thời tiết mới nhất
+     */
     private void refreshWeather() {
         // Lấy thành phố đã lưu
         String savedCity = preferenceManager.getSavedCity();
@@ -139,29 +178,76 @@ public class WeatherActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Hiển thị dialog chọn thành phố
+     * 
+     * Hiển thị danh sách 14 thành phố phổ biến tại Việt Nam:
+     * Hà Nội, TP.HCM, Đà Nẵng, Hải Phòng, Cần Thơ, Biên Hòa, Huế, 
+     * Nha Trang, Buôn Ma Thuột, Quy Nhơn, Vũng Tàu, Thái Nguyên, Nam Định, Vinh
+     * 
+     * Khi người dùng chọn thành phố:
+     * 1. Gọi fetchWeather() để lấy thông tin thời tiết
+     * 2. Đóng dialog
+     */
     private void showChangeCityDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_search_city, null);
         builder.setView(dialogView);
 
-        SearchView searchView = dialogView.findViewById(R.id.search_view_city);
+        // Lấy các view từ dialog
         RecyclerView rvResults = dialogView.findViewById(R.id.rv_city_results);
+        Button btnSearchCity = dialogView.findViewById(R.id.btn_search_city);
+        LinearLayout layoutSearch = dialogView.findViewById(R.id.layout_search);
+        androidx.appcompat.widget.SearchView searchView = dialogView.findViewById(R.id.search_view_city);
         TextView tvNoResults = dialogView.findViewById(R.id.tv_no_results);
 
         rvResults.setLayoutManager(new LinearLayoutManager(this));
 
+        // Danh sách các thành phố phổ biến tại Việt Nam
+        List<GeoResult> popularCities = new ArrayList<>();
+        popularCities.add(createCity("Hanoi"));
+        popularCities.add(createCity("Ho Chi Minh City"));
+        popularCities.add(createCity("Da Nang"));
+        popularCities.add(createCity("Hai Phong"));
+        popularCities.add(createCity("Can Tho"));
+        popularCities.add(createCity("Bien Hoa"));
+        popularCities.add(createCity("Hue"));
+        popularCities.add(createCity("Nha Trang"));
+        popularCities.add(createCity("Buon Ma Thuot"));
+        popularCities.add(createCity("Quy Nhon"));
+        popularCities.add(createCity("Vung Tau"));
+        popularCities.add(createCity("Thai Nguyen"));
+        popularCities.add(createCity("Nam Dinh"));
+        popularCities.add(createCity("Vinh"));
+
         // Adapter với listener
-        CitySearchAdapter adapter = new CitySearchAdapter(new ArrayList<>(), city -> {
+        CitySearchAdapter adapter = new CitySearchAdapter(popularCities, city -> {
             // Khi người dùng nhấn vào 1 thành phố:
             fetchWeather(city.name); // Tải thời tiết
             searchDialog.dismiss(); // Đóng dialog
         });
         rvResults.setAdapter(adapter);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        // Xử lý nút "Tìm thành phố khác"
+        btnSearchCity.setOnClickListener(v -> {
+            // Toggle hiển thị thanh tìm kiếm
+            if (layoutSearch.getVisibility() == View.GONE) {
+                layoutSearch.setVisibility(View.VISIBLE);
+                btnSearchCity.setText(R.string.hide_search);
+                searchView.requestFocus();
+            } else {
+                layoutSearch.setVisibility(View.GONE);
+                btnSearchCity.setText(R.string.search_other_city);
+                // Reset về danh sách thành phố phổ biến
+                adapter.updateData(popularCities);
+                tvNoResults.setVisibility(View.GONE);
+            }
+        });
+
+        // Xử lý tìm kiếm
+        searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Khi nhấn enter (hoặc nút search)
                 performSearch(query, adapter, tvNoResults);
                 return true;
             }
@@ -169,7 +255,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
-                    adapter.updateData(new ArrayList<>()); // Xóa kết quả
+                    adapter.updateData(new ArrayList<>()); // Xóa kết quả tìm kiếm
                     tvNoResults.setVisibility(View.GONE);
                 }
                 return true;
@@ -187,7 +273,9 @@ public class WeatherActivity extends AppCompatActivity {
         searchDialog.show();
     }
 
-    // Hàm mới để thực hiện search
+    /**
+     * Thực hiện tìm kiếm thành phố qua API
+     */
     private void performSearch(String query, CitySearchAdapter adapter, TextView tvNoResults) {
         if (query.length() < 2) return; // Không search nếu query quá ngắn
 
@@ -206,7 +294,7 @@ public class WeatherActivity extends AppCompatActivity {
                     adapter.updateData(results); // Cập nhật RecyclerView
                     tvNoResults.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
                 } else {
-                    // Lỗi từ phía server (ví dụ: 401 do sai key)
+                    // Lỗi từ phía server
                     Log.e(TAG_SEARCH, "Lỗi khi tìm kiếm: Code " + response.code() + " - " + response.message());
                     adapter.updateData(new ArrayList<>());
                     tvNoResults.setVisibility(View.VISIBLE);
@@ -215,7 +303,7 @@ public class WeatherActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<List<GeoResult>> call, @NonNull Throwable t) {
-                // Lỗi mạng (ví dụ: không có internet)
+                // Lỗi mạng
                 Log.e(TAG_SEARCH, "LỖI TÌM KIẾM THÀNH PHỐ: " + t.getMessage(), t);
 
                 if (!call.isCanceled()) {
@@ -226,6 +314,38 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Tạo object GeoResult cho thành phố
+     * 
+     * @param name Tên thành phố (tiếng Anh, ví dụ: "Hanoi", "Ho Chi Minh City")
+     * @return GeoResult object với name và country = "VN"
+     */
+    private GeoResult createCity(String name) {
+        GeoResult city = new GeoResult();
+        city.name = name;
+        city.country = "VN";
+        return city;
+    }
+
+    /**
+     * Lấy thông tin thời tiết cho thành phố
+     * 
+     * Flow:
+     * 1. Hiển thị progress bar (loading)
+     * 2. Gọi OpenWeatherMap API với:
+     *    - Tên thành phố
+     *    - Đơn vị: metric (độ C)
+     *    - Ngôn ngữ: vi (tiếng Việt)
+     *    - API key
+     * 3. Nếu thành công:
+     *    - Lưu tên thành phố vào SharedPreferences
+     *    - Hiển thị dữ liệu trên UI
+     * 4. Nếu lỗi:
+     *    - Hiển thị thông báo lỗi
+     *    - Ghi log để debug
+     * 
+     * @param city Tên thành phố (tiếng Anh)
+     */
     private void fetchWeather(String city) {
         progressBar.setVisibility(View.VISIBLE);
         weatherContent.setVisibility(View.GONE);

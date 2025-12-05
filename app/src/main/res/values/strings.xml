@@ -41,6 +41,10 @@
     <string name="change_password_verify_note">To secure your account, please enter your current password.</string>
     <string name="humidity_format">Humidity: %d%%</string>
     <string name="remind_at">Remind at: </string>
+    <string name="search_other_city">Search other city</string>
+    <string name="hide_search">Hide search</string>
+    <string name="search_city_hint">Enter city name (e.g., hanoi, ...)</string>
+    <string name="no_results_found">No results found</string>
     
     <!-- Language Selection -->
     <string name="language_selection_title">Welcome to Lifehub</string>
@@ -161,6 +165,7 @@
     
     <!-- Toolbar Titles -->
     <string name="title_weather">Weather</string>
+    <string name="select_city">Select City</string>
     <string name="title_qr_scanner">Scan QR Code</string>
     <string name="title_app_permissions">App Permissions</string>
     <string name="title_notes">Notes</string>

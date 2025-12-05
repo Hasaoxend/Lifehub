@@ -80,7 +80,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Xóa tài khoản"
             android:src="@android:drawable/ic_menu_delete"
-            android:tint="?android:attr/textColorSecondary"
+            app:tint="?android:attr/textColorSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

@@ -38,28 +38,78 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * Activity chính, "bộ điều khiển" trung tâm của ứng dụng.
- * (Phiên bản đã refactor Hilt và xóa logic không cần thiết)
+ * MainActivity - Activity chính của ứng dụng Lifehub
+ * 
+ * === CHỨC NĂNG CHÍNH ===
+ * 1. Điều hướng giữa 3 Fragment chính qua BottomNavigationView:
+ *    - AccountFragment: Quản lý tài khoản (mật khẩu, TOTP)
+ *    - ProductivityFragment: Ghi chú, công việc, dự án
+ *    - SettingsFragment: Cài đặt ứng dụng
+ * 
+ * 2. Khởi tạo Firestore Listeners cho tất cả repositories:
+ *    - Đảm bảo dữ liệu realtime được đồng bộ từ Firestore
+ *    - Tự động cập nhật UI khi data thay đổi
+ * 
+ * 3. Quản lý permissions (Android 12+, 13+):
+ *    - POST_NOTIFICATIONS: Quyền hiển thị thông báo
+ *    - SCHEDULE_EXACT_ALARM: Quyền đặt báo thức chính xác cho reminders
+ * 
+ * === DEPENDENCY INJECTION (Hilt) ===
+ * @AndroidEntryPoint đánh dấu để Hilt tự động inject các dependencies:
+ * - TotpRepository: Quản lý mã TOTP (2FA)
+ * - AccountRepository: Quản lý tài khoản
+ * - CalendarRepository: Quản lý sự kiện lịch
+ * - ProductivityRepository: Quản lý notes/tasks/projects
+ * 
+ * === LUỒNG HOẠT ĐỘNG ===
+ * 1. User login thành công ở LoginActivity
+ * 2. Chạy MainActivity.onCreate()
+ * 3. Gọi startListening() cho tất cả repositories
+ * 4. Firestore bắt đầu lắng nghe thay đổi dữ liệu
+ * 5. Hiển thị AccountFragment mặc định
+ * 6. User có thể navigate qua BottomNavigationView
+ * 
+ * === PHÁT TRIỂN TIẾP ===
+ * TODO: Thêm Fragment mới cho tính năng Calendar
+ * TODO: Implement deep linking cho notifications
+ * TODO: Thêm animation chuyển fragment
+ * 
+ * @version 1.0.0
+ * @since 2025-12-05
  */
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    private BottomNavigationView bottomNav;
+    // ===== UI COMPONENTS =====
+    private BottomNavigationView bottomNav;  // Thanh điều hướng dưới cùng
+    
+    // ===== REPOSITORIES (Hilt Injection) =====
+    // Các repository này được inject tự động bởi Hilt
+    // Không cần khởi tạo thủ công
+    @Inject
+    TotpRepository totpRepository;  // Quản lý mã TOTP 2FA  // Quản lý mã TOTP 2FA
     
     @Inject
-    TotpRepository totpRepository;
+    AccountRepository accountRepository;  // Quản lý tài khoản (mật khẩu đã mã hóa)
     
     @Inject
-    AccountRepository accountRepository;
+    CalendarRepository calendarRepository;  // Quản lý sự kiện lịch
     
     @Inject
-    CalendarRepository calendarRepository;
-    
-    @Inject
-    ProductivityRepository productivityRepository;
+    ProductivityRepository productivityRepository;  // Quản lý notes, tasks, projects
 
-    // ----- BỘ XIN QUYỀN MỚI (DÙNG CHO THÔNG BÁO) -----
-    // (Giữ nguyên)
+    // ===== PERMISSION LAUNCHER =====
+    /**
+     * ActivityResultLauncher để xin quyền runtime
+     * 
+     * Sử dụng cho:
+     * - POST_NOTIFICATIONS (Android 13+): Hiển thị thông báo
+     * 
+     * Cách sử dụng:
+     * requestPermissionLauncher.launch(new String[]{Manifest.permission.POST_NOTIFICATIONS});
+     * 
+     * Kết quả được xử lý trong callback registerForActivityResult
+     */
     private final ActivityResultLauncher<String[]> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), permissions -> {
                 // Xử lý kết quả sau khi người dùng chọn "Cho phép" hoặc "Từ chối"
@@ -77,17 +127,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ✅ QUAN TRỌNG: Restart Firestore listeners cho user hiện tại
-        // Đảm bảo các repository lắng nghe đúng dữ liệu của user vừa đăng nhập
-        totpRepository.startListening();
-        accountRepository.startListening();
-        calendarRepository.startListening();
-        productivityRepository.startListening();
+        // ===== BƯỚC 1: KHỚI TẠO FIRESTORE LISTENERS =====
+        // Quan trọng: Phải restart listeners mỗi khi mở MainActivity
+        // Ví dụ: User login -> MainActivity -> Back -> Login lại -> MainActivity
+        // Nếu không restart, listeners vẫn lắng nghe user cũ -> Sai dữ liệu!
+        totpRepository.startListening();            // Bắt đầu lắng nghe TOTP codes
+        accountRepository.startListening();         // Bắt đầu lắng nghe accounts
+        calendarRepository.startListening();        // Bắt đầu lắng nghe calendar events
+        productivityRepository.startListening();    // Bắt đầu lắng nghe notes/tasks/projects
+
+        // ===== BƯỚC 2: SETUP UI =====
 
         bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(navListener);
 
-        // Hiển thị Fragment Trang chính (Tài khoản) làm mặc định
+        // ===== BƯỚC 3: HIỂN THỊ FRAGMENT MẶC ĐỊNH =====
+        // savedInstanceState == null -> Lần đầu mở activity (không phải restore)
+        // Hiển thị AccountFragment làm trang chủ
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new AccountFragment()).commit();
@@ -100,8 +156,26 @@ public class MainActivity extends AppCompatActivity {
         // ---------------------------------
     }
 
-    // Bộ lắng nghe (Listener) cho thanh điều hướng dưới
-    // (Giữ nguyên)
+    // ===== NAVIGATION LISTENER =====
+    /**
+     * Xử lý sự kiện khi user click vào item trong BottomNavigationView
+     * 
+     * === LUỒNG HOẠT ĐỘNG ===
+     * 1. User click vào 1 trong 3 icon: Accounts, Productivity, Settings
+     * 2. Check item.getItemId() để biết icon nào được click
+     * 3. Tạo Fragment tương ứng
+     * 4. Thay thế fragment hiện tại bằng fragment mới
+     * 5. Return true để highlight icon đã chọn
+     * 
+     * === THÊM FRAGMENT MỚI ===
+     * Để thêm fragment mới (ví dụ: CalendarFragment):
+     * 1. Thêm item vào bottom_nav_menu.xml:
+     *    <item android:id="@+id/navigation_calendar" .../>
+     * 2. Thêm case mới vào listener:
+     *    else if (itemId == R.id.navigation_calendar) {
+     *        selectedFragment = new CalendarFragment();
+     *    }
+     */
     private final NavigationBarView.OnItemSelectedListener navListener =
             item -> {
                 Fragment selectedFragment = null;
@@ -124,9 +198,32 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             };
 
+    // ===== PERMISSION MANAGEMENT =====
     /**
-     * HÀM NÀY VẪN TỒN TẠI, NHƯNG KHÔNG ĐƯỢC GỌI TRONG onCreate()
-     * (Giữ nguyên)
+     * Kiểm tra và yêu cầu các quyền cần thiết
+     * 
+     * === LƯU Ý QUAN TRỌNG ===
+     * Hàm này HIỆN KHÔNG ĐƯỢC GỌI trong onCreate()
+     * Lý do: Không nên xin quyền ngay khi mở app (UX kém)
+     * 
+     * === KHI NÀO NÊN XIN QUYỀN? ===
+     * - POST_NOTIFICATIONS: Khi user tạo reminder/notification lần đầu
+     * - SCHEDULE_EXACT_ALARM: Khi user set alarm lần đầu
+     * 
+     * === CÁCH PHÁT TRIỂN TIẾP ===
+     * Option 1: Gọi hàm này trong TaskDetailActivity khi user tạo reminder
+     * Option 2: Gọi hàm này trong SettingsFragment khi user bật notifications
+     * 
+     * === CÁC QUYỀN ĐƯỢC XỪA LÝ ===
+     * 1. POST_NOTIFICATIONS (Android 13+/API 33+):
+     *    - Quyền hiển thị notification
+     *    - Bắt buộc phải xin runtime permission
+     * 
+     * 2. SCHEDULE_EXACT_ALARM (Android 12+/API 31+):
+     *    - Quyền đặt báo thức chính xác
+     *    - Không cần runtime permission, chỉ cần dẫn user vào Settings
+     * 
+     * @see #requestPermissionLauncher Kiểm tra kết quả xin quyền
      */
     private void checkAndRequestPermissions() {
         List<String> permissionsToRequest = new ArrayList<>();

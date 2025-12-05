@@ -19,7 +19,170 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * TotpManager - Quản lý Time-based One-Time Password (TOTP)
- * Tương tự như Google Authenticator
+ * 
+ * === MỤC ĐÍCH ===
+ * Class này implement TOTP (RFC 6238) - tương tự Google Authenticator.
+ * Tạo mã OTP 6 số thay đổi mỗi 30 giây cho 2FA authentication.
+ * 
+ * === THUẬT TOÁN TOTP (RFC 6238) ===
+ * 
+ * 1. PARAMETERS:
+ *    - Secret Key: 160-bit (20 bytes) ngẫu nhiên, encode Base32
+ *    - Time Step: 30 giây (mã mới mỗi 30s)
+ *    - Digits: 6 số
+ *    - Algorithm: HMAC-SHA1
+ * 
+ * 2. FLOW TẠO MÃ:
+ *    ```
+ *    Current Time (Unix timestamp)
+ *         |
+ *         v
+ *    Time Index = Time / 30
+ *         |
+ *         v
+ *    HMAC-SHA1(Secret, Time Index) -> 20 bytes hash
+ *         |
+ *         v
+ *    Dynamic Truncation (lấy 4 bytes)
+ *         |
+ *         v
+ *    Convert to 6-digit number
+ *         |
+ *         v
+ *    TOTP Code: "123456"
+ *    ```
+ * 
+ * 3. DYNAMIC TRUNCATION:
+ *    - Lấy byte cuối của hash -> offset (0-15)
+ *    - Lấy 4 bytes từ vị trí offset
+ *    - Convert sang integer 31-bit
+ *    - Mod 10^6 để ra 6 số
+ * 
+ * === VÍ DỤ SỚ DỤNG ===
+ * 
+ * ```java
+ * // 1. Tạo secret mới cho user
+ * String secret = TotpManager.generateSecret();
+ * // Ví dụ: "JBSWY3DPEHPK3PXP"
+ * 
+ * // 2. Lưu secret vào Firestore (nên mã hóa!)
+ * TotpAccount account = new TotpAccount();
+ * account.setSecret(secret);
+ * repository.insert(account);
+ * 
+ * // 3. Hiển thị QR code cho user scan
+ * String qrUrl = TotpManager.generateQRCodeUrl(
+ *     "user@example.com",
+ *     "MyApp",
+ *     secret
+ * );
+ * Bitmap qrBitmap = TotpManager.generateQRCode(qrUrl, 512, 512);
+ * imageView.setImageBitmap(qrBitmap);
+ * 
+ * // 4. Tạo mã OTP hiện tại
+ * String currentCode = TotpManager.getCurrentCode(secret);
+ * // Ví dụ: "842156" (thay đổi mỗi 30s)
+ * 
+ * // 5. Xác thực mã user nhập
+ * boolean isValid = TotpManager.validateCode(secret, userInput);
+ * if (isValid) {
+ *     // Login thành công
+ * }
+ * 
+ * // 6. Lấy thời gian còn lại của mã
+ * int remaining = TotpManager.getRemainingSeconds();
+ * // Ví dụ: 15 (còn 15s nữa sẽ đổi mã)
+ * ```
+ * 
+ * === TIME WINDOW VALIDATION ===
+ * 
+ * validateCode() chấp nhận mã trong 3 time windows:
+ * - Window hiện tại (0s - 30s)
+ * - Window trước (-30s - 0s)
+ * - Window sau (30s - 60s)
+ * 
+ * Lý do: Cho phép sai lệch đồng hồ giữa client và server.
+ * 
+ * ```
+ * Timeline:
+ * |-------- Window -1 --------|-------- Window 0 --------|-------- Window +1 --------|
+ * |  Code: 123456             |  Code: 789012           |  Code: 345678            |
+ * | (chấp nhận)               | (chấp nhận)            | (chấp nhận)               |
+ * ```
+ * 
+ * === QR CODE FORMAT ===
+ * 
+ * URL format theo RFC:
+ * ```
+ * otpauth://totp/{issuer}:{account}?secret={secret}&issuer={issuer}
+ * 
+ * Ví dụ:
+ * otpauth://totp/MyApp:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=MyApp
+ * ```
+ * 
+ * === BẢO MẬT ===
+ * 
+ * 1. SECRET KEY:
+ *    - Tạo bằng SecureRandom (cryptographically strong)
+ *    - 160-bit = 20 bytes (chuẩn TOTP)
+ *    - NÊN MÃ HÓA trước khi lưu Firestore!
+ * 
+ * 2. TIME SYNCHRONIZATION:
+ *    - TOTP phụ thuộc vào đồng hồ chính xác
+ *    - Nếu đồng hồ sai > 30s -> mã không khớp
+ *    - Nên dùng NTP đồng bộ thời gian
+ * 
+ * 3. BACKUP CODES:
+ *    - Nên tạo backup codes cho user
+ *    - Nếu mất điện thoại -> dùng backup code để login
+ * 
+ * === HMAC-SHA1 DETAILS ===
+ * 
+ * ```java
+ * // Input:
+ * byte[] key = base32Decode(secret);  // 20 bytes
+ * byte[] data = longToBytes(timeIndex);  // 8 bytes
+ * 
+ * // HMAC:
+ * Mac mac = Mac.getInstance("HmacSHA1");
+ * mac.init(new SecretKeySpec(key, "HmacSHA1"));
+ * byte[] hash = mac.doFinal(data);  // 20 bytes output
+ * 
+ * // Dynamic Truncation:
+ * int offset = hash[19] & 0x0F;  // 0-15
+ * int binary = ((hash[offset] & 0x7F) << 24)
+ *            | ((hash[offset+1] & 0xFF) << 16)
+ *            | ((hash[offset+2] & 0xFF) << 8)
+ *            | (hash[offset+3] & 0xFF);
+ * 
+ * int otp = binary % 1000000;  // 6 digits
+ * ```
+ * 
+ * === SO SÁNH VỚI HOTP ===
+ * 
+ * | Feature      | HOTP (RFC 4226)   | TOTP (RFC 6238)     |
+ * |--------------|-------------------|---------------------|
+ * | Counter      | Incremental       | Time-based (30s)    |
+ * | Sync Issue   | Counter mismatch  | Clock drift         |
+ * | Use Case     | Hardware tokens   | Mobile apps         |
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * 
+ * 1. Secret MUST be stored encrypted (AES-256-GCM)
+ * 2. QR code chỉ hiển thị 1 lần khi setup
+ * 3. Không gửi secret qua network (chỉ QR code local)
+ * 4. Time drift > 90s (3 windows) -> fail
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Hỗ trợ SHA256/SHA512 (RFC 6238 option)
+ * TODO: Customizable time step (15s, 60s)
+ * TODO: Customizable digits (4, 8)
+ * TODO: Thêm counter-based HOTP
+ * TODO: Generate backup codes (10 codes × 8 digits)
+ * FIXME: Xử lý time drift detection
+ * 
+ * @see <a href="https://tools.ietf.org/html/rfc6238">RFC 6238 - TOTP</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4226">RFC 4226 - HOTP</a>
  */
 public class TotpManager {
 

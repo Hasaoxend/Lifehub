@@ -29,6 +29,152 @@ import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * LoginActivity - Màn hình đăng nhập
+ * 
+ * === MỤC ĐÍCH ===
+ * Activity chính cho authentication với 2 phương thức:
+ * 1. Email/Password Login (Firebase Authentication)
+ * 2. Biometric Login (Fingerprint/Face ID)
+ * 
+ * === TÍNH NĂNG NỔI BẬT ===
+ * 
+ * 1. PASSWORD STRENGTH VALIDATION:
+ *    - Minimum 8 characters
+ *    - Phải có: uppercase, lowercase, number, special char
+ *    - Kiểm tra khi login lần đầu
+ *    - Gợi ý đổi password nếu yếu
+ * 
+ * 2. BIOMETRIC AUTHENTICATION:
+ *    - Hiển thị option nếu thiết bị hỗ trợ
+ *    - Sử dụng BiometricHelper
+ *    - Auto-login sau khi verify thành công
+ * 
+ * 3. WEAK PASSWORD DETECTION:
+ *    - Kiểm tra lần đầu login
+ *    - Lưu flag trong SharedPreferences (per user)
+ *    - Hiển thị dialog gợi ý đổi password
+ *    - Link trực tiếp đến ChangePasswordActivity
+ * 
+ * === SECURITY FEATURES ===
+ * 
+ * 1. SCREEN SECURITY:
+ *    ```java
+ *    getWindow().setFlags(
+ *        WindowManager.LayoutParams.FLAG_SECURE,
+ *        WindowManager.LayoutParams.FLAG_SECURE
+ *    );
+ *    ```
+ *    - Chặn screenshot
+ *    - Chặn screen recording
+ *    - Che màn hình trong Recent Apps
+ * 
+ * 2. PASSWORD PATTERNS:
+ *    ```java
+ *    MIN_PASSWORD_LENGTH = 8
+ *    UPPERCASE_PATTERN = [A-Z]
+ *    LOWERCASE_PATTERN = [a-z]
+ *    NUMBER_PATTERN = [0-9]
+ *    SPECIAL_CHAR_PATTERN = [!@#$%^&*(),.?\":{}|<>]
+ *    ```
+ * 
+ * === FLOW DIAGRAM ===
+ * ```
+ * onCreate()
+ *    |
+ *    v
+ * performInitialCheck() <- LoginViewModel
+ *    |
+ *    ├─> User logged in + Biometric enabled -> Auto-login
+ *    ├─> User logged in, no biometric -> MainActivity
+ *    └─> Not logged in -> Show login form
+ * 
+ * User nhập email/password
+ *    |
+ *    v
+ * login() <- LoginViewModel
+ *    |
+ *    ├─> Success -> Check password strength
+ *    │              |
+ *    │              ├─> Strong -> MainActivity
+ *    │              └─> Weak -> Show dialog suggest change
+ *    │
+ *    └─> Failure -> Show error message
+ * ```
+ * 
+ * === SHARED PREFERENCES ===
+ * Key format: "weak_password_checked_{userId}"
+ * - true: Đã check weak password rồi, không check nữa
+ * - false/null: Chưa check, cần kiểm tra
+ * 
+ * === BIOMETRIC IMPLEMENTATION ===
+ * ```java
+ * // Kiểm tra khả dụng
+ * if (BiometricHelper.isBiometricAvailable(this)) {
+ *     mLayoutBiometric.setVisibility(View.VISIBLE);
+ * }
+ * 
+ * // Show prompt
+ * BiometricHelper.showBiometricPrompt(this, new BiometricAuthListener() {
+ *     public void onBiometricAuthSuccess() {
+ *         // Auto-login
+ *         navigateToMainActivity();
+ *     }
+ * });
+ * ```
+ * 
+ * === PASSWORD VALIDATION ===
+ * ```java
+ * private boolean isPasswordWeak(String password) {
+ *     return password.length() < MIN_PASSWORD_LENGTH
+ *         || !UPPERCASE_PATTERN.matcher(password).find()
+ *         || !LOWERCASE_PATTERN.matcher(password).find()
+ *         || !NUMBER_PATTERN.matcher(password).find()
+ *         || !SPECIAL_CHAR_PATTERN.matcher(password).find();
+ * }
+ * ```
+ * 
+ * === MVVM PATTERN ===
+ * LoginActivity -> LoginViewModel -> FirebaseAuth
+ * - Activity chỉ handle UI
+ * - ViewModel handle business logic
+ * - LiveData cho login state changes
+ * 
+ * === LIFECYCLE ===
+ * 1. onCreate(): Setup UI, inject dependencies
+ * 2. performInitialCheck(): Kiểm tra user đã login chưa
+ * 3. observeLoginState(): Observe login success/failure
+ * 4. onBiometricAuthSuccess(): Auto-login khi biometric OK
+ * 
+ * === ERROR HANDLING ===
+ * - Email invalid: "Email không hợp lệ"
+ * - Password wrong: "Sai email hoặc mật khẩu"
+ * - Network error: "Lỗi kết nối"
+ * - Biometric failed: "Xác thực thất bại"
+ * 
+ * === NAVIGATION ===
+ * - Login success -> MainActivity
+ * - "Đăng ký" -> RegisterEmailActivity
+ * - "Quên mật khẩu" -> ResetPasswordActivity
+ * - Weak password -> ChangePasswordActivity (optional)
+ * 
+ * === LƯU Ý QUAN TRỌNG ===
+ * 1. FLAG_SECURE phải set TRƯỚC setContentView()
+ * 2. Weak password check CHỈ 1 LẦN per user
+ * 3. Biometric option CHỈ hiển thị nếu device support
+ * 4. Clear password field sau login failed
+ * 
+ * === TODO: TÍNH NĂNG TƯƠNG LAI ===
+ * TODO: Thêm "Remember me" option
+ * TODO: Implement login rate limiting (chống brute force)
+ * TODO: Thêm multi-factor authentication (SMS OTP)
+ * TODO: Social login (Google, Facebook)
+ * FIXME: Handle biometric lockout (quá nhiều lần thử sai)
+ * 
+ * @see LoginViewModel Handle login business logic
+ * @see BiometricHelper Biometric authentication
+ * @see MainActivity Destination sau login
+ */
 @AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity implements BiometricHelper.BiometricAuthListener {
 
