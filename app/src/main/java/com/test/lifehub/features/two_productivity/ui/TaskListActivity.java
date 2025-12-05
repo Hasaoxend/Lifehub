@@ -155,10 +155,15 @@ public class TaskListActivity extends AppCompatActivity
 
         View menuAddProject = bottomSheetView.findViewById(R.id.menu_add_project);
         View menuAddTask = bottomSheetView.findViewById(R.id.menu_add_task);
+        TextView tvMenuAddTaskLabel = bottomSheetView.findViewById(R.id.tv_menu_add_task_label);
 
         // Ẩn menu Project nếu là Shopping
         if (mTaskType == Constants.TASK_TYPE_SHOPPING) {
             menuAddProject.setVisibility(View.GONE);
+            // Đổi text cho Shopping
+            if (tvMenuAddTaskLabel != null) {
+                tvMenuAddTaskLabel.setText(R.string.add_shopping_item);
+            }
         } else {
             menuAddProject.setOnClickListener(v -> {
                 dismissBottomSheet();

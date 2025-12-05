@@ -36,6 +36,7 @@
             <!-- ... (et_service_name, et_username, et_password, btn_generate_password, et_website_url) ... -->
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_service_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
@@ -48,6 +49,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

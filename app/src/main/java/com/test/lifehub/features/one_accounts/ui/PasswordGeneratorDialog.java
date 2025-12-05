@@ -90,7 +90,7 @@ public class PasswordGeneratorDialog extends DialogFragment {
         // Thanh trượt
         mSlider.addOnChangeListener((slider, value, fromUser) -> {
             mLength = (int) value;
-            tvLengthLabel.setText("Độ dài: " + mLength);
+            tvLengthLabel.setText(getString(R.string.password_length_label, mLength));
             generatePassword(); // Tự động tạo lại khi trượt
         });
 

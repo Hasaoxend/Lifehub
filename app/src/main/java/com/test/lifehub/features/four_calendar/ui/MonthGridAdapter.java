@@ -100,16 +100,9 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
         }
         // (Xóa logic highlight "isSelected")
 
-        // Hiển thị ngày âm lịch
-        if (day.lunarDate != null && !day.lunarDate.isEmpty() && day.isCurrentMonth) {
-            holder.tvLunarDate.setText(day.lunarDate);
-            holder.tvLunarDate.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvLunarDate.setVisibility(View.GONE);
-        }
-
-        // Hiển thị ngày lễ
-        if (day.holidayName != null && !day.holidayName.isEmpty() && day.isCurrentMonth) {
+        // Hiển thị ngày lễ (ưu tiên trước)
+        boolean hasHoliday = day.holidayName != null && !day.holidayName.isEmpty() && day.isCurrentMonth;
+        if (hasHoliday) {
             holder.tvHoliday.setText(day.holidayName);
             holder.tvHoliday.setVisibility(View.VISIBLE);
             if (!isToday) { // Chỉ đổi màu chữ nếu không phải hôm nay
@@ -117,6 +110,14 @@ public class MonthGridAdapter extends ListAdapter<MonthDayData, MonthGridAdapter
             }
         } else {
             holder.tvHoliday.setVisibility(View.GONE);
+        }
+
+        // Hiển thị ngày âm lịch - ẨN nếu có ngày lễ để tránh lặp (vd: "Tết Nguyên Đán" + "1/1")
+        if (day.lunarDate != null && !day.lunarDate.isEmpty() && day.isCurrentMonth && !hasHoliday) {
+            holder.tvLunarDate.setText(day.lunarDate);
+            holder.tvLunarDate.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvLunarDate.setVisibility(View.GONE);
         }
 
         // Hiển thị tên sự kiện (KHÔNG bao gồm ngày lễ)

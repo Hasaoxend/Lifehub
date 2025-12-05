@@ -355,7 +355,12 @@ List<GeoResult> popularCities = Arrays.asList(
 
 4. **Quyền ứng dụng**: Xem và quản lý permissions
 
-5. **Đăng xuất**: Clear session + về LoginActivity
+5. **Reset weak password warning**: Đặt lại cảnh báo mật khẩu yếu
+   - Xóa flag `weak_password_checked_{userId}` trong SharedPreferences
+   - Lần đăng nhập sau sẽ kiểm tra lại độ mạnh mật khẩu
+   - Hữu ích cho testing hoặc khi muốn được nhắc đổi mật khẩu
+
+6. **Đăng xuất**: Clear session + về LoginActivity
 
 ---
 

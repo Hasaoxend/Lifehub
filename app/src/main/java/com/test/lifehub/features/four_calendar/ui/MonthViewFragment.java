@@ -231,7 +231,7 @@ public class MonthViewFragment extends Fragment {
      *    - Vu Lan (15/7 âm)
      *    - Tết Trung Thu (15/8 âm)
      *    - Tết Trùng Cửu (9/9 âm)
-     *    - Tết Ông Công Ông Táo (23/11 âm)
+     *    - Tết Ông Công Ông Táo (23/12 âm)
      *    - Giao Thừa (29-30/12 âm)
      * 
      * @param day Ngày cần kiểm tra
@@ -241,7 +241,7 @@ public class MonthViewFragment extends Fragment {
         int month = day.get(Calendar.MONTH); // 0-11 in Java Calendar
         int date = day.get(Calendar.DAY_OF_MONTH);
         
-        // Các ngày lễ dương lịch - SỬA: month bắt đầu từ 0
+        // Các ngày lễ dương lịch
         if (month == Calendar.JANUARY && date == 1) return "Tết Dương lịch";
         if (month == Calendar.FEBRUARY && date == 14) return "Valentine";
         if (month == Calendar.MARCH && date == 8) return "Quốc tế Phụ nữ";
@@ -253,42 +253,48 @@ public class MonthViewFragment extends Fragment {
         if (month == Calendar.NOVEMBER && date == 20) return "Ngày Nhà giáo VN";
         if (month == Calendar.DECEMBER && date == 25) return "Giáng sinh";
         
-        // Các ngày lễ âm lịch - HARDCODE cho một số năm gần đây để tránh lỗi convert
-        // TODO: Cập nhật hàng năm hoặc sửa thuật toán convert
-        int year = day.get(Calendar.YEAR);
-        
-        // Tết Nguyên Đán 2025: 29/1/2025 (Mùng 1 Tết)
-        if (year == 2025) {
-            if (month == Calendar.JANUARY && (date >= 29 && date <= 31)) {
-                int tetDay = date - 28;
-                if (tetDay == 1) return "Tết Nguyên Đán";
-                return "Tết (Mùng " + tetDay + ")";
+        // Các ngày lễ âm lịch - chuyển đổi ngày dương sang âm và so sánh
+        LunarCalendar.LunarDate lunarDate = LunarCalendar.convertSolarToLunar(day.getTime());
+        if (lunarDate != null && lunarDate.isValid) {
+            int lunarDay = lunarDate.day;
+            int lunarMonth = lunarDate.month;
+            boolean isLeap = lunarDate.isLeapMonth;
+            
+            // Tết Nguyên Đán (1-3/1 âm)
+            if (lunarMonth == 1 && !isLeap && lunarDay >= 1 && lunarDay <= 3) {
+                if (lunarDay == 1) return "Tết Nguyên Đán";
+                return "Tết (Mùng " + lunarDay + ")";
             }
-            if (month == Calendar.FEBRUARY && date == 12) return "Tết Nguyên Tiêu"; // 15/1 âm
-            if (month == Calendar.APRIL && date == 8) return "Giỗ Tổ Hùng Vương"; // 10/3 âm
-            if (month == Calendar.MAY && date == 12) return "Phật Đản"; // 15/4 âm
-            if (month == Calendar.JUNE && date == 2) return "Tết Đoan Ngọ"; // 5/5 âm
-            if (month == Calendar.AUGUST && date == 9) return "Vu Lan"; // 15/7 âm
-            if (month == Calendar.SEPTEMBER && date == 7) return "Tết Trung Thu"; // 15/8 âm
-            if (month == Calendar.OCTOBER && date == 10) return "Tết Trùng Cửu"; // 9/9 âm
-            if (month == Calendar.DECEMBER && date == 22) return "Tết Ông Công Ông Táo"; // 23/11 âm
-        }
-        
-        // Tết 2026: 17/2/2026
-        if (year == 2026) {
-            if (month == Calendar.FEBRUARY && (date >= 17 && date <= 19)) {
-                int tetDay = date - 16;
-                if (tetDay == 1) return "Tết Nguyên Đán";
-                return "Tết (Mùng " + tetDay + ")";
-            }
-            if (month == Calendar.MARCH && date == 4) return "Tết Nguyên Tiêu";
-            if (month == Calendar.APRIL && date == 27) return "Giỗ Tổ Hùng Vương";
-            if (month == Calendar.MAY && date == 31) return "Phật Đản";
-            if (month == Calendar.JUNE && date == 21) return "Tết Đoan Ngọ";
-            if (month == Calendar.AUGUST && date == 28) return "Vu Lan";
-            if (month == Calendar.SEPTEMBER && date == 27) return "Tết Trung Thu";
-            if (month == Calendar.OCTOBER && date == 29) return "Tết Trùng Cửu";
-            if (month == Calendar.JANUARY && date == 10) return "Tết Ông Công Ông Táo";
+            
+            // Tết Nguyên Tiêu (15/1 âm)
+            if (lunarMonth == 1 && !isLeap && lunarDay == 15) return "Tết Nguyên Tiêu";
+            
+            // Tết Hàn Thực (3/3 âm)
+            if (lunarMonth == 3 && !isLeap && lunarDay == 3) return "Tết Hàn Thực";
+            
+            // Giỗ Tổ Hùng Vương (10/3 âm)
+            if (lunarMonth == 3 && !isLeap && lunarDay == 10) return "Giỗ Tổ Hùng Vương";
+            
+            // Phật Đản (15/4 âm)
+            if (lunarMonth == 4 && !isLeap && lunarDay == 15) return "Phật Đản";
+            
+            // Tết Đoan Ngọ (5/5 âm)
+            if (lunarMonth == 5 && !isLeap && lunarDay == 5) return "Tết Đoan Ngọ";
+            
+            // Vu Lan (15/7 âm)
+            if (lunarMonth == 7 && !isLeap && lunarDay == 15) return "Vu Lan";
+            
+            // Tết Trung Thu (15/8 âm)
+            if (lunarMonth == 8 && !isLeap && lunarDay == 15) return "Tết Trung Thu";
+            
+            // Tết Trùng Cửu (9/9 âm)
+            if (lunarMonth == 9 && !isLeap && lunarDay == 9) return "Tết Trùng Cửu";
+            
+            // Tết Ông Công Ông Táo (23/12 âm)
+            if (lunarMonth == 12 && !isLeap && lunarDay == 23) return "Tết Ông Công Ông Táo";
+            
+            // Giao Thừa (29-30/12 âm - tùy tháng 12 có 29 hay 30 ngày)
+            if (lunarMonth == 12 && !isLeap && (lunarDay == 29 || lunarDay == 30)) return "Giao Thừa";
         }
         
         return null;
@@ -313,7 +319,7 @@ public class MonthViewFragment extends Fragment {
         return dayEvents;
     }
 
-    // KHÔI PHỤC LẠI HÀM NÀY
+
     private void showEventsForDay(MonthDayData day) {
         // Mở DayEventsDialog với cả ngày lễ và sự kiện
         DayEventsDialog dialog = DayEventsDialog.newInstance(
@@ -324,7 +330,7 @@ public class MonthViewFragment extends Fragment {
         dialog.show(getParentFragmentManager(), "DayEventsDialog");
     }
 
-    // (Các hàm điều hướng giữ nguyên)
+
     private void updateDateTitle() {
         if (getActivity() == null || !(getActivity() instanceof CalendarActivity)) return;
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
@@ -348,7 +354,7 @@ public class MonthViewFragment extends Fragment {
         mCurrentMonth = Calendar.getInstance();
         loadMonthGrid();
         updateDateTitle();
-        // (Bạn có thể thêm logic cuộn đến hôm nay nếu muốn)
+
     }
 
     // (Xóa các hàm helper của Agenda: findPositionInAdapter, findDayData)

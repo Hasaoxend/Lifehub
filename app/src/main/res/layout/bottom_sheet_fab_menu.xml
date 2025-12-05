@@ -70,6 +70,7 @@
             app:tint="?attr/colorPrimary" />
 
         <TextView
+            android:id="@+id/tv_menu_add_task_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

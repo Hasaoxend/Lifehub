@@ -6,7 +6,17 @@
 
 ## 📋 Setup Instructions
 
-### 1. OpenWeatherMap API Key
+### 1. Firebase Configuration (google-services.json)
+
+1. Truy cập Firebase Console: https://console.firebase.google.com/
+2. Chọn project của bạn (hoặc tạo mới)
+3. Vào **Project Settings** > **General**
+4. Scroll xuống phần **Your apps** > chọn Android app
+5. Tải file `google-services.json`
+6. **Copy file vào thư mục:** `app/google-services.json`
+7. File này đã được thêm vào `.gitignore` - **KHÔNG** commit lên Git!
+
+### 2. OpenWeatherMap API Key
 
 1. Đăng ký tài khoản miễn phí tại: https://openweathermap.org/api
 2. Lấy API key từ dashboard

@@ -42,6 +42,7 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
 
     private Toolbar mToolbar;
     private TextInputEditText etServiceName, etUsername, etPassword, etWebsiteUrl, etNotes;
+    private TextInputLayout layoutServiceName, layoutUsername, layoutPassword;
     private Button btnGeneratePassword, btnAddField, btnRemoveField;
 
     private AddEditAccountViewModel mViewModel;
@@ -120,6 +121,9 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
     // (Giữ nguyên findViews)
     private void setupViews() {
         mToolbar = findViewById(R.id.toolbar);
+        layoutServiceName = findViewById(R.id.layout_service_name);
+        layoutUsername = findViewById(R.id.layout_username);
+        layoutPassword = findViewById(R.id.layout_password);
         etServiceName = findViewById(R.id.et_service_name);
         etUsername = findViewById(R.id.et_username);
         etPassword = findViewById(R.id.et_password);
@@ -252,7 +256,31 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
         String username = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString().trim(); // Đây là Plain Text
 
-        if (serviceName.isEmpty() || username.isEmpty() || password.isEmpty()) {
+        // Validation với hiển thị icon chấm than
+        boolean hasError = false;
+        
+        if (serviceName.isEmpty()) {
+            layoutServiceName.setError(getString(R.string.error_service_name_required));
+            hasError = true;
+        } else {
+            layoutServiceName.setError(null);
+        }
+        
+        if (username.isEmpty()) {
+            layoutUsername.setError(getString(R.string.error_username_required));
+            hasError = true;
+        } else {
+            layoutUsername.setError(null);
+        }
+        
+        if (password.isEmpty()) {
+            layoutPassword.setError(getString(R.string.error_password_required));
+            hasError = true;
+        } else {
+            layoutPassword.setError(null);
+        }
+        
+        if (hasError) {
             Toast.makeText(this, R.string.account_missing_info, Toast.LENGTH_SHORT).show();
             return;
         }

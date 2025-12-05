@@ -317,6 +317,11 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
     }
 
     private String formatResult(double value) {
+        // Xử lý số rất lớn hoặc rất nhỏ bằng scientific notation
+        if (Math.abs(value) >= 1e15 || (Math.abs(value) < 1e-6 && value != 0)) {
+            // Hiển thị dạng scientific notation (ví dụ: 1e16)
+            return String.format("%.6e", value);
+        }
         return decimalFormat.format(value);
     }
 

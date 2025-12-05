@@ -272,25 +272,14 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
             return;
         }
         
-        // Check if already prompted for this user
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String key = KEY_WEAK_PASSWORD_CHECKED + user.getUid();
-        
-        if (prefs.getBoolean(key, false)) {
-            // Already checked, proceed
-            navigateToMain();
-            return;
-        }
-        
         // Get entered password to validate
         String password = etPassword.getText() != null ? etPassword.getText().toString() : "";
         
         if (isPasswordStrong(password)) {
-            // Strong password, mark as checked and proceed
-            prefs.edit().putBoolean(key, true).apply();
+            // Strong password, proceed to main
             navigateToMain();
         } else {
-            // Weak password detected
+            // Weak password detected - MUST change password (mandatory)
             showWeakPasswordDialog();
         }
     }
@@ -314,19 +303,10 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
             .setMessage(R.string.msg_weak_password_detected)
             .setCancelable(false)
             .setPositiveButton(R.string.btn_change_password_now, (dialog, which) -> {
-                // Navigate to ChangePasswordActivity
+                // Navigate to ChangePasswordActivity (MANDATORY)
                 Intent intent = new Intent(this, ChangePasswordActivity.class);
                 startActivity(intent);
                 finish();
-            })
-            .setNegativeButton(R.string.btn_remind_later, (dialog, which) -> {
-                // Mark as checked to avoid repeated prompts this session
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user != null) {
-                    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                    prefs.edit().putBoolean(KEY_WEAK_PASSWORD_CHECKED + user.getUid(), true).apply();
-                }
-                navigateToMain();
             })
             .show();
     }

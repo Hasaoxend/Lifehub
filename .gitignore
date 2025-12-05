@@ -13,3 +13,23 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# API Keys và cấu hình nhạy cảm
+google-services.json
+*.keystore
+*.jks
+key.properties
+
+# Thư mục build
+*/build/
+build/
+
+# Gradle files
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# IDE-specific files
+.idea/
+*.iws
+.vscode/

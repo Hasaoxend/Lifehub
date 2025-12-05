@@ -86,6 +86,9 @@
     <string name="change_login_password">Đổi mật khẩu đăng nhập</string>
     <string name="manage_permissions">Quản lý quyền</string>
     <string name="use_biometric">Sử dụng Vân tay / Khuôn mặt</string>
+    <string name="reset_weak_password_warning">Đặt lại cảnh báo mật khẩu yếu</string>
+    <string name="reset_weak_password_desc">Bật lại kiểm tra độ mạnh mật khẩu khi đăng nhập lần sau</string>
+    <string name="weak_password_warning_reset">Đã đặt lại cảnh báo mật khẩu. Bạn sẽ được nhắc nhở khi đăng nhập lần sau.</string>
     
     <!-- Calendar -->
     <string-array name="repeat_options">
@@ -179,6 +182,7 @@
     <!-- Tasks -->
     <string name="tasks">Công việc</string>
     <string name="add_task">Thêm công việc</string>
+    <string name="add_shopping_item">Thêm mục mua sắm</string>
     <string name="task_title">Tiêu đề công việc</string>
     <string name="task_description">Mô tả</string>
     <string name="due_date">Hạn hoàn thành</string>
@@ -359,6 +363,9 @@
     <string name="account_auth_failed">Xác thực thất bại: %s</string>
     <string name="account_copied">Đã sao chép %s</string>
     <string name="account_missing_info">Thiếu thông tin bắt buộc</string>
+    <string name="error_service_name_required">Tên dịch vụ là bắt buộc</string>
+    <string name="error_username_required">Tên đăng nhập là bắt buộc</string>
+    <string name="error_password_required">Mật khẩu là bắt buộc</string>
     <string name="account_saved_secure">Đã lưu (Bảo mật)</string>
     <string name="account_deleted_msg">Đã xóa tài khoản</string>
     <string name="account_delete_failed">Không thể xóa tài khoản</string>
@@ -424,9 +431,8 @@
     
     <!-- Weak Password Detection -->
     <string name="title_weak_password_detected">Phát hiện Mật khẩu Yếu</string>
-    <string name="msg_weak_password_detected">Mật khẩu hiện tại của bạn không đáp ứng yêu cầu bảo mật.\n\nVì an toàn tài khoản, vui lòng đổi sang mật khẩu mạnh hơn ngay.</string>
+    <string name="msg_weak_password_detected">Mật khẩu hiện tại của bạn không đáp ứng yêu cầu bảo mật.\n\n⚠️ BẮT BUỘC: Vì an toàn tài khoản, bạn phải đổi sang mật khẩu mạnh hơn ngay bây giờ.\n\nYêu cầu mật khẩu mạnh:\n• Tối thiểu 8 ký tự\n• Ít nhất 1 chữ HOA (A-Z)\n• Ít nhất 1 chữ thường (a-z)\n• Ít nhất 1 số (0-9)\n• Ít nhất 1 ký tự đặc biệt (!@#$%^&amp;*)</string>
     <string name="btn_change_password_now">Đổi Mật Khẩu Ngay</string>
-    <string name="btn_remind_later">Nhắc Lại Sau</string>
     
     <!-- Reset Password Activity -->
     <string name="reset_password_title">Đặt Lại Mật Khẩu</string>
