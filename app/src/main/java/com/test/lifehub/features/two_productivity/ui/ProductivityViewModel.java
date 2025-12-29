@@ -26,7 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
  * 1. Notes (Ghi chú)
  * 2. Tasks (Công việc) - Có thể nhóm theo Projects
  * 3. Shopping Items (Danh sách mua sắm)
- * 
+ *   
  * === KIẾN TRÚC MVVM ===
  * ```
  * ProductivityFragment (View Layer)

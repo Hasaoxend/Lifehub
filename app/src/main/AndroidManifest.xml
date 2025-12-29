@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
@@ -65,6 +66,12 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.PasscodeSetupActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.RegisterEmailActivity"
@@ -136,6 +143,18 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".features.masterpassword.MasterPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.ChangePasscodeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".core.services.ReminderService"
             android:enabled="true"
@@ -145,6 +164,67 @@
             android:name=".core.receivers.AlarmReceiver"
             android:enabled="true"
             android:exported="false" />
+        
+        <!-- ===== AUTOFILL SERVICE ===== -->
+        <service
+            android:name=".core.services.LifeHubAutofillService"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_configuration" />
+        </service>
+        
+        <!-- Autofill Authentication Activity (Biometric before fill) -->
+        <activity
+            android:name=".ui.AutofillAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Lifehub.Autofill"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+        
+        <!-- Save Credential Activity (Save new password) -->
+        <activity
+            android:name=".ui.SaveCredentialActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Lifehub.Autofill"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+        
+        <!-- Autofill Picker Activity (Choose account after biometric) -->
+        <activity
+            android:name=".ui.AutofillPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Lifehub.Autofill"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+        
+        <!-- Accessibility Autofill Activity (Browser autofill) -->
+        <activity
+            android:name=".ui.AccessibilityAutofillActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Lifehub.Autofill"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+        
+        <!-- Accessibility Service for Browser Autofill -->
+        <service
+            android:name=".core.services.LifeHubAccessibilityService"
+            android:exported="true"
+            android:label="@string/accessibility_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+            
     </application>
 
 </manifest>

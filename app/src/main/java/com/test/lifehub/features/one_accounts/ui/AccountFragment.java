@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -162,6 +163,11 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
 
     private static final String TAG = "AccountFragment";
     private static final int REQUEST_ADD_TOTP_MANUAL = 1007;
+    
+    // SharedPreferences keys for expansion state
+    private static final String PREFS_NAME = "account_fragment_prefs";
+    private static final String PREF_TOTP_EXPANDED = "totp_expanded";
+    private static final String PREF_PASSWORD_EXPANDED = "password_expanded";
 
     private RecyclerView recyclerView;
     private UnifiedAccountAdapter adapter;
@@ -216,8 +222,28 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
     private void setupRecyclerView() {
         adapter = new UnifiedAccountAdapter();
         adapter.setOnItemClickListener(this);
+        
+        // Restore expansion state from SharedPreferences
+        loadExpansionState();
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+    }
+    
+    private void loadExpansionState() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean totpExpanded = prefs.getBoolean(PREF_TOTP_EXPANDED, true);
+        boolean passwordExpanded = prefs.getBoolean(PREF_PASSWORD_EXPANDED, true);
+        adapter.setExpansionState(totpExpanded, passwordExpanded);
+    }
+    
+    private void saveExpansionState() {
+        if (adapter == null || getContext() == null) return;
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit()
+            .putBoolean(PREF_TOTP_EXPANDED, adapter.isTotpExpanded())
+            .putBoolean(PREF_PASSWORD_EXPANDED, adapter.isPasswordExpanded())
+            .apply();
     }
 
     private void setupSearchView() {
@@ -447,7 +473,9 @@ public class AccountFragment extends Fragment implements UnifiedAccountAdapter.O
     public void onPause() {
         super.onPause();
         totpUpdateHandler.removeCallbacks(totpUpdateRunnable);
+        saveExpansionState(); // Save expansion state when leaving
     }
+
 
     @Override
     public void onDestroyView() {

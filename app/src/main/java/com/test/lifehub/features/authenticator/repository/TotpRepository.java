@@ -12,12 +12,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.test.lifehub.core.security.EncryptionHelper;
+import com.test.lifehub.core.security.EncryptionManager;
 import com.test.lifehub.features.authenticator.data.TotpAccount;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,7 +35,8 @@ public class TotpRepository {
     
     private final FirebaseAuth mAuth;
     private final FirebaseFirestore mDb;
-    private final EncryptionHelper encryptionHelper;
+    private final EncryptionManager encryptionManager;
+    private final EncryptionHelper encryptionHelper; // For legacy migration
     private final MutableLiveData<List<TotpAccount>> mAllAccounts = new MutableLiveData<>();
     
     private boolean isListening = false; // Cờ để tránh listener trùng lặp
@@ -41,9 +44,10 @@ public class TotpRepository {
     private ListenerRegistration listenerRegistration = null; // Store listener to remove later
 
     @Inject
-    public TotpRepository(FirebaseAuth auth, FirebaseFirestore db, EncryptionHelper encryptionHelper) {
+    public TotpRepository(FirebaseAuth auth, FirebaseFirestore db, EncryptionManager encryptionManager, EncryptionHelper encryptionHelper) {
         this.mAuth = auth;
         this.mDb = db;
+        this.encryptionManager = encryptionManager;
         this.encryptionHelper = encryptionHelper;
         
         // Bắt đầu lắng nghe ngay khi Repository được tạo
@@ -132,6 +136,18 @@ public class TotpRepository {
                     List<TotpAccount> filteredAccounts = new ArrayList<>();
                     for (TotpAccount account : accounts) {
                         if (currentUserId.equals(account.getUserOwnerId())) {
+                            // 🔐 GIẢI MÃ SECRET KEY trước khi trả về
+                            try {
+                                String encryptedSecret = account.getSecretKey();
+                                if (encryptedSecret != null && !encryptedSecret.isEmpty()) {
+                                    String decryptedSecret = encryptionManager.decrypt(encryptedSecret);
+                                    account.setSecretKey(decryptedSecret);
+                                    Log.d(TAG, "Decrypted secret for: " + account.getIssuer());
+                                }
+                            } catch (Exception decryptError) {
+                                Log.e(TAG, "Failed to decrypt secret for " + account.getIssuer() + ": " + decryptError.getMessage());
+                                // Giữ nguyên secret nếu không giải mã được (có thể là data cũ chưa mã hóa)
+                            }
                             filteredAccounts.add(account);
                         } else {
                             Log.w(TAG, "⚠️ Filtered out TOTP account with wrong userOwnerId: " + account.getUserOwnerId());
@@ -204,7 +220,7 @@ public class TotpRepository {
 
         // Mã hóa secret key trước khi lưu
         try {
-            String encryptedSecret = encryptionHelper.encrypt(account.getSecretKey());
+            String encryptedSecret = encryptionManager.encrypt(account.getSecretKey());
             account.setSecretKey(encryptedSecret);
         } catch (Exception e) {
             Log.e(TAG, "Error encrypting secret key", e);
@@ -302,5 +318,107 @@ public class TotpRepository {
     public interface OnCompleteListener {
         void onSuccess(String documentId);
         void onFailure(String error);
+    }
+    
+    /**
+     * Migrate TOTP encryption from legacy EncryptionHelper to new EncryptionManager
+     * This re-encrypts all TOTP secrets with the cross-platform key
+     */
+    public void migrateTotpEncryption() {
+        CollectionReference ref = getTotpCollection();
+        if (ref == null) {
+            Log.w(TAG, "Cannot migrate TOTP: No user logged in");
+            return;
+        }
+        
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "Starting TOTP encryption migration...");
+        Log.d(TAG, "========================================");
+        
+        ref.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.isEmpty()) {
+                Log.d(TAG, "No TOTP accounts to migrate");
+                return;
+            }
+            
+            AtomicInteger successCount = new AtomicInteger(0);
+            AtomicInteger failCount = new AtomicInteger(0);
+            int totalCount = snapshot.size();
+            
+            for (var doc : snapshot.getDocuments()) {
+                String docId = doc.getId();
+                String encryptedSecret = doc.getString("secretKey");
+                
+                if (encryptedSecret == null || encryptedSecret.isEmpty()) {
+                    Log.w(TAG, "Skipping " + docId + ": No secret key");
+                    continue;
+                }
+                
+                // Check if already migrated (try to decrypt with new key first)
+                try {
+                    String testDecrypt = encryptionManager.decrypt(encryptedSecret);
+                    // If we can validate it as base32, it's already migrated
+                    if (isValidBase32(testDecrypt)) {
+                        Log.d(TAG, "Already migrated: " + docId);
+                        successCount.incrementAndGet();
+                        continue;
+                    }
+                } catch (Exception e) {
+                    // Expected for non-migrated data
+                }
+                
+                // Try to decrypt with old EncryptionHelper
+                try {
+                    String plainSecret = encryptionHelper.decrypt(encryptedSecret);
+                    
+                    if (plainSecret == null || plainSecret.isEmpty() || plainSecret.equals(encryptedSecret)) {
+                        Log.w(TAG, "Cannot decrypt with legacy key: " + docId);
+                        failCount.incrementAndGet();
+                        continue;
+                    }
+                    
+                    // Re-encrypt with new EncryptionManager
+                    String newEncrypted = encryptionManager.encrypt(plainSecret);
+                    
+                    // Update Firestore
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("secretKey", newEncrypted);
+                    updates.put("encryptionVersion", 2);
+                    updates.put("migratedAt", System.currentTimeMillis());
+                    
+                    ref.document(docId).update(updates)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "✓ Migrated TOTP: " + docId);
+                            successCount.incrementAndGet();
+                            checkMigrationComplete(successCount.get(), failCount.get(), totalCount);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "✗ Failed to update TOTP: " + docId, e);
+                            failCount.incrementAndGet();
+                            checkMigrationComplete(successCount.get(), failCount.get(), totalCount);
+                        });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error migrating TOTP " + docId + ": " + e.getMessage());
+                    failCount.incrementAndGet();
+                }
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to fetch TOTP accounts for migration", e);
+        });
+    }
+    
+    private void checkMigrationComplete(int success, int fail, int total) {
+        if (success + fail >= total) {
+            Log.d(TAG, "========================================");
+            Log.d(TAG, "TOTP Migration Complete!");
+            Log.d(TAG, "Success: " + success + ", Failed: " + fail);
+            Log.d(TAG, "========================================");
+        }
+    }
+    
+    private boolean isValidBase32(String str) {
+        if (str == null || str.isEmpty()) return false;
+        // Base32 alphabet: A-Z and 2-7
+        return str.matches("^[A-Z2-7=]+$");
     }
 }

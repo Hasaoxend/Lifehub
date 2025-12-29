@@ -4,25 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:fitsSystemWindows="true"
     tools:context=".ui.LoginActivity">
 
-    <!-- Thanh Toolbar ở trên cùng -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_login"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_arrow_back" /> <!-- TODO: Thêm icon ic_arrow_back -->
+        app:navigationIcon="@drawable/ic_arrow_back" />
 
-    <!-- Tiêu đề chính -->
     <TextView
         android:id="@+id/tv_login_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
         android:text="@string/login_prompt"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
@@ -30,17 +26,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar_login" />
 
-    <!-- Ô nhập Email (Thay cho thẻ User) -->
+    <!-- Stage 1 Wrapper -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_email_stage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="layout_login_email,btn_next,layout_biometric_login"
+        android:visibility="visible" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_login_email"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="64dp"
         app:layout_constraintEnd_toEndOf="@id/tv_login_title"
         app:layout_constraintStart_toStartOf="@id/tv_login_title"
         app:layout_constraintTop_toBottomOf="@id/tv_login_title"
-        app:startIconDrawable="@drawable/ic_email"> <!-- TODO: Thêm icon ic_email -->
+        app:startIconDrawable="@drawable/ic_email">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_login_email"
@@ -50,28 +54,70 @@
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Ô nhập Mật khẩu -->
+    <!-- Fingerprint Shortcut -->
+    <FrameLayout
+        android:id="@+id/layout_biometric_login"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_circle_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/layout_login_email"
+        app:layout_constraintStart_toEndOf="@id/layout_login_email"
+        app:layout_constraintEnd_toEndOf="@id/tv_login_title"
+        app:layout_constraintTop_toTopOf="@id/layout_login_email">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_fingerprint"
+            app:tint="?attr/colorPrimary" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:text="Tiếp tục"
+        android:backgroundTint="#D32F2F"
+        app:layout_constraintEnd_toEndOf="@id/tv_login_title"
+        app:layout_constraintStart_toStartOf="@id/tv_login_title"
+        app:layout_constraintTop_toBottomOf="@id/layout_login_email" />
+
+    <!-- Stage 2 Wrapper -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_password_stage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="layout_login_password,btn_login"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_login_password"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="@id/layout_login_email"
-        app:layout_constraintStart_toStartOf="@id/layout_login_email"
-        app:layout_constraintTop_toBottomOf="@id/layout_login_email"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="@id/tv_login_title"
+        app:layout_constraintStart_toStartOf="@id/tv_login_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_login_title"
         app:passwordToggleEnabled="true"
-        app:startIconDrawable="@drawable/ic_lock"> <!-- Icon ổ khóa (đã có) -->
+        app:startIconDrawable="@drawable/ic_lock">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_login_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password"
+            android:hint="Nhập Mật khẩu / Master Key"
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Nút Đăng nhập -->
     <Button
         android:id="@+id/btn_login"
         android:layout_width="0dp"
@@ -84,80 +130,57 @@
         app:layout_constraintStart_toStartOf="@id/layout_login_password"
         app:layout_constraintTop_toBottomOf="@id/layout_login_password" />
 
-    <!-- ProgressBar (Loading) - Đặt ở giữa nút -->
-    <ProgressBar
-        android:id="@+id/pb_login"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/btn_login"
-        app:layout_constraintBottom_toBottomOf="@id/btn_login"
-        app:layout_constraintStart_toStartOf="@id/btn_login"
-        app:layout_constraintEnd_toEndOf="@id/btn_login"
-        android:translationZ="2dp" />
-
-    <!-- Quên mật khẩu & Đổi tài khoản (Dùng "Tạo tài khoản" thay thế) -->
-    <TextView
-        android:id="@+id/tv_forgot_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/forgot_password"
-        android:layout_marginTop="16dp"
-        android:padding="8dp"
-        android:textColor="?attr/colorPrimary"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        app:layout_constraintStart_toStartOf="@id/btn_login"
-        app:layout_constraintTop_toBottomOf="@id/btn_login" />
-
-    <TextView
-        android:id="@+id/tv_go_to_register"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/create_account"
-        android:padding="8dp"
-        android:textColor="?attr/colorPrimary"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        app:layout_constraintEnd_toEndOf="@id/btn_login"
-        app:layout_constraintTop_toTopOf="@id/tv_forgot_password" />
-
-    <!-- Nút Đăng nhập bằng Vân tay -->
+    <!-- Links Section (Bottom) -->
     <LinearLayout
-        android:id="@+id/layout_biometric_login"
+        android:id="@+id/layout_links"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="32dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="12dp"
-        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toTopOf="@id/tv_privacy_policy"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_forgot_password"
-        android:visibility="gone"
-        tools:visibility="visible">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_fingerprint"
-            app:tint="?attr/colorPrimary" /> <!-- TODO: Thêm icon ic_fingerprint -->
+        <TextView
+            android:id="@+id/tv_forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:text="@string/forgot_password"
+            android:textColor="?attr/colorPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="@string/biometric_login_label"
-            android:textColor="?attr/colorPrimary"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"/>
+            android:text=" | "
+            android:textColor="@color/dark_gray" />
+
+        <TextView
+            android:id="@+id/tv_go_to_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:text="@string/create_account"
+            android:textColor="?attr/colorPrimary" />
     </LinearLayout>
 
-    <!-- Footer (Bỏ qua các nút Hướng dẫn, Câu hỏi...) -->
+    <ProgressBar
+        android:id="@+id/pb_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:translationZ="2dp" />
+
     <TextView
         android:id="@+id/tv_privacy_policy"
         android:layout_width="wrap_content"

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Autofill Service Configuration
+    Khai báo settings activity cho AutofillService
+-->
+<autofill-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.test.lifehub.features.three_settings.ui.SettingsActivity" />

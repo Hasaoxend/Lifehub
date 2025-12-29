@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "LifeHub",
+  "version": "1.0.0",
+  "description": "LifeHub - Password Manager & Productivity Tool",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "vite.svg",
+      "48": "vite.svg",
+      "128": "vite.svg"
+    }
+  },
+  "icons": {
+    "16": "vite.svg",
+    "48": "vite.svg",
+    "128": "vite.svg"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "vite.svg"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

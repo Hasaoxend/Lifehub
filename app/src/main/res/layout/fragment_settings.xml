@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -183,6 +184,41 @@
                             android:src="@drawable/ic_arrow_forward"
                             app:tint="@color/dark_gray"/>
                     </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/btn_sync_web"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingVertical="8dp">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle_elevated">
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_language"
+                                app:tint="@color/colorPrimary"/>
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Đồng bộ hóa dữ liệu Web"
+                            android:textSize="16sp"
+                            android:layout_marginStart="16dp"/>
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_forward"
+                            app:tint="@color/dark_gray"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -213,6 +249,98 @@
                         android:layout_height="wrap_content"
                         android:text="@string/use_biometric"
                         android:textSize="16sp"/>
+
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginVertical="8dp"/>
+
+                    <LinearLayout
+                        android:id="@+id/btn_change_passcode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingVertical="8dp">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle_elevated">
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_shield"
+                                app:tint="@color/colorPrimary"/>
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/title_change_passcode"
+                            android:textSize="16sp"
+                            android:layout_marginStart="16dp"/>
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_forward"
+                            app:tint="@color/dark_gray"/>
+                    </LinearLayout>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginVertical="12dp"/>
+                    
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_autofill"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_autofill"
+                        android:textSize="16sp"/>
+                    
+                    <TextView
+                        android:id="@+id/tv_autofill_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_autofill_hint"
+                        android:textSize="12sp"
+                        android:textColor="@color/dark_gray"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"/>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginVertical="12dp"/>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_background_persistence"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Duy trì chạy nền (Khuyên dùng)"
+                        android:textSize="16sp"/>
+                    
+
+                    
+                    <TextView
+                        android:id="@+id/tv_background_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Giúp Autofill hoạt động ổn định và không bị hệ thống tự động tắt."
+                        android:textSize="12sp"
+                        android:textColor="@color/dark_gray"
+                        android:layout_marginTop="4dp"
+                        android:visibility="visible"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

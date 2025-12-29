@@ -2,45 +2,64 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
   
+    // ===== HELPER FUNCTIONS =====
+    
+    // Kiểm tra user đã đăng nhập và là chủ sở hữu
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Kiểm tra kích thước string không vượt quá giới hạn
+    function isValidStringSize(field, maxSize) {
+      return field.size() <= maxSize;
+    }
+    
+    // Kiểm tra document size
+    function isValidDocumentSize() {
+      return request.resource.data.keys().size() <= 20; // Tối đa 20 fields
+    }
+    
+    // Kiểm tra user đã đăng ký và email đã được xác minh
+    function isVerified(userId) {
+      return isOwner(userId) && request.auth.token.email_verified == true;
+    }
+    
+    // ===== USER DOCUMENT =====
     match /users/{userId} {
-      // ✅ Cho phép người dùng đọc, tạo, cập nhật, xóa
-      // tài liệu của CHÍNH HỌ.
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      // 'write' đã bao gồm 'create', 'update', 'delete'
-      // 'read' vẫn được giữ nguyên
+      // Cho phép đọc/ghi thông tin cơ bản (salt, verification) ngay cả khi chưa verify email
+      // để có thể setup tài khoản hoặc xem thông báo verify.
+      allow read, write: if isOwner(userId);
 
-      // Các quy tắc con này đảm bảo rằng người dùng A
-      // không thể đọc hoặc ghi vào dữ liệu của người dùng B.
-      
       // Module 1: Tài khoản (Passwords)
       match /accounts/{accountId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
       // Module 1: Authenticator (TOTP/2FA)
       match /totp_accounts/{totpAccountId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
       // Module 2: Năng suất (Ghi chú)
       match /notes/{noteId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
       // Module 2: Năng suất (Công việc/Mua sắm)
       match /tasks/{taskId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
       // Module 2: Năng suất (Projects - Thư mục)
       match /projects/{projectId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
       // Module 4: Calendar
       match /calendar_events/{eventId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
     }
   }
 }
+

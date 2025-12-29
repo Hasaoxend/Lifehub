@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.test.lifehub.R;
-import com.test.lifehub.core.security.EncryptionHelper;
+import com.test.lifehub.core.security.EncryptionManager;
 import com.test.lifehub.features.one_accounts.data.AccountEntry;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
 
     // Inject Helper để GIẢI MÃ khi load dữ liệu lên màn hình
     @Inject
-    EncryptionHelper encryptionHelper;
+    EncryptionManager encryptionManager;
 
     private Toolbar mToolbar;
     private TextInputEditText etServiceName, etUsername, etPassword, etWebsiteUrl, etNotes;
@@ -156,16 +156,17 @@ public class AddEditAccountActivity extends AppCompatActivity implements Passwor
         etNotes.setText(account.notes);
 
         // --- GIẢI MÃ MẬT KHẨU ĐỂ HIỂN THỊ ---
-        String decryptedPass = encryptionHelper.decrypt(account.password);
+        String decryptedPass = encryptionManager.decrypt(account.password);
         etPassword.setText(decryptedPass);
         // ------------------------------------
 
         mCurrentCustomFieldCount = 0;
         // (Logic populate custom field giữ nguyên)
         for (CustomFieldViewHolder vh : mCustomFieldViews) { vh.block.setVisibility(View.GONE); vh.clear(); }
-        if (account.customFields != null) {
+        Map<String, Object> fieldsMap = account.asCustomFieldsMap();
+        if (fieldsMap != null && !fieldsMap.isEmpty()) {
             int i = 0;
-            for (Map.Entry<String, Object> entry : account.customFields.entrySet()) {
+            for (Map.Entry<String, Object> entry : fieldsMap.entrySet()) {
                 if (i >= MAX_CUSTOM_FIELDS) break;
                 Object val = entry.getValue();
                 if (val instanceof Map) {

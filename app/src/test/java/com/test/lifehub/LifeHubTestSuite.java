@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.test.lifehub.core.security.EncryptionHelperTest;
+import com.test.lifehub.core.security.LoginRateLimiterTest;
 import com.test.lifehub.core.util.SessionManagerTest;
 import com.test.lifehub.features.authenticator.ui.AuthenticatorTest;
 import com.test.lifehub.features.four_calendar.ui.CalendarViewModelTest;
@@ -21,6 +22,7 @@ import com.test.lifehub.ui.LoginViewModelTest;
     // Core Tests
     EncryptionHelperTest.class,
     SessionManagerTest.class,
+    LoginRateLimiterTest.class,
     
     // Feature Tests - Authentication
     LoginViewModelTest.class,

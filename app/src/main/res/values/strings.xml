@@ -30,7 +30,7 @@
     <string name="go_to_settings">Go to Settings</string>
     <string name="granted_status">Granted: %1$d/%2$d permissions</string>
     <string name="understood">Got it</string>
-    <string name="password_length_format">Length: %d</string>
+    <string name="password_length_format">Length:</string>
     <string name="password_requirement_8_chars">At least 8 characters</string>
     <string name="already_have_account">Already have an account? </string>
     <string name="login">Login</string>
@@ -276,6 +276,10 @@
     <string name="error_email_invalid">Email is invalid</string>
     <string name="error_email_check_failed">Email check failed: %s</string>
     <string name="error_login_failed">Login failed</string>
+    <string name="error_rate_limited_minutes">Too many failed attempts.\n\nPlease try again in %1$d minutes and %2$d seconds.</string>
+    <string name="error_rate_limited_seconds">Too many failed attempts.\n\nPlease try again in %1$d seconds.</string>
+    <string name="title_account_locked">Account Temporarily Locked</string>
+    <string name="warning_remaining_attempts">Warning: %d attempts remaining</string>
     
     <!-- Registration Success -->
     <string name="registration_success_title">Registration Successful!</string>
@@ -490,4 +494,57 @@
     <!-- Calculator Buttons -->
     <string name="calc_button_c">C</string>
     <string name="calc_button_ac">AC</string>
+    
+    <!-- Autofill Feature -->
+    <string name="autofill_title">Fill with LifeHub</string>
+    <string name="autofill_icon_desc">Autofill icon</string>
+    <string name="autofill_choose_option">Choose what to fill:</string>
+    <string name="autofill_fill_all">Fill Username &amp; Password</string>
+    <string name="autofill_username_only">Username Only</string>
+    <string name="autofill_password_only">Password Only</string>
+    <string name="autofill_security_note">Protected by biometric authentication</string>
+    <string name="autofill_choose_account">Chọn tài khoản</string>
+    <string name="autofill_enable_hint">To use autofill: Settings > System > Autofill service > LifeHub</string>
+    <string name="settings_autofill">Autofill Service</string>
+    <string name="settings_autofill_hint">Requires Biometric to be enabled first</string>
+    <string name="settings_autofill_enabled">Autofill enabled</string>
+    <string name="settings_autofill_disabled">Autofill disabled</string>
+    <string name="settings_autofill_requires_biometric">Please enable Biometric first</string>
+    
+    <!-- Save Credential -->
+    <string name="save_password_title">Save Password</string>
+    <string name="biometric_title_save">Confirm Save</string>
+    <string name="biometric_subtitle_save">Verify to save this password</string>
+    <string name="error_empty_fields">Username and password are required</string>
+    <string name="save_success">Password saved successfully</string>
+    <string name="hint_username">Username / Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_service_name">Service Name</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="update_account_title">Update Account</string>
+    <string name="update_button">Update</string>
+    
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_label">LifeHub Browser Autofill</string>
+    <string name="accessibility_service_description">Cho phép LifeHub tự động điền mật khẩu trong các trình duyệt web như Chrome, Brave, Firefox. Dịch vụ này chỉ hoạt động trong các trình duyệt và không đọc dữ liệu từ các ứng dụng khác.</string>
+    <string name="title_passcode_setup">Security Setup</string>
+    <string name="passcode_setup_intro">Create a 6-digit PIN to encrypt your data. This is separate from your login password.</string>
+    <string name="passcode_setup_confirm">Confirm your 6-digit PIN</string>
+    <string name="recovery_code_title">Recovery Code</string>
+    <string name="recovery_code_desc">SAVE THIS CODE! It is the only way to recover your data if you forget your PIN. We cannot reset it for you.</string>
+    <string name="btn_setup_pin">Set PIN &amp; Generate Recovery Code</string>
+    <string name="error_pin_length">PIN must be exactly 6 digits</string>
+    <string name="error_pin_mismatch">PINs do not match</string>
+    <string name="passcode_setup_success">Security setup successful!</string>
+    <string name="clipboard_copy_success">Copied to clipboard</string>
+    <string name="lockout_too_many_attempts">Too many failed attempts</string>
+    <string name="lockout_countdown_format">Try again in %s</string>
+    <string name="lockout_remaining_attempts">Warning: %d attempts remaining</string>
+    <string name="title_change_passcode">Change Security PIN</string>
+    <string name="label_current_pin">Current PIN</string>
+    <string name="label_new_pin">New PIN</string>
+    <string name="label_confirm_new_pin">Confirm New PIN</string>
+    <string name="msg_passcode_changed_success">PIN changed successfully!</string>
+    <string name="error_passcode_incorrect">Current PIN is incorrect</string>
 </resources>

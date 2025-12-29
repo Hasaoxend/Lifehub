@@ -8,28 +8,56 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-
-# API Keys và cấu hình nhạy cảm
-google-services.json
-*.keystore
-*.jks
-key.properties
-
-# Thư mục build
-*/build/
-build/
-
 # Gradle files
 .gradle/
 gradle-app.setting
 !gradle-wrapper.jar
 
-# IDE-specific files
+# Build artifacts
+/build
+build/
+*/build/
+captures/
+.externalNativeBuild
+.cxx
+
+# IDE-specific
 .idea/
-*.iws
 .vscode/
+*.iml
+*.iws
+*.sw?
+.DS_Store
+
+# API Keys & Sensitive Config
+local.properties
+google-services.json
+*.keystore
+*.jks
+key.properties
+.env
+.env.*
+!.env.example
+
+# Build Logs & Debug
+build_log*.txt
+signing_report*.txt
+errors.txt
+npm-debug.log*
+yarn-debug.log*
+
+# Firebase local data
+.firebase/
+.firebaserc
+
+# Gemini & Agent data
+.gemini/
+.agent/
+brain/
+implementation_plan.md
+walkthrough.md
+task.md
+
+# Extension Config
+extension/popup/libs/firebase-config.js
+!extension/popup/libs/firebase-config.example.js

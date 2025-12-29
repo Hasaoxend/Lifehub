@@ -93,10 +93,19 @@ public class AccountEntry implements Serializable {
     public String password;
     public String notes;
 
-    // ----- Trường Tùy chỉnh (Dùng Map linh hoạt) -----
-    // Key: Tên trường (String)
-    // Value: Map<String, Object> (ví dụ: { "value": "Giá trị", "type": 1 })
-    public Map<String, Object> customFields;
+    // ----- Trường Tùy chỉnh (Dùng Object để tránh crash nếu Firestore lưu [] thay vì {}) -----
+    public Object customFields;
+
+    /**
+     * Helper để lấy customFields dưới dạng Map an toàn
+     */
+    @Exclude
+    public Map<String, Object> asCustomFieldsMap() {
+        if (customFields instanceof Map) {
+            return (Map<String, Object>) customFields;
+        }
+        return new HashMap<>();
+    }
 
     // ----- Thông tin Người sở hữu (Bắt buộc cho Luật Bảo mật) -----
     public String userOwnerId; // Sẽ lưu UID của Firebase Auth
@@ -111,6 +120,5 @@ public class AccountEntry implements Serializable {
 
     public AccountEntry() {
         // Constructor rỗng (bắt buộc cho Firestore)
-        this.customFields = new HashMap<>();
     }
 }

@@ -49,8 +49,19 @@ import javax.inject.Singleton;
  * @see AccountViewModel ViewModel sử dụng repository này
  * @see EncryptionHelper Mã hóa/giải mã mật khẩu
  */
+import com.test.lifehub.core.security.EncryptionManager;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * AccountRepository - Quản lý dữ liệu tài khoản từ Firestore
+ */
 @Singleton
 public class AccountRepository {
+    
+    public interface MigrationCallback {
+        void onProgress(int current, int total);
+        void onComplete(int successCount, int failedCount);
+    }
 
     private static final String TAG = "AccountRepository";
     
@@ -322,6 +333,72 @@ public class AccountRepository {
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "❌ Failed to delete account", e);
                     });
+        }
+    }
+    /**
+     * Thực hiện chuyển đổi mã hóa toàn bộ tài khoản sang chuẩn mới.
+     * 
+     * @param encryptionManager Quản lý mã hóa
+     * @param callback Callback thông báo tiến độ
+     */
+    public void migrateEncryption(EncryptionManager encryptionManager, MigrationCallback callback) {
+        List<AccountEntry> accounts = mAllAccounts.getValue();
+        if (accounts == null || accounts.isEmpty()) {
+            if (callback != null) callback.onComplete(0, 0);
+            return;
+        }
+
+        int total = accounts.size();
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failedCount = new AtomicInteger(0);
+        AtomicInteger processedCount = new AtomicInteger(0);
+
+        for (AccountEntry account : accounts) {
+            String encryptedPwd = account.password;
+            if (encryptedPwd == null || encryptedPwd.isEmpty()) {
+                if (processedCount.incrementAndGet() == total && callback != null) {
+                    callback.onComplete(successCount.get(), failedCount.get());
+                }
+                continue;
+            }
+
+            // Giải mã bằng logic tự động (có fallback legacy nội bộ trong EncryptionManager)
+            String decrypted = encryptionManager.decrypt(encryptedPwd);
+            
+            // Mã hóa lại BẮT BUỘC bằng chuẩn Cross-platform
+            String newEncrypted = encryptionManager.encrypt(decrypted);
+
+            // Nếu mật khẩu thay đổi (nghĩa là nó vừa được upgrade lên chuẩn mới)
+            if (!newEncrypted.equals(encryptedPwd)) {
+                account.password = newEncrypted;
+                CollectionReference ref = getAccountCollection();
+                if (ref != null && account.documentId != null) {
+                    ref.document(account.documentId).set(account)
+                        .addOnSuccessListener(aVoid -> {
+                            successCount.incrementAndGet();
+                            int current = processedCount.incrementAndGet();
+                            if (callback != null) callback.onProgress(current, total);
+                            if (current == total && callback != null) {
+                                callback.onComplete(successCount.get(), failedCount.get());
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            failedCount.incrementAndGet();
+                            int current = processedCount.incrementAndGet();
+                            if (callback != null) callback.onProgress(current, total);
+                            if (current == total && callback != null) {
+                                callback.onComplete(successCount.get(), failedCount.get());
+                            }
+                        });
+                }
+            } else {
+                // Đã ở chuẩn mới hoặc không có gì thay đổi
+                int current = processedCount.incrementAndGet();
+                if (callback != null) callback.onProgress(current, total);
+                if (current == total && callback != null) {
+                    callback.onComplete(successCount.get(), failedCount.get());
+                }
+            }
         }
     }
 }

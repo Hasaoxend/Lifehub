@@ -1,0 +1,28 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconGrad" x1="20" y1="10" x2="108" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#6366f1" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#0f0f1a"/>
+  
+  <!-- Shield icon -->
+  <path d="M64 16L24 36V60C24 88 47.2 113.92 64 120C80.8 113.92 104 88 104 60V36L64 16Z" 
+        fill="url(#iconGrad)" 
+        stroke="rgba(255,255,255,0.2)" 
+        stroke-width="2"
+        filter="url(#shadow)"/>
+  
+  <!-- Key icon inside -->
+  <circle cx="64" cy="54" r="12" fill="none" stroke="white" stroke-width="4"/>
+  <rect x="60" y="64" width="8" height="24" rx="2" fill="white"/>
+  <rect x="68" y="76" width="10" height="4" rx="1" fill="white"/>
+  <rect x="68" y="84" width="6" height="4" rx="1" fill="white"/>
+</svg>

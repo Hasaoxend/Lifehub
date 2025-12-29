@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.test.lifehub.R;
 import com.test.lifehub.core.security.BiometricHelper;
-import com.test.lifehub.core.security.EncryptionHelper;
+import com.test.lifehub.core.security.EncryptionManager;
 import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.one_accounts.data.AccountEntry;
 
@@ -39,7 +39,7 @@ public class AccountDetailActivity extends AppCompatActivity implements Biometri
     public static final String EXTRA_ACCOUNT_ID = "ACCOUNT_ID";
 
     @Inject
-    EncryptionHelper encryptionHelper;
+    EncryptionManager encryptionManager;
 
     @Inject
     SessionManager sessionManager;
@@ -119,10 +119,11 @@ public class AccountDetailActivity extends AppCompatActivity implements Biometri
 
         // --- XỬ LÝ CÁC TRƯỜNG TÙY CHỈNH ---
         layoutCustomFields.removeAllViews();
-        if (account.customFields != null && !account.customFields.isEmpty()) {
+        Map<String, Object> fieldsMap = account.asCustomFieldsMap();
+        if (fieldsMap != null && !fieldsMap.isEmpty()) {
             LayoutInflater inflater = LayoutInflater.from(this);
 
-            for (Map.Entry<String, Object> entry : account.customFields.entrySet()) {
+            for (Map.Entry<String, Object> entry : fieldsMap.entrySet()) {
                 String label = entry.getKey();
                 Object valueObj = entry.getValue();
 
@@ -207,7 +208,7 @@ public class AccountDetailActivity extends AppCompatActivity implements Biometri
     private void showPassword() {
         if (mAccount == null) return;
         isPasswordVisible = true;
-        String plain = encryptionHelper.decrypt(mAccount.password);
+        String plain = encryptionManager.decrypt(mAccount.password);
         tvPassword.setText(plain);
         btnTogglePassword.setImageResource(R.drawable.ic_visibility_off);
     }
@@ -239,7 +240,7 @@ public class AccountDetailActivity extends AppCompatActivity implements Biometri
             // Lưu ý: Trường tùy chỉnh hiện tại chưa được mã hóa trong DB nên text đã là plain text.
             // Hàm này check nếu là mật khẩu chính thì cần decrypt, còn custom field thì dùng trực tiếp.
             if (label.equals("Mật khẩu")) {
-                contentToCopy = encryptionHelper.decrypt(text);
+                contentToCopy = encryptionManager.decrypt(text);
             }
         }
 

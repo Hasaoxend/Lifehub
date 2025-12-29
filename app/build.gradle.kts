@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.test.lifehub"
-    compileSdk = 36 // Đảm bảo project hỗ trợ SDK mới nhất
-
+    compileSdk = 35 // Android 15 (Stable)
+    
     defaultConfig {
         applicationId = "com.test.lifehub"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

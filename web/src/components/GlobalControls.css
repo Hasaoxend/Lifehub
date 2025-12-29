@@ -1,0 +1,73 @@
+.global-controls {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.global-control-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.global-control-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.global-control-btn.theme-btn {
+  color: #6366f1;
+}
+
+.global-control-btn.theme-btn:hover {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.global-control-btn.lang-btn {
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.global-control-btn.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+/* Dark mode */
+[data-theme="dark"] .global-control-btn {
+  background: rgba(30, 30, 50, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .global-control-btn:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .global-control-btn.theme-btn {
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .global-control-btn.theme-btn:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1a1a2e;
+}
+
+[data-theme="dark"] .global-control-btn.lang-btn {
+  color: white;
+}
+
+[data-theme="dark"] .global-control-btn.lang-btn:hover {
+  background: rgba(50, 50, 80, 0.95);
+}

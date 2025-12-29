@@ -4,6 +4,8 @@ import android.content.Context;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.test.lifehub.core.security.EncryptionHelper;
+import com.test.lifehub.core.security.EncryptionManager;
+import com.test.lifehub.core.security.LoginRateLimiter;
 import com.test.lifehub.core.util.PreferenceManager;
 import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.two_productivity.data.WeatherApiService;
@@ -21,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @InstallIn(SingletonComponent.class)
 public class AppModule {
 
-    // ===== THÊM LẠI HÀM NÀY NẾU BỊ MẤT =====
+    // ===== SESSION & SECURITY =====
     @Provides
     @Singleton
     public SessionManager provideSessionManager(@ApplicationContext Context context) {
@@ -32,6 +34,24 @@ public class AppModule {
     @Singleton
     public EncryptionHelper provideEncryptionHelper(@ApplicationContext Context context) {
         return new EncryptionHelper(context);
+    }
+    
+    @Provides
+    @Singleton
+    public EncryptionManager provideEncryptionManager(
+            @ApplicationContext Context context,
+            EncryptionHelper legacyHelper,
+            com.test.lifehub.core.security.CrossPlatformEncryptionHelper crossPlatformHelper,
+            FirebaseFirestore db,
+            FirebaseAuth auth
+    ) {
+        return new EncryptionManager(context, legacyHelper, crossPlatformHelper, db, auth);
+    }
+    
+    @Provides
+    @Singleton
+    public LoginRateLimiter provideLoginRateLimiter(@ApplicationContext Context context) {
+        return new LoginRateLimiter(context);
     }
     // ======================================
 

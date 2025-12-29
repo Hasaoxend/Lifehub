@@ -30,7 +30,7 @@
     <string name="go_to_settings">Đi đến Cài đặt</string>
     <string name="granted_status">Đã cấp: %1$d/%2$d quyền</string>
     <string name="understood">Đã hiểu</string>
-    <string name="password_length_format">Độ dài: %d</string>
+    <string name="password_length_format">Độ dài:</string>
     <string name="password_requirement_8_chars">Ít nhất 8 ký tự</string>
     <string name="already_have_account">Đã có tài khoản? </string>
     <string name="login">Đăng nhập</string>
@@ -276,6 +276,10 @@
     <string name="error_email_invalid">Email không hợp lệ</string>
     <string name="error_email_check_failed">Lỗi kiểm tra email: %s</string>
     <string name="error_login_failed">Đăng nhập thất bại</string>
+    <string name="error_rate_limited_minutes">Đã thử quá nhiều lần.\n\nVui lòng thử lại sau %1$d phút %2$d giây.</string>
+    <string name="error_rate_limited_seconds">Đã thử quá nhiều lần.\n\nVui lòng thử lại sau %1$d giây.</string>
+    <string name="title_account_locked">Tài khoản tạm thời bị khóa</string>
+    <string name="warning_remaining_attempts">Cảnh báo: Còn %d lần thử</string>
     
     <!-- Registration Success -->
     <string name="registration_success_title">Đăng ký Thành công!</string>
@@ -490,4 +494,52 @@
     <!-- Calculator Buttons -->
     <string name="calc_button_c">C</string>
     <string name="calc_button_ac">AC</string>
+    
+    <!-- Autofill Feature -->
+    <string name="autofill_title">Điền với LifeHub</string>
+    <string name="autofill_icon_desc">Biểu tượng tự động điền</string>
+    <string name="autofill_choose_option">Chọn nội dung cần điền:</string>
+    <string name="autofill_fill_all">Điền Tên đăng nhập &amp; Mật khẩu</string>
+    <string name="autofill_username_only">Chỉ Tên đăng nhập</string>
+    <string name="autofill_password_only">Chỉ Mật khẩu</string>
+    <string name="autofill_security_note">Được bảo vệ bằng xác thực sinh trắc học</string>
+    <string name="autofill_enable_hint">Bật tự động điền: Cài đặt > Hệ thống > Tự động điền > LifeHub</string>
+    <string name="settings_autofill">Dịch vụ Tự động điền</string>
+    <string name="settings_autofill_hint">Cần bật Sinh trắc học trước</string>
+    <string name="settings_autofill_enabled">Đã bật tự động điền</string>
+    <string name="settings_autofill_disabled">Đã tắt tự động điền</string>
+    <string name="settings_autofill_requires_biometric">Vui lòng bật Sinh trắc học trước</string>
+    
+    <!-- Save Credential -->
+    <string name="save_password_title">Lưu Mật khẩu</string>
+    <string name="update_account_title">Cập nhật tài khoản</string>
+    <string name="biometric_title_save">Xác nhận Lưu</string>
+    <string name="biometric_subtitle_save">Xác thực để lưu mật khẩu này</string>
+    <string name="error_empty_fields">Tên đăng nhập và mật khẩu là bắt buộc</string>
+    <string name="save_success">Đã lưu mật khẩu thành công</string>
+    <string name="hint_username">Tên đăng nhập / Email</string>
+    <string name="hint_password">Mật khẩu</string>
+    <string name="hint_service_name">Tên dịch vụ</string>
+    <string name="btn_save">Lưu</string>
+    <string name="update_button">Cập nhật</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="title_passcode_setup">Thiết lập Bảo mật</string>
+    <string name="passcode_setup_intro">Tạo mã PIN 6 số để mã hóa dữ liệu. Mã này độc lập với mật khẩu đăng nhập của bạn.</string>
+    <string name="passcode_setup_confirm">Xác nhận mã PIN 6 số</string>
+    <string name="recovery_code_title">Mã khôi phục</string>
+    <string name="recovery_code_desc">HÃY LƯU MÃ NÀY! Đây là cách duy nhất để cứu dữ liệu nếu bạn quên mã PIN. Chúng tôi không thể khôi phục nó giúp bạn.</string>
+    <string name="btn_setup_pin">Thiết lập PIN &amp; Tạo mã khôi phục</string>
+    <string name="error_pin_length">Mã PIN phải có đúng 6 chữ số</string>
+    <string name="error_pin_mismatch">Mã PIN xác nhận không khớp</string>
+    <string name="passcode_setup_success">Thiết lập bảo mật thành công!</string>
+    <string name="clipboard_copy_success">Đã copy vào bộ nhớ tạm</string>
+    <string name="lockout_too_many_attempts">Quá nhiều lần thử sai</string>
+    <string name="lockout_countdown_format">Thử lại sau %s</string>
+    <string name="lockout_remaining_attempts">Cảnh báo: Còn lại %d lần thử</string>
+    <string name="title_change_passcode">Đổi mã PIN bảo mật</string>
+    <string name="label_current_pin">Mã PIN hiện tại</string>
+    <string name="label_new_pin">Mã PIN mới</string>
+    <string name="label_confirm_new_pin">Xác nhận mã PIN mới</string>
+    <string name="msg_passcode_changed_success">Đổi mã PIN thành công!</string>
+    <string name="error_passcode_incorrect">Mã PIN hiện tại không chính xác</string>
 </resources>

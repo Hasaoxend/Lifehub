@@ -30,9 +30,11 @@ public class SessionManager {
     private static final String KEY_USER_TOKEN = "user_token";          // Token xác thực của user
     private static final String KEY_BIOMETRIC_ENABLED = "is_biometric_enabled"; // Bật sinh trắc học?
     private static final String KEY_THEME_MODE = "theme_mode";          // Chế độ giao diện (sáng/tối)
+    private static final String KEY_ENCRYPTION_PASSWORD = "enc_pwd";    // Mật khẩu login (để biometric unlock encryption key)
 
     // Khóa lưu trạng thái lần đầu mở app
     private static final String KEY_IS_FIRST_RUN = "is_first_run";
+    private static final String KEY_LAST_EMAIL = "last_email";
     
     // Khóa lưu ngôn ngữ ứng dụng
     private static final String KEY_LANGUAGE = "app_language";
@@ -40,8 +42,14 @@ public class SessionManager {
     // Khóa lưu thông tin TOTP (xác thực 2 yếu tố)
     private static final String KEY_TOTP_ACCOUNTS = "totp_accounts"; // Danh sách tài khoản TOTP (dạng JSON)
     private static final String KEY_TOTP_ENABLED = "totp_enabled";    // Đã bật TOTP chưa?
+    
+    // File preferences riêng cho Autofill (PLAIN - không encrypted để service đọc được)
+    private static final String AUTOFILL_PREF_NAME = "lifehub_autofill_prefs";
+    public static final String KEY_AUTOFILL_BIOMETRIC = "autofill_biometric_enabled";
+    public static final String KEY_AUTOFILL_SERVICE = "autofill_service_enabled";
 
     private SharedPreferences sharedPreferences;
+    private SharedPreferences autofillPreferences; // Plain prefs cho autofill
 
     /**
      * Khởi tạo SessionManager với bộ nhớ mã hóa an toàn
@@ -64,9 +72,13 @@ public class SessionManager {
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
+            
+            // Plain preferences cho autofill (có thể đọc từ process khác)
+            autofillPreferences = context.getSharedPreferences(AUTOFILL_PREF_NAME, Context.MODE_PRIVATE);
         } catch (GeneralSecurityException | IOException e) {
             Log.e(TAG, "CRITICAL: Không thể tạo bộ nhớ bảo mật.", e);
             sharedPreferences = null;
+            autofillPreferences = context.getSharedPreferences(AUTOFILL_PREF_NAME, Context.MODE_PRIVATE);
         }
     }
 
@@ -84,11 +96,12 @@ public class SessionManager {
      * 
      * @param token Token xác thực từ Firebase Authentication
      */
-    public void createLoginSession(String token) {
+    public void createLoginSession(String token, String email) {
         if (!isSecure()) return;
         sharedPreferences.edit()
                 .putBoolean(KEY_IS_LOGGED_IN, true)
                 .putString(KEY_USER_TOKEN, token)
+                .putString(KEY_LAST_EMAIL, email)
                 .apply();
     }
 
@@ -107,7 +120,11 @@ public class SessionManager {
      */
     public void logoutUser() {
         if (!isSecure()) return;
-        sharedPreferences.edit().remove(KEY_IS_LOGGED_IN).remove(KEY_USER_TOKEN).apply();
+        sharedPreferences.edit()
+                .remove(KEY_IS_LOGGED_IN)
+                .remove(KEY_USER_TOKEN)
+                .remove(KEY_ENCRYPTION_PASSWORD)
+                .apply();
     }
 
     /**
@@ -140,6 +157,12 @@ public class SessionManager {
      */
     public void setBiometricEnabled(boolean enabled) {
         if(isSecure()) sharedPreferences.edit().putBoolean(KEY_BIOMETRIC_ENABLED, enabled).apply();
+        
+        // ⚠️ Sync với autofillPreferences để service đọc được
+        // Chỉ lưu boolean flag, không phải data nhạy cảm -> an toàn với plain prefs
+        if (autofillPreferences != null) {
+            autofillPreferences.edit().putBoolean(KEY_AUTOFILL_BIOMETRIC, enabled).apply();
+        }
     }
 
     /**
@@ -148,6 +171,33 @@ public class SessionManager {
      */
     public boolean isBiometricEnabled() {
         return isSecure() && sharedPreferences.getBoolean(KEY_BIOMETRIC_ENABLED, false);
+    }
+
+    
+    // --- AUTOFILL SERVICE ---
+    
+    private static final String KEY_AUTOFILL_ENABLED = "autofill_enabled";
+    
+    /**
+     * Bật/tắt dịch vụ Autofill
+     * ⚠️ RÀNG BUỘC: Chỉ bật được khi Biometric đã bật
+     * @param enabled true để bật, false để tắt
+     */
+    public void setAutofillEnabled(boolean enabled) {
+        if(isSecure()) sharedPreferences.edit().putBoolean(KEY_AUTOFILL_ENABLED, enabled).apply();
+        
+        // ⚠️ Sync với autofillPreferences để service đọc được
+        if (autofillPreferences != null) {
+            autofillPreferences.edit().putBoolean(KEY_AUTOFILL_SERVICE, enabled).apply();
+        }
+    }
+    
+    /**
+     * Kiểm tra xem dịch vụ Autofill đã được bật chưa
+     * @return true nếu đã bật Autofill
+     */
+    public boolean isAutofillEnabled() {
+        return isSecure() && sharedPreferences.getBoolean(KEY_AUTOFILL_ENABLED, false);
     }
 
     // --- CÁC HÀM MỚI CHO INTRO ---
@@ -228,5 +278,39 @@ public class SessionManager {
     public String getLanguage() {
         if (!isSecure()) return null;
         return sharedPreferences.getString(KEY_LANGUAGE, null);
+    }
+    /**
+     * Lưu mật khẩu đăng nhập (MÃ HÓA) để dùng cho biometric unlock encryption key
+     * @param password Mật khẩu người dùng nhập khi login
+     */
+    public void saveEncryptionPassword(String password) {
+        if (isSecure()) {
+            sharedPreferences.edit().putString(KEY_ENCRYPTION_PASSWORD, password).apply();
+        }
+    }
+
+    /**
+     * Lấy mật khẩu đăng nhập đã lưu
+     * @return Mật khẩu, hoặc null nếu chưa lưu
+     */
+    public String getEncryptionPassword() {
+        if (!isSecure()) return null;
+        return sharedPreferences.getString(KEY_ENCRYPTION_PASSWORD, null);
+    }
+
+    /**
+     * Xóa mật khẩu đăng nhập đã lưu (khi logout hoặc tắt biometric)
+     */
+    public void clearEncryptionPassword() {
+        if (isSecure()) {
+            sharedPreferences.edit().remove(KEY_ENCRYPTION_PASSWORD).apply();
+        }
+    }
+    /**
+     * Lấy email đăng nhập cuối cùng
+     */
+    public String getLastEmail() {
+        if (!isSecure()) return null;
+        return sharedPreferences.getString(KEY_LAST_EMAIL, null);
     }
 }

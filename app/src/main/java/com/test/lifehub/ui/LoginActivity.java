@@ -23,7 +23,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.test.lifehub.R;
 import com.test.lifehub.core.security.BiometricHelper;
+import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.three_settings.ui.ChangePasswordActivity;
+
+import javax.inject.Inject;
 
 import java.util.regex.Pattern;
 
@@ -193,9 +196,13 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     private Button btnLogin;
     private TextView tvGoToRegister, tvForgotPassword;
     private ProgressBar pbLogin;
-    private LinearLayout mLayoutBiometric;
+    private View mLayoutBiometric;
+    private View mGroupEmail, mGroupPassword;
+    private Button btnNext;
     private LoginViewModel mViewModel;
     private FirebaseAuth mAuth;
+    @Inject
+    SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,6 +224,18 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
 
         setupListeners();
         observeLoginState();
+        // ===== BƯỚC 3: KIỂM TRA EMAIL TỪ INTENT (SAU KHI ĐĂNG KÝ) =====
+        String emailIntent = getIntent().getStringExtra("EMAIL");
+        if (emailIntent != null) {
+            etEmail.setText(emailIntent);
+        } else {
+            // Thử lấy email cuối cùng đăng nhập
+            String lastEmail = mViewModel.getLastEmail();
+            if (lastEmail != null) {
+                etEmail.setText(lastEmail);
+            }
+        }
+
         observeInitialCheck();
 
         if (savedInstanceState == null) {
@@ -235,20 +254,53 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
         pbLogin = findViewById(R.id.pb_login);
         mLayoutBiometric = findViewById(R.id.layout_biometric_login);
+        mGroupEmail = findViewById(R.id.group_email_stage);
+        mGroupPassword = findViewById(R.id.group_password_stage);
+        btnNext = findViewById(R.id.btn_next);
     }
 
     private void setupListeners() {
+        btnNext.setOnClickListener(v -> handleNextStep());
         btnLogin.setOnClickListener(v -> mViewModel.attemptManualLogin(etEmail.getText().toString().trim(), etPassword.getText().toString().trim()));
         tvGoToRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterEmailActivity.class)));
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
-        mLayoutBiometric.setOnClickListener(v -> { setLoading(true); BiometricHelper.showBiometricPrompt(this, this); });
+        mLayoutBiometric.setOnClickListener(v -> handleBiometricLogin());
+    }
+
+    private void handleNextStep() {
+        String email = etEmail.getText().toString().trim();
+        if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Luôn chuyển sang bước nhập mật khẩu. 
+        // Firebase mặc định bật "Email enumeration protection" nên fetchSignInMethodsForEmail sẽ trả về rỗng.
+        showPasswordStage();
+    }
+
+    private void showPasswordStage() {
+        mGroupEmail.setVisibility(View.GONE);
+        mGroupPassword.setVisibility(View.VISIBLE);
+        etPassword.requestFocus();
+    }
+
+    private void handleBiometricLogin() {
+        if (BiometricHelper.isBiometricAvailable(this)) {
+            setLoading(true);
+            BiometricHelper.showBiometricPrompt(this, false, this);
+        }
     }
 
     private void observeInitialCheck() {
         mViewModel.initialState.observe(this, state -> {
             if(state==null) return;
             setLoading(false);
-            if(state == LoginViewModel.InitialCheckState.SHOW_BIOMETRIC_PROMPT) mLayoutBiometric.setVisibility(View.VISIBLE);
+            if(state == LoginViewModel.InitialCheckState.SHOW_BIOMETRIC_PROMPT) {
+                mLayoutBiometric.setVisibility(View.VISIBLE);
+                // TỰ ĐỘNG: Hiện vân tay luôn mà không chờ user bấm (cho phép dùng PIN thiết bị nếu vân tay lỗi)
+                BiometricHelper.showBiometricPrompt(this, false, this);
+            }
             else if(state == LoginViewModel.InitialCheckState.NAVIGATE_TO_MAIN) navigateToMain();
         });
     }
@@ -256,24 +308,76 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     private void observeLoginState() {
         mViewModel.loginState.observe(this, state -> {
             if(state==null) return;
-            if(state == LoginViewModel.LoginState.LOADING) setLoading(true);
-            else if(state == LoginViewModel.LoginState.SUCCESS) { 
+            
+            if(state == LoginViewModel.LoginState.LOADING) {
+                setLoading(true);
+            } else if(state == LoginViewModel.LoginState.SUCCESS) { 
                 setLoading(false); 
-                checkPasswordStrengthBeforeNavigate();
+                
+                // Lấy mật khẩu vừa dùng để đăng nhập (thủ công hoặc vân tay)
+                String pwd = etPassword.getText().toString();
+                if (pwd.isEmpty()) {
+                    pwd = mViewModel.getSavedPassword();
+                }
+                
+                checkPasswordStrengthBeforeNavigate(pwd);
+            } else if(state == LoginViewModel.LoginState.ERROR_RATE_LIMITED) {
+                setLoading(false);
+                showRateLimitedError();
+            } else if(state == LoginViewModel.LoginState.ERROR_BAD_CREDENTIALS) {
+                setLoading(false);
+                // Hiển thị cảnh báo nếu còn ít lần thử
+                if (mViewModel.shouldShowWarning()) {
+                    int remaining = mViewModel.getRemainingAttempts();
+                    Toast.makeText(this, 
+                        getString(R.string.error_login_failed) + "\n" + 
+                        getString(R.string.warning_remaining_attempts, remaining), 
+                        Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, R.string.error_login_failed, Toast.LENGTH_SHORT).show();
+                }
+            } else if (state == LoginViewModel.LoginState.ERROR_ENCRYPTION_FAILED) {
+                setLoading(false);
+                Toast.makeText(this, "Lỗi xác thực khóa mã hóa. Vui lòng kiểm tra lại mật khẩu.", Toast.LENGTH_LONG).show();
+            } else if (state == LoginViewModel.LoginState.ERROR_NEEDS_PIN_SETUP) {
+                setLoading(false);
+                // Chuyển sang màn hình Setup PIN
+                Intent intent = new Intent(this, PasscodeSetupActivity.class);
+                startActivity(intent);
+                finish();
+            } else { 
+                setLoading(false); 
+                Toast.makeText(this, R.string.error_login_failed, Toast.LENGTH_SHORT).show(); 
             }
-            else { setLoading(false); Toast.makeText(this, R.string.error_login_failed, Toast.LENGTH_SHORT).show(); }
         });
     }
     
-    private void checkPasswordStrengthBeforeNavigate() {
+    private void showRateLimitedError() {
+        long remainingSeconds = mViewModel.getRemainingLockTimeSeconds();
+        long minutes = remainingSeconds / 60;
+        long seconds = remainingSeconds % 60;
+        
+        String message;
+        if (minutes > 0) {
+            message = getString(R.string.error_rate_limited_minutes, minutes, seconds);
+        } else {
+            message = getString(R.string.error_rate_limited_seconds, seconds);
+        }
+        
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.title_account_locked)
+            .setMessage("Tài khoản của bạn tạm thời bị khóa do nhập sai nhiều lần. Vui lòng thử lại sau " + mViewModel.getRemainingLockTimeSeconds() + " giây.")
+            .setPositiveButton("OK", null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show();
+    }
+    
+    private void checkPasswordStrengthBeforeNavigate(String password) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             navigateToMain();
             return;
         }
-        
-        // Get entered password to validate
-        String password = etPassword.getText() != null ? etPassword.getText().toString() : "";
         
         if (isPasswordStrong(password)) {
             // Strong password, proceed to main
@@ -359,7 +463,29 @@ public class LoginActivity extends AppCompatActivity implements BiometricHelper.
     }
 
     @Override
-    public void onBiometricAuthSuccess() { navigateToMain(); }
+    public void onBiometricAuthSuccess() { 
+        // Lấy mật khẩu đã lưu
+        String savedPassword = mViewModel.getSavedPassword();
+        if (savedPassword != null) {
+            String email = etEmail.getText().toString().trim();
+            
+            // Nếu email chưa nhập, dùng email cuối cùng
+            if (TextUtils.isEmpty(email)) {
+                email = mViewModel.getLastEmail();
+            }
+            
+            if (!TextUtils.isEmpty(email)) {
+                setLoading(true);
+                mViewModel.attemptManualLogin(email, savedPassword);
+            } else {
+                setLoading(false);
+                Toast.makeText(this, "Vui lòng nhập Email trước", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            setLoading(false);
+            Toast.makeText(this, "Chưa thiết lập Vân tay cho tài khoản này", Toast.LENGTH_LONG).show();
+        }
+    }
     @Override
     public void onBiometricAuthError(String errorMessage) { setLoading(false); Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show(); }
     @Override

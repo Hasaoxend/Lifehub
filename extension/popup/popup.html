@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeHub</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Loading State -->
+    <div id="loading" class="screen active">
+      <div class="loader"></div>
+      <p>Đang tải...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="header">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L4 7V11C4 16.5 7.84 21.74 12 23C16.16 21.74 20 16.5 20 11V7L12 2Z" fill="url(#grad)" stroke="white" stroke-width="1.5"/>
+            <path d="M12 8V12M12 16H12.01" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="grad" x1="4" y1="2" x2="20" y2="23" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>LifeHub</span>
+        </div>
+        <div class="header-actions">
+          <a href="https://lifehub-project-d8c97.web.app" target="_blank" class="icon-btn" title="Mở LifeHub Web">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="login-content">
+        <h2>Đăng nhập</h2>
+        <p class="subtitle">Nhập thông tin tài khoản LifeHub của bạn</p>
+        
+        <div id="login-error" class="error-message hidden"></div>
+        
+        <form id="login-form">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="example@email.com" required>
+          </div>
+          <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="login-btn">
+            <span>Đăng nhập</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Passcode Screen (Unlock / Setup) -->
+    <div id="passcode-screen" class="screen">
+      <div class="header">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L4 7V11C4 16.5 7.84 21.74 12 23C16.16 21.74 20 16.5 20 11V7L12 2Z" fill="url(#grad3)" stroke="white" stroke-width="1.5"/>
+            <path d="M12 8V12M12 16H12.01" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="grad3" x1="4" y1="2" x2="20" y2="23" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>LifeHub</span>
+        </div>
+        <div class="header-actions">
+          <a href="https://lifehub-project-d8c97.web.app" target="_blank" class="icon-btn" title="Mở LifeHub Web">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="passcode-content">
+        <h2 id="passcode-title">Nhập mã PIN</h2>
+        <p id="passcode-subtitle" class="subtitle">Nhập mã PIN 6 số để mở khóa dữ liệu</p>
+        
+        <div id="passcode-error" class="error-message hidden"></div>
+        
+        <div class="pin-input-container">
+          <input type="password" id="pin-input" maxlength="6" pattern="\d{6}" inputmode="numeric" placeholder="••••••" autocomplete="off">
+        </div>
+
+        <div id="setup-re-entry" class="input-group hidden">
+          <label>Nhập lại mã PIN</label>
+          <input type="password" id="pin-confirm" maxlength="6" pattern="\d{6}" inputmode="numeric" placeholder="••••••" autocomplete="off">
+        </div>
+        
+        <button id="passcode-btn" class="btn btn-primary">
+          <span>Xác nhận</span>
+        </button>
+
+        <button id="passcode-logout-btn" class="btn btn-text" style="margin-top: 12px; width: 100%; color: var(--text-secondary);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16,17 21,12 16,7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>Đăng xuất</span>
+        </button>
+
+        <div id="recovery-notice" class="recovery-notice hidden">
+          <p>Mã PIN này sẽ được dùng để mã hóa dữ liệu của bạn trên tất cả thiết bị.</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Main Screen -->
+    <div id="main-screen" class="screen">
+      <div class="header">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L4 7V11C4 16.5 7.84 21.74 12 23C16.16 21.74 20 16.5 20 11V7L12 2Z" fill="url(#grad2)" stroke="white" stroke-width="1.5"/>
+            <defs>
+              <linearGradient id="grad2" x1="4" y1="2" x2="20" y2="23" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>LifeHub</span>
+        </div>
+        <div class="header-actions">
+          <a href="https://lifehub-project-d8c97.web.app" target="_blank" class="icon-btn" title="Mở LifeHub Web">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </a>
+          <button id="theme-toggle" class="icon-btn" title="Giao diện">
+            <!-- Sun icon for light mode, Moon for dark -->
+            <svg class="sun-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+          <button id="refresh-btn" class="icon-btn" title="Làm mới">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+            </svg>
+          </button>
+          <button id="settings-btn" class="icon-btn" title="Cài đặt">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+          <button id="logout-btn" class="icon-btn" title="Đăng xuất">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Settings Menu Dropdown -->
+      <div id="settings-menu" class="settings-menu hidden">
+        <div class="menu-item" id="lang-toggle-btn">
+          <span class="menu-icon">🇻🇳</span>
+          <span class="menu-text">Tiếng Việt</span>
+        </div>
+        <div class="menu-divider"></div>
+        
+        <!-- Lock Timeout Setting -->
+        <div class="menu-group">
+          <div class="menu-label">Tự động khóa</div>
+          <select id="lock-timeout-select" class="menu-select">
+            <option value="0">Luôn hỏi</option>
+            <option value="180">Sau 3 giờ</option>
+            <option value="360">Sau 6 giờ</option>
+            <option value="720">Sau 12 giờ</option>
+          </select>
+        </div>
+        <div class="menu-divider"></div>
+
+        <a href="https://lifehub-project-d8c97.web.app/settings" target="_blank" class="menu-item external-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+          </svg>
+          <span>Quên mật khẩu</span>
+        </a>
+        <a href="https://lifehub-project-d8c97.web.app/settings" target="_blank" class="menu-item external-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Đổi mật khẩu</span>
+        </a>
+        <a href="https://lifehub-project-d8c97.web.app/settings" target="_blank" class="menu-item external-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Đổi Passcode</span>
+        </a>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="accounts">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L4 7V11C4 16.5 7.84 21.74 12 23C16.16 21.74 20 16.5 20 11V7L12 2Z"/>
+          </svg>
+          <span>Kho lưu trữ</span>
+        </button>
+        <button class="tab" data-tab="notes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Ghi chú</span>
+        </button>
+        <button class="tab" data-tab="tasks">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span>Việc</span>
+        </button>
+        <button class="tab" data-tab="calendar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Lịch</span>
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input type="text" id="global-search" placeholder="Tìm kiếm tài khoản, ghi chú...">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Accounts/Vault Tab -->
+        <div id="accounts-tab" class="tab-pane active">
+          <!-- Vault Type Selector -->
+          <div class="vault-header">
+            <select id="vault-type-select" class="vault-select">
+              <option value="all">Tất cả</option>
+              <option value="accounts">Tài khoản</option>
+              <option value="totp">2FA (Authentication)</option>
+            </select>
+          </div>
+
+          <div id="accounts-list" class="items-list">
+            <!-- Items (Accounts + TOTP) will be loaded here -->
+          </div>
+          
+          <div id="no-accounts" class="empty-state hidden">
+            <p>Không có dữ liệu</p>
+          </div>
+        </div>
+
+        <!-- TOTP Tab -->
+        <div id="totp-tab" class="tab-pane">
+          <div id="totp-list" class="items-list">
+            <!-- TOTP codes will be loaded here -->
+          </div>
+          <div id="no-totp" class="empty-state hidden">
+            <p>Chưa có tài khoản 2FA nào</p>
+          </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes-tab" class="tab-pane">
+          <div class="tab-header">
+            <span>Ghi chú của bạn</span>
+            <button id="create-note-btn" class="add-btn" title="Tạo ghi chú mới">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+          <div id="notes-list" class="items-list">
+            <!-- Notes will be loaded here -->
+          </div>
+          <div id="no-notes" class="empty-state hidden">
+            <p>Chưa có ghi chú nào</p>
+          </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasks-tab" class="tab-pane">
+          <div class="tab-header">
+            <select id="task-type-select" class="vault-select" style="flex: 1; margin-right: 8px;">
+              <option value="all">Tất cả</option>
+              <option value="tasks">Công việc</option>
+              <option value="shopping">Mua sắm</option>
+            </select>
+            <button id="create-task-btn" class="add-btn" title="Tạo công việc mới">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+          <div id="tasks-list" class="items-list">
+            <!-- Tasks will be loaded here -->
+          </div>
+          <div id="no-tasks" class="empty-state hidden">
+            <p>Không có công việc nào</p>
+          </div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="calendar-tab" class="tab-pane">
+          <div class="calendar-nav-header">
+            <button id="calendar-prev-day" class="icon-btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div id="calendar-date-display" class="calendar-current-date">Hôm nay</div>
+            <button id="calendar-next-day" class="icon-btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+            <button id="create-event-btn" class="add-btn-sm" title="Tạo sự kiện mới">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="calendar-date-strip" class="date-strip">
+            <!-- Dates will be generated here -->
+          </div>
+
+          <div id="calendar-day-view" class="day-view">
+            <div class="time-gutter">
+              <!-- Hours will be generated here -->
+            </div>
+            <div id="calendar-events-container" class="events-grid">
+              <!-- Event blocks will be placed here -->
+            </div>
+          </div>
+
+          <div id="no-events" class="empty-state hidden">
+            <p>Không có sự kiện nào trong ngày này</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Creation Modal -->
+  <div id="note-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Tạo ghi chú mới</h3>
+        <button class="modal-close" id="close-note-modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label for="note-title-input">Tiêu đề</label>
+          <input type="text" id="note-title-input" placeholder="Tiêu đề ghi chú">
+        </div>
+        <div class="input-group">
+          <label for="note-content-input">Nội dung</label>
+          <textarea id="note-content-input" placeholder="Nhập nội dung ghi chú..." rows="5"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-note-btn">Hủy</button>
+        <button class="btn btn-primary" id="save-note-btn">Lưu ghi chú</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Detail Modal -->
+  <div id="note-detail-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="note-detail-title">Ghi chú</h3>
+        <button class="modal-close" id="close-detail-modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-info-group">
+          <label>Nội dung</label>
+          <div id="note-detail-content" class="detail-text-content"></div>
+        </div>
+        <div class="detail-info-group">
+          <label>Cập nhật lần cuối</label>
+          <div id="note-detail-date" class="detail-meta"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="detail-copy-btn">Sao chép nội dung</button>
+        <button class="btn btn-primary" id="detail-close-btn">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

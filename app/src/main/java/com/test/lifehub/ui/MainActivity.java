@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,7 +23,11 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.test.lifehub.R;
+import com.test.lifehub.core.security.EncryptionManager;
+import com.test.lifehub.core.services.LifeHubAutofillService;
+import com.test.lifehub.core.util.SessionManager;
 import com.test.lifehub.features.authenticator.repository.TotpRepository;
+import com.test.lifehub.features.one_accounts.data.AccountEntry;
 import com.test.lifehub.features.one_accounts.repository.AccountRepository;
 import com.test.lifehub.features.four_calendar.repository.CalendarRepository;
 import com.test.lifehub.features.two_productivity.repository.ProductivityRepository;
@@ -97,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
     
     @Inject
     ProductivityRepository productivityRepository;  // Quản lý notes, tasks, projects
+    
+    @Inject
+    SessionManager sessionManager;  // Quản lý session và preferences
+    
+    @Inject
+    EncryptionManager encryptionManager;  // Quản lý mã hóa đa nền tảng
+
+    private boolean hasMigrated = false;
 
     // ===== PERMISSION LAUNCHER =====
     /**
@@ -124,17 +137,73 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // --- BẢO MẬT: Chống chụp màn hình/quay màn hình ---
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        // --------------------------------------------------
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ===== BƯỚC 1: KHỚI TẠO FIRESTORE LISTENERS =====
-        // Quan trọng: Phải restart listeners mỗi khi mở MainActivity
-        // Ví dụ: User login -> MainActivity -> Back -> Login lại -> MainActivity
-        // Nếu không restart, listeners vẫn lắng nghe user cũ -> Sai dữ liệu!
-        totpRepository.startListening();            // Bắt đầu lắng nghe TOTP codes
-        accountRepository.startListening();         // Bắt đầu lắng nghe accounts
-        calendarRepository.startListening();        // Bắt đầu lắng nghe calendar events
-        productivityRepository.startListening();    // Bắt đầu lắng nghe notes/tasks/projects
+        // ===== BƯỚC 1: KIỂM TRA ENCRYPTION STATUS =====
+        if (!encryptionManager.isUnlocked()) {
+            android.util.Log.d("MainActivity", "Encryption is locked, checking setup status...");
+            
+            encryptionManager.checkSetupStatus(result -> {
+                android.util.Log.d("MainActivity", "Setup status result: " + result);
+                if (result == EncryptionManager.InitResult.NEEDS_SETUP) {
+                    android.util.Log.d("MainActivity", "Redirecting to Setup");
+                    Intent intent = new Intent(this, com.test.lifehub.ui.PasscodeSetupActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    android.util.Log.d("MainActivity", "Redirecting to Unlock (MasterPasswordActivity)");
+                    // Mặc định hoặc FAILURE (có salt nhưng chưa unlock) -> Sang màn hình nhập PIN
+                    Intent intent = new Intent(this, com.test.lifehub.features.masterpassword.MasterPasswordActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+            return;
+        }
+
+        // ===== BƯỚC 2: KHỚI TẠO FIRESTORE LISTENERS =====
+        totpRepository.startListening();
+        accountRepository.startListening();
+        calendarRepository.startListening();
+        productivityRepository.startListening();
+        
+        // ===== BƯỚC 2.5: AUTO-MIGRATE TOTP LEGACY ENCRYPTION =====
+        // Migrate TOTP secrets from old EncryptionHelper to new EncryptionManager
+        android.util.Log.d("MainActivity", "🛠️ Triggering TOTP migration check...");
+        totpRepository.migrateTotpEncryption();
+
+        // ===== BƯỚC 1.5: AUTO-MIGRATE LEGACY ENCRYPTION =====
+        // Tự động chuyển đổi dữ liệu cũ sang chuẩn Cross-platform
+        // để Web có thể đọc được. Chỉ chạy 1 lần mỗi phiên app.
+        accountRepository.getAllAccounts().observe(this, accounts -> {
+            if (!hasMigrated && accounts != null && !accounts.isEmpty()) {
+                hasMigrated = true;
+                android.util.Log.d("MainActivity", "🛠️ Checking for legacy data migration...");
+                accountRepository.migrateEncryption(encryptionManager, new AccountRepository.MigrationCallback() {
+                    @Override
+                    public void onProgress(int current, int total) {
+                        android.util.Log.d("MainActivity", "Migration progress: " + current + "/" + total);
+                    }
+
+                    @Override
+                    public void onComplete(int successCount, int failedCount) {
+                        if (successCount > 0) {
+                            android.util.Log.d("MainActivity", "✅ Migration completed: updated " + successCount + " legacy accounts.");
+                            Toast.makeText(MainActivity.this, "Đã cập nhật bảo mật cho " + successCount + " tài khoản.", Toast.LENGTH_LONG).show();
+                        } else {
+                            android.util.Log.d("MainActivity", "Migration check done. No legacy data found.");
+                        }
+                    }
+                });
+            }
+        });
 
         // ===== BƯỚC 2: SETUP UI =====
 
@@ -148,12 +217,62 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new AccountFragment()).commit();
         }
+        
+        // ===== BƯỚC 4: SETUP AUTOFILL SERVICE =====
+        // Sync biometric state và accounts cache cho AutofillService
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setupAutofillService();
+        }
 
         // --- XÓA LOGIC XIN QUYỀN ---
         // (Như đã khuyên, logic này nên được chuyển vào
         // nơi cần thiết, ví dụ: khi bấm nút tạo Nhắc nhở)
         // checkAndRequestPermissions();
         // ---------------------------------
+    }
+    
+    /**
+     * Setup Autofill Service với cache và biometric state
+     * Gọi sau khi repositories đã start listening
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.O)
+    private void setupAutofillService() {
+        // 1. Sync autofill enabled state (cần cả biometric + autofill đều ON)
+        boolean biometricEnabled = sessionManager.isBiometricEnabled();
+        boolean autofillEnabled = sessionManager.isAutofillEnabled();
+        LifeHubAutofillService.setBiometricEnabled(biometricEnabled && autofillEnabled);
+        
+        // 2. Observe accounts, tạo COPY với passwords đã decrypt rồi sync với cache
+        // QUAN TRỌNG: Tạo copy mới vì LiveData objects không nên modify trực tiếp
+        accountRepository.getAllAccounts().observe(this, accounts -> {
+            if (accounts != null && !accounts.isEmpty()) {
+                List<AccountEntry> decryptedAccounts = new ArrayList<>();
+                
+                for (AccountEntry original : accounts) {
+                    // Tạo copy mới
+                    AccountEntry copy = new AccountEntry();
+                    copy.documentId = original.documentId;
+                    copy.serviceName = original.serviceName;
+                    copy.username = original.username;
+                    copy.websiteUrl = original.websiteUrl;
+                    copy.notes = original.notes;
+                    copy.userOwnerId = original.userOwnerId;
+                    
+                    // Luôn thử decrypt - encryptionHelper.decrypt() đã có fallback
+                    // Nếu decrypt thất bại (password đã plain text), nó trả về string gốc
+                    if (original.password != null && !original.password.isEmpty()) {
+                        copy.password = encryptionManager.decrypt(original.password);
+                    } else {
+                        copy.password = "";
+                    }
+                    
+                    decryptedAccounts.add(copy);
+                }
+                
+                android.util.Log.d("MainActivity", "Autofill cache updated with " + decryptedAccounts.size() + " accounts (passwords decrypted)");
+                LifeHubAutofillService.updateAccountsCache(decryptedAccounts);
+            }
+        });
     }
 
     // ===== NAVIGATION LISTENER =====

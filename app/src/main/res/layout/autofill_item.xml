@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    autofill_item.xml - Layout cho mỗi item trong autofill popup
+    Hiển thị trong dropdown của Android Autofill Framework
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- Service Name -->
+    <TextView
+        android:id="@+id/autofill_service_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:text="Facebook" />
+
+    <!-- Username -->
+    <TextView
+        android:id="@+id/autofill_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:text="john.doe@gmail.com" />
+
+    <!-- Password Hint (masked) -->
+    <TextView
+        android:id="@+id/autofill_password_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="10sp"
+        android:textColor="@android:color/darker_gray"
+        android:text="••••••••"
+        android:visibility="gone" />
+
+</LinearLayout>
