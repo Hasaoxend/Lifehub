@@ -79,17 +79,17 @@ Bản Web là một bảng điều khiển (dashboard) chuyên dụng để qu�
 
 ---
 
-## 4. Phân tích Chiến lược Hệ thống (Pros & Cons)
+## 3. Phân tích Chiến lược Hệ thống (Pros & Cons)
 
 Việc đánh giá khách quan các ưu điểm và hạn chế giúp định hướng phát triển trong tương lai và đảm bảo người dùng hiểu rõ giới hạn của hệ thống.
 
-### 4.1. Ưu điểm (Advantages)
+### 3.1. Ưu điểm (Advantages)
 - **Bảo mật Đa lớp Thực thụ:** Kết hợp mã hóa phần cứng (Biometric KeyStore) và mã hóa phần mềm (AES-256) đảm bảo ngay cả quản trị viên máy chủ cũng không thể đọc được dữ liệu người dùng.
 - **Tính Hiệp đồng (Synergy):** Khả năng chuyển đổi liền mạch giữa môi trường làm việc tập trung (Web) và di động (Android/Extension).
 - **Phản hồi Tức thời:** Sử dụng công nghệ WebSocket của Firestore cho phép dữ liệu thay đổi trên điện thoại xuất hiện gần như ngay lập tức trên trình duyệt.
 - **Dễ dàng Triển khai:** Cấu trúc Monorepo và các template cấu hình giúp nhà phát triển mới tiếp cận dự án một cách có hệ thống.
 
-### 4.2. Nhược điểm và Thách thức (Disadvantages & Limitations)
+### 3.2. Nhược điểm và Thách thức (Disadvantages & Limitations)
 - **Phụ thuộc vào Firebase:** Hệ thống gắn chặt với hạ tầng của Google. Nếu Firebase gặp sự cố hoặc thay đổi chính sách giá, việc di chuyển (migration) sang hệ thống khác sẽ đòi hỏi nỗ lực lớn.
 - **Quản lý Khóa Chủ (Secret Key Management):** Vì đây là mô hình Zero-Knowledge, nếu người dùng quên Khóa Chủ và không có bản sao lưu, toàn bộ dữ liệu mã hóa sẽ **vĩnh viễn không thể khôi phục**.
 - **Hiệu năng với Dữ liệu lớn:** Việc mã hóa/giải mã toàn bộ danh sách (ví dụ: hàng ngàn tài khoản) ngay tại client có thể gây trễ (latency) trên các thiết bị có hiệu năng thấp.
@@ -97,24 +97,24 @@ Việc đánh giá khách quan các ưu điểm và hạn chế giúp định h�
 
 ---
 
-## 5. Hạ tầng Dữ liệu và Logic Đồng bộ
+## 4. Hạ tầng Dữ liệu và Logic Đồng bộ
 
-### 5.1. Cấu trúc Cơ sở dữ liệu (Firestore)
+### 4.1. Cấu trúc Cơ sở dữ liệu (Firestore)
 LifeHub sử dụng mô hình bộ sưu tập con (sub-collection) lấy người dùng làm trung tâm. Tất cả các đường dẫn đều được tiền tố bằng UID của người dùng.
 
 - **`users/{uid}/accounts`**: Mỗi tài liệu lưu trữ `serviceName`, `username`, và `password` (Dạng mã hóa - Ciphertext).
 - **`users/{uid}/tasks`**: Hỗ trợ các công việc con phân cấp thông qua tham chiếu `projectId`.
-- **`users/{uid}/calendar`**: Các tài liệu sự kiện thời gian thực with `startTime`, `endTime`, và `location`.
+- **`users/{uid}/calendar`**: Các tài liệu sự kiện thời gian thực với `startTime`, `endTime`, và `location`.
 - **`users/{uid}/notes`**: Lưu trữ các văn bản lớn với `title` và `content` (Dạng mã hóa - Ciphertext).
 
-### 5.2. Luồng Đồng bộ Toàn cầu
+### 4.2. Luồng Đồng bộ Toàn cầu
 1. **Thay đổi (Mutation):** Một nền tảng (ví dụ: Android) thực hiện gọi lệnh `set()` hoặc `update()` trên một tài liệu Firestore.
 2. **Đẩy dữ liệu (Push):** Công cụ thời gian thực của Firestore truyền bá thay đổi đến tất cả các trình lắng nghe đã xác thực.
 3. **Giải mã (Decryption):** Các nền tảng mục tiêu (Web/Ext) nhận Ciphertext mới và sử dụng Khóa Chủ (Master Key) chung được lưu trong kho lưu trữ an toàn cục bộ (KeyStore/LocalStorage) để giải mã và hiển thị.
 
 ---
 
-## 6. Cơ chế Mã hóa và Quyền riêng tư
+## 5. Cơ chế Mã hóa và Quyền riêng tư
 
 LifeHub hoạt động dựa trên nguyên tắc **Cơ sở kiến thức Không tri thức (Zero-Knowledge Knowledge Base - ZKKB)** đối với các trường dữ liệu nhạy cảm. Dữ liệu thô không bao giờ rời khỏi thiết bị ở dạng văn bản thuần túy.
 
@@ -137,21 +137,21 @@ sequenceDiagram
     App->>User: Hiển thị văn bản thuần túy
 ```
 
-### 6.1. Dẫn xuất Khóa (Key Derivation)
+### 5.1. Dẫn xuất Khóa (Key Derivation)
 Khóa Chủ được dẫn xuất từ mã PIN/Mật khẩu do người dùng cung cấp bằng phương thức PBKDF2 với hơn 100,000 vòng lặp trên thiết bị client, đảm bảo mật khẩu gốc không bao giờ được gửi lên đám mây.
 
 ---
 
-## 7. Danh mục Triển khai và Cấu hình
+## 6. Danh mục Triển khai và Cấu hình
 
-### 5.1. Sơ đồ File Cấu hình
+### 6.1. Sơ đồ File Cấu hình
 | Yêu cầu | Đường dẫn Android | Đường dẫn Web | Đường dẫn Extension |
 |:---|:---|:---|:---|
 | Cấu hình Firebase | `android/app/google-services.json` | `web/.env` | `extension/popup/libs/firebase-config.js` |
 | Weather API | `android/local.properties` | `web/.env` | Không áp dụng |
 | Công cụ Build | `Gradle 8.x` | `Vite 5.x` | `Manifest V3` |
 
-### 5.2. Sẵn sàng cho Git (Security Readiness)
+### 6.2. Sẵn sàng cho Git (Security Readiness)
 Kho lưu trữ được cấu hình nghiêm ngặt để bảo vệ các bí mật:
 - **Loại trừ:** Tất cả các tệp `.jks`, `.keystore`, `.env`, và cấu hình JSON riêng tư đều được khớp trong `/.gitignore`.
 - **Lọc dữ liệu:** Mã nguồn không chứa bất kỳ thông tin xác thực cứng (hardcoded) nào. Tất cả cấu hình được đưa vào thông qua `BuildConfig` lúc build hoặc `import.meta.env` lúc runtime.
@@ -160,4 +160,4 @@ Kho lưu trữ được cấu hình nghiêm ngặt để bảo vệ các bí m�
 
 LifeHub được xây dựng vì sự tin cậy, bảo mật và tính hiệp đồng đa nền tảng.
 
-*Kỹ thuật Xuất sắc - Bảo mật tương lai kỹ thuật số của bạn.*
+
