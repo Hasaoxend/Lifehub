@@ -1,27 +1,31 @@
-# 🌟 LifeHub: The All-in-One Life Ecosystem
+# LifeHub Ecosystem: Technical Documentation
 
-LifeHub is a privacy-first, cross-platform ecosystem designed to unify your digital life. It seamlessly synchronizes sensitive data, tasks, notes, and schedules across Android, Web, and Browser environments using a secure, decentralized mindset.
+LifeHub is an integrated, multi-platform personal management system designed to centralize and secure digital life data. This repository functions as a monorepo containing the native Android application, the centralized Web dashboard, and the browser-based Quick Access extension.
 
 ---
 
-## 🏗️ System Architecture
+## 1. System Architecture
 
-LifeHub follows a **Hybrid Cloud Architecture** where Firebase acts as the central synchronization hub, while each platform maintains its own optimized logic and local security.
+LifeHub utilizes a unified cloud backend with platform-specific architectures tailored for optimal performance and security.
+
+### 1.1. High-Level System Overview
+The following diagram illustrates the synchronization flow between platforms and the central Firebase hub.
 
 ```mermaid
 graph TD
     User((User))
     
-    subgraph Platforms
-        Android[Android App - Java/SDK]
-        Web[Web Dashboard - React/TS]
-        Ext[Chrome Extension - Vanilla JS]
+    subgraph "Client Tier"
+        Android[Android App - Native Java]
+        Web[Web Hub - React/TS/Vite]
+        Ext[Browser Extension - Vanilla JS]
     end
     
-    subgraph "Secure Sync Hub (Firebase)"
-        Auth[Firebase Auth - Identity]
-        Firestore[(Firestore - Real-time Data)]
-        Rules[Security Rules - Per-User Isolation]
+    subgraph "Cloud Infrastructure (Firebase)"
+        Auth[Firebase Authentication]
+        Firestore[(Real-time Firestore)]
+        Storage[Cloud Storage]
+        Rules[Security Rules Engine]
     end
     
     User --> Android
@@ -35,74 +39,115 @@ graph TD
     Android --> Auth
     Web --> Auth
     Ext --> Auth
+    
+    Firestore --- Rules
+```
+
+### 1.2. Android Architecture (MVVM + Repository)
+The Android application is built using the Clean Architecture principles to ensure scalability and testability.
+
+- **UI Layer:** Activities and Fragments observe LiveData from ViewModels.
+- **ViewModel Layer:** Handles UI logic and maintains state during configuration changes.
+- **Repository Layer:** Abstract data source management, handling real-time Firestore synchronization.
+- **Data Source Layer:** Firebase Firestore and SharedPreferences.
+
+### 1.3. Web Architecture
+- **Framework:** React 18 with Vite for optimized build performance.
+- **State Management:** Custom hooks for modularized data fetching.
+- **Styling:** Vanilla CSS with a focus on glassmorphism and premium aesthetics.
+
+### 1.4. Extension Architecture
+- **Standard:** Manifest V3.
+- **Technology:** Vanilla JavaScript using ES Modules for modularity.
+- **Lifecycle:** Background Service Worker handles persistence and communication with content scripts.
+
+---
+
+## 2. Core Functional Modules
+
+### 2.1. Security & Account Management
+- **AES-256 Encryption:** All sensitive data is encrypted on the client-side using industry-standard AES-256-GCM before transit.
+- **Biometric Integration:** Native Android Biometric API integration for secure local authentication.
+- **Advanced TOTP:** Built-in 2FA support with real-time code generation synchronized across all platforms.
+
+### 2.2. Productivity Suite
+- **Hierarchical Tasks:** Support for projects and sub-projects with cross-platform filtering.
+- **Secure Notes:** Encrypted note-taking with real-time markdown-style rendering.
+- **Smart Reminders:** Local AlarmManager integration on Android synchronized with cloud-based task states.
+
+### 2.3. Unified Calendar
+- **Cross-Platform Sync:** Dynamic event management with a specialized "Day View" optimized for browser extensions.
+- **Conflict Resolution:** Advanced overlap detection and transparent UI rendering for dense schedules.
+
+---
+
+## 3. Data Integrity and Security
+
+### 3.1. Firestore Data Structure
+Data is partitioned per user to ensure strict isolation and privacy.
+
+```
+users/
+  ├─ {userId}/
+      ├─ accounts/ (Encrypted Login Data)
+      ├─ tasks/ (Productivity Data)
+      ├─ notes/ (Encrypted Content)
+      ├─ calendar/ (Schedule Metadata)
+```
+
+### 3.2. Firebase Security Rules
+Access is restricted at the database level to prevent unauthorized data exposure.
+```javascript
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth.uid == userId;
+    }
+  }
+}
 ```
 
 ---
 
-## 🔒 Data Security Model
+## 4. Repository Structure
 
-Security is not an afterthought in LifeHub; it is the core foundation.
-
-### 🛡️ Layered Protection
-1.  **Local AES-256 Encryption:** All account passwords and secure notes are encrypted *on-device* before reaching the cloud.
-2.  **Biometric Gatekeeper:** Mobile access is protected by Android’s Biometric API (Fingerprint/Face Unlock).
-3.  **Zero-Key Leakage Policy:** All project API keys are managed via `.env` files and private config templates that are never committed to source control.
-4.  **Firestore Isolation:** Security rules ensure that `User A` can never access the path of `User B`.
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant P as Platform (App/Web/Ext)
-    participant E as Encryption Engine (AES-256)
-    participant F as Firestore (Cloud)
-
-    U->>P: Enter Password
-    P->>E: Encrypt with Master Key
-    E->>P: Ciphertext
-    P->>F: Save Encrypted Data
-    Note right of F: Only Ciphertext is stored in Cloud
-```
+| Path | Description | Stack |
+|:---|:---|:---|
+| `android/` | Primary mobile application source. | Java, Gradle, Hilt |
+| `web/` | Desktop-optimized dashboard. | React, TypeScript, Vite |
+| `extension/` | Browser quick-access tool. | JavaScript, Manifest V3 |
+| `firestore.rules` | Security policy for cloud data. | Firebase |
 
 ---
 
-## 📁 Repository Structure
+## 5. Development and Deployment
 
-The project is organized as a unified monorepo for easier cross-platform development:
+### 5.1. Git Security Readiness
+This project has been sanitized for public repository deployment. All sensitive configurations are managed through local environment files excluded from version control.
 
-| Directory | Platform | Key Responsibility |
-|-----------|----------|-------------------|
-| `android/`| **Android** | Native app logic, Biometric Auth, Autofill Services. |
-| `web/`    | **Web**     | Central dashboard, React-based UI, Data management. |
-| `extension/` | **Extension** | Browser integration, quick TOTP & Calendar access. |
+#### Configuration Templates:
+- **Android:** `android/app/google-services.json.template`
+- **Web:** `web/.env.example`
+- **Extension:** `extension/popup/libs/firebase-config.example.js`
 
----
+### 5.2. Setup Procedures
 
-## 🛠️ Getting Started
+#### Android Platform
+1. Initialize the project in Android Studio by pointing to the `android/` directory.
+2. Provide a valid `google-services.json` in `android/app/`.
+3. Define `OPENWEATHER_API_KEY` in `android/local.properties`.
 
-### 1. Android Setup
-- **Directory:** `android/`
-- **Config:** Copy `google-services.json` to `android/app/`.
-- **API Keys:** Add `OPENWEATHER_API_KEY` to `android/local.properties`.
+#### Web Platform
+1. Navigate to the `web/` directory.
+2. Execute `npm install` to load dependencies.
+3. Configure authentication variables in `.env`.
+4. Run the development server via `npm run dev`.
 
-### 2. Web Platform Setup
-- **Directory:** `web/`
-- **Install:** `npm install`
-- **Config:** Create `.env` based on `.env.example`.
-- **Run:** `npm run dev`
-
-### 3. Browser Extension Setup
-- **Directory:** `extension/`
-- **Config:** Create `extension/popup/libs/firebase-config.js`.
-- **Install:** Load the `extension/` folder as an "Unpacked Extension" in Chrome.
+#### Browser Extension
+1. Create `extension/popup/libs/firebase-config.js` with valid Firebase credentials.
+2. Navigate to `chrome://extensions` and enable Developer Mode.
+3. Load the `extension/` directory as an unpacked extension.
 
 ---
 
-## 🛡️ Security Audit & Git Readiness
-This repository has been audited for Git deployment:
-- ✅ **Redacted History:** No hardcoded secrets in source files.
-- ✅ **Secure Gitignores:** Comprehensive rules for all 3 platforms.
-- ✅ **Config Templates:** Standardized `.example` files provided for easy setup.
-
----
-
-*LifeHub - Simplifying complexity, securing reality.*
+*LifeHub Engineering - Professional synchronization of digital reality.*
