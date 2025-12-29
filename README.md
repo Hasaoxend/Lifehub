@@ -1,153 +1,145 @@
-# LifeHub Ecosystem: Technical Documentation
+# LifeHub Ecosystem: Professional Monorepo Documentation
 
-LifeHub is an integrated, multi-platform personal management system designed to centralize and secure digital life data. This repository functions as a monorepo containing the native Android application, the centralized Web dashboard, and the browser-based Quick Access extension.
+LifeHub is a mission-critical, high-security personal data ecosystem designed for real-time synchronization across mobile (Android), stationary (Web Dashboard), and quick-access (Browser Extension) platforms. 
+
+This repository implements a monorepo structure to unify the three platforms under a single security and data integrity umbrella, powered by a decentralized encryption-first mindset.
 
 ---
 
-## 1. System Architecture
+## 1. System Architecture & Component Mapping
 
-LifeHub utilizes a unified cloud backend with platform-specific architectures tailored for optimal performance and security.
-
-### 1.1. High-Level System Overview
-The following diagram illustrates the synchronization flow between platforms and the central Firebase hub.
+The system is architected as a **Quad-Tier Distributed Infrastructure**. Data flows through hardened client-side layers before reaching the synchronized cloud hub.
 
 ```mermaid
 graph TD
-    User((User))
-    
-    subgraph "Client Tier"
-        Android[Android App - Native Java]
-        Web[Web Hub - React/TS/Vite]
-        Ext[Browser Extension - Vanilla JS]
+    subgraph "Core Client Applications"
+        Android[Android App: Native Java/SDK]
+        Web[Web Hub: React/TS/Vite]
+        Ext[Chrome Extension: Manifest V3]
     end
-    
-    subgraph "Cloud Infrastructure (Firebase)"
-        Auth[Firebase Authentication]
-        Firestore[(Real-time Firestore)]
-        Storage[Cloud Storage]
+
+    subgraph "Platform-Specific Security"
+        AndroidSec[AES-256 + Biometric API]
+        WebSec[Encryption.ts + Environment Guard]
+        ExtSec[libs/encryption-helper.js]
+    end
+
+    subgraph "Global Cloud Infrastructure (Firebase)"
+        Auth[Firebase Identity Platform]
+        Firestore[(Real-time Global Firestore)]
         Rules[Security Rules Engine]
     end
-    
-    User --> Android
-    User --> Web
-    User --> Ext
-    
-    Android <--> Firestore
-    Web <--> Firestore
-    Ext <--> Firestore
-    
+
+    Android --> AndroidSec
+    Web --> WebSec
+    Ext --> ExtSec
+
+    AndroidSec <--> Firestore
+    WebSec <--> Firestore
+    ExtSec <--> Firestore
+
     Android --> Auth
     Web --> Auth
     Ext --> Auth
+```
+
+---
+
+## 2. Technical Component Breakdown
+
+### 2.1. Android Platform (`/android`)
+The native Android tier follows the **MVVM + Repository + Hilt** architectural standard.
+
+- **Core Security Engine:** 
+  - `CrossPlatformEncryptionHelper.java`: Implements a specialized version of AES-256-GCM designed to match JavaScript's Web Crypto API, ensuring cross-platform decryption.
+  - `BiometricHelper.java`: Bridges Android KeyStore with the BiometricPrompt API for hardware-backed security.
+- **Service Layer:**
+  - `LifeHubAutofillService.java`: A custom Service implementation allowing LifeHub to act as a system-wide pass manager.
+  - `LifeHubAccessibilityService.java`: Specifically tuned for browser autofill detection.
+- **Modularity:** 
+  - `features/one_accounts`: Manages encrypted login credentials.
+  - `features/two_productivity`: Houses the Notes and Task micro-services.
+  - `features/four_calendar`: Implements the calendar engine.
+
+### 2.2. Web Platform (`/web`)
+The Web tier is a specialized dashboard for deep data management.
+
+- **State Management:** Uses custom React hooks (`useNotes`, `useTasks`, `useAuth`) to decouple UI components from Firestore listeners.
+- **Utility Layer:** 
+  - `encryption.ts`: The web-side implementation of the global encryption standard.
+  - `lunarUtils.ts`: Specialized engine for handling traditional lunar-solar date conversions.
+  - `totp.ts`: Implements the RFC 6238 standard for real-time 2FA generation.
+
+### 2.3. Browser Extension Platform (`/extension`)
+Optimized for low-latency retrieval of credentials and schedule overview.
+
+- **Background Service Worker (`background.js`):** Manages the persistent session and inter-script messaging.
+- **Quick-Access UI:** Built with localized libraries (`firebase-app.js`, `firebase-auth.js`) to eliminate external script dependencies, enhancing security and speed.
+- **Calendar Engine:** Features a specialized horizontal date-strip UI for high-density event visualization.
+
+---
+
+## 3. Data Infrastructure and Sync Logic
+
+### 3.1. Database Schema (Firestore)
+LifeHub uses a user-centric sub-collection model. All paths are prefixed with the User UID.
+
+- **`users/{uid}/accounts`**: Each document stores a `serviceName`, `username`, and `password` (Ciphertext).
+- **`users/{uid}/tasks`**: Supports hierarchical sub-tasks via `projectId` references.
+- **`users/{uid}/calendar`**: Real-time event documents with `startTime`, `endTime`, and `location`.
+- **`users/{uid}/notes`**: Large-text documents with `title` and `content` (Ciphertext).
+
+### 3.2. Global Sync Flow
+1. **Mutation:** A platform (e.g., Android) performs a `set()` or `update()` call on a Firestore document.
+2. **Push:** Firestore's real-time engine propagates the change to all authenticated listeners.
+3. **Decryption:** Targeted platforms (Web/Ext) receive the new Ciphertext and use the shared Master Key stored in their local secure vault (KeyStore/LocalStorage) to decrypt and display.
+
+---
+
+## 4. Encryption & Privacy Mechanics
+
+LifeHub operates on a **Zero-Knowledge Knowledge Base (ZKKB)** principle for sensitive fields.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App as Client (Any Platform)
+    participant Key as Master Key Vault
+    participant Cloud as Firebase Firestore
+
+    User->>App: Input Sensitive Data (Password/Note)
+    App->>Key: Retrieve Master Key (Locally)
+    Key-->>App: Key Bytes
+    App->>App: AES-256-GCM Encryption
+    App->>Cloud: Write Ciphertext
+    Note over Cloud: Cloud ONLY sees random bits.
     
-    Firestore --- Rules
+    Cloud-->>App: Read Ciphertext
+    App->>App: AES-256-GCM Decryption
+    App->>User: Display Cleartext
 ```
 
-### 1.2. Android Architecture (MVVM + Repository)
-The Android application is built using the Clean Architecture principles to ensure scalability and testability.
-
-- **UI Layer:** Activities and Fragments observe LiveData from ViewModels.
-- **ViewModel Layer:** Handles UI logic and maintains state during configuration changes.
-- **Repository Layer:** Abstract data source management, handling real-time Firestore synchronization.
-- **Data Source Layer:** Firebase Firestore and SharedPreferences.
-
-### 1.3. Web Architecture
-- **Framework:** React 18 with Vite for optimized build performance.
-- **State Management:** Custom hooks for modularized data fetching.
-- **Styling:** Vanilla CSS with a focus on glassmorphism and premium aesthetics.
-
-### 1.4. Extension Architecture
-- **Standard:** Manifest V3.
-- **Technology:** Vanilla JavaScript using ES Modules for modularity.
-- **Lifecycle:** Background Service Worker handles persistence and communication with content scripts.
+### 4.1. Key derivation
+Master Keys are derived from user-provided PINs/Passwords using PBKDF2 with 100,000+ iterations on client devices, ensuring that the raw password never travels to the cloud.
 
 ---
 
-## 2. Core Functional Modules
+## 5. Deployment & Configuration Matrix
 
-### 2.1. Security & Account Management
-- **AES-256 Encryption:** All sensitive data is encrypted on the client-side using industry-standard AES-256-GCM before transit.
-- **Biometric Integration:** Native Android Biometric API integration for secure local authentication.
-- **Advanced TOTP:** Built-in 2FA support with real-time code generation synchronized across all platforms.
+### 5.1. File Mapping for Setup
+| Requirement | Android Path | Web Path | Extension Path |
+|:---|:---|:---|:---|
+| Firebase Config | `android/app/google-services.json` | `web/.env` | `extension/popup/libs/firebase-config.js` |
+| Weather API | `android/local.properties` | `web/.env` | N/A |
+| Build Tool | `Gradle 8.x` | `Vite 5.x` | `Manifest V3` |
 
-### 2.2. Productivity Suite
-- **Hierarchical Tasks:** Support for projects and sub-projects with cross-platform filtering.
-- **Secure Notes:** Encrypted note-taking with real-time markdown-style rendering.
-- **Smart Reminders:** Local AlarmManager integration on Android synchronized with cloud-based task states.
-
-### 2.3. Unified Calendar
-- **Cross-Platform Sync:** Dynamic event management with a specialized "Day View" optimized for browser extensions.
-- **Conflict Resolution:** Advanced overlap detection and transparent UI rendering for dense schedules.
+### 5.2. Git Readiness
+The repository is strictly configured to protect secrets:
+- **Exclusion:** All `.jks`, `.keystore`, `.env`, and private JSON configs are matched in `/.gitignore`.
+- **Redaction:** Source code contains NO hardcoded credentials. All configuration is injected via build-time `BuildConfig` or runtime `import.meta.env`.
 
 ---
 
-## 3. Data Integrity and Security
+LifeHub is built for reliability, security, and cross-platform synergy.
 
-### 3.1. Firestore Data Structure
-Data is partitioned per user to ensure strict isolation and privacy.
-
-```
-users/
-  ├─ {userId}/
-      ├─ accounts/ (Encrypted Login Data)
-      ├─ tasks/ (Productivity Data)
-      ├─ notes/ (Encrypted Content)
-      ├─ calendar/ (Schedule Metadata)
-```
-
-### 3.2. Firebase Security Rules
-Access is restricted at the database level to prevent unauthorized data exposure.
-```javascript
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth.uid == userId;
-    }
-  }
-}
-```
-
----
-
-## 4. Repository Structure
-
-| Path | Description | Stack |
-|:---|:---|:---|
-| `android/` | Primary mobile application source. | Java, Gradle, Hilt |
-| `web/` | Desktop-optimized dashboard. | React, TypeScript, Vite |
-| `extension/` | Browser quick-access tool. | JavaScript, Manifest V3 |
-| `firestore.rules` | Security policy for cloud data. | Firebase |
-
----
-
-## 5. Development and Deployment
-
-### 5.1. Git Security Readiness
-This project has been sanitized for public repository deployment. All sensitive configurations are managed through local environment files excluded from version control.
-
-#### Configuration Templates:
-- **Android:** `android/app/google-services.json.template`
-- **Web:** `web/.env.example`
-- **Extension:** `extension/popup/libs/firebase-config.example.js`
-
-### 5.2. Setup Procedures
-
-#### Android Platform
-1. Initialize the project in Android Studio by pointing to the `android/` directory.
-2. Provide a valid `google-services.json` in `android/app/`.
-3. Define `OPENWEATHER_API_KEY` in `android/local.properties`.
-
-#### Web Platform
-1. Navigate to the `web/` directory.
-2. Execute `npm install` to load dependencies.
-3. Configure authentication variables in `.env`.
-4. Run the development server via `npm run dev`.
-
-#### Browser Extension
-1. Create `extension/popup/libs/firebase-config.js` with valid Firebase credentials.
-2. Navigate to `chrome://extensions` and enable Developer Mode.
-3. Load the `extension/` directory as an unpacked extension.
-
----
-
-*LifeHub Engineering - Professional synchronization of digital reality.*
+*Engineering Excellence - Securing Your Digital Future.*
